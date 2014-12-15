@@ -19,6 +19,7 @@
         <!-- Bootstrap core CSS ans JS -->
         <?php echo js('pace.min.js?v=' . $version); ?>
         <?php echo css('bootstrap.css?v=' . $version); ?>
+        
         <?php echo css('bootflat.min.css?v=' . $version); ?>
         <?php echo css('pace.css?v=' . $version); ?>
         <?php echo css('theme.css?v=' . $version); ?>
@@ -32,7 +33,11 @@
         <?php echo js('bootstrap.js?v=' . $version); ?>
         <?php echo js('customJS.js?v=' . $version); ?>
         <?php echo js('site.min.js?v=' . $version); ?>
-
+        
+        <?php echo css('jasny-bootstrap.min.css?v=' . $version); ?>
+        <?php //echo css('navmenu-push.css?v=' . $version); ?>
+        <?php echo css('simple-sidebar.css?v=' . $version); ?>
+        
         <!--time picker-->    
         <?php echo css('bootstrap-timepicker.min.css?v=' . $version); ?>  
         <?php echo js('bootstrap-timepicker.min.js?v=' . $version); ?> 
@@ -45,14 +50,8 @@
         <?php echo js('/locales/bootstrap-datepicker.th.js?v=' . $version); ?>  
 
         <script type="text/javascript">
-            $(window).scroll(function () {
-                if ($(this).scrollTop() > 50) { //use `this`, not `document`
-                    $('#top-nav').fadeOut();
-                    $(".pace-progress").css("margin-top", "58px");
-                } else {
-                    $('#top-nav').fadeIn();
-                    $(".pace-progress").css("margin-top", "91px");
-                }
+            $(window).scroll(function () {               
+                $(".pace-progress").css("margin-top", "58px");
                 if ($(this).scrollTop() > $(window).height() / 2) {
                     $('#scroll-top').removeClass('hidden');
                 } else {
@@ -65,26 +64,19 @@
         </script>
     </head>
     <body>
-        <nav class="navbar navbar-fixed-top sh-nav" role="navigation">
+        <nav id="top-nav" class="navbar navbar-fixed-top navbar-default " role="navigation">
             <div class="container-fluid">
-                <div class="navbar-header">
-                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-                        <span class="sr-only">Toggle navigation</span>
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span>
-                    </button>
-                    <a class="navbar-brand" href="#">Project name</a>
+                <div class="navbar-header">                    
+                    <span class="navbar-brand">ระบบขายตั๋วหน้าเคาเตอร์</span>
                 </div>
-                <div id="navbar" class="collapse navbar-collapse">
-                    <ul class="nav navbar-nav">
-                        <li class="active"><a href="#">Home</a></li>
-                        <li><a href="#about">About</a></li>
-                        <li><a href="#contact">Contact</a></li>
-                    </ul>
-                </div><!-- /.nav-collapse -->
-            </div><!-- /.container -->
-        </nav><!-- /.navbar -->
+                <div id="bs-example-navbar-collapse-3" class="collapse navbar-collapse">
+                    <p class="navbar-text navbar-right">
+                        <a class="navbar-link" href="">Signed in as Mark Otto</a>
+                    </p>
+                </div>
+            </div>
+        </nav>
+
 
         <?php
         if (isset($debug) && $debug != NULL) {

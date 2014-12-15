@@ -19,6 +19,10 @@ class Home extends CI_Controller {
         $this->m_template->set_Content('home/main', $data);
         $this->m_template->showTemplate();
     }
+    
+    public function test(){
+        $this->load->view("home/test");
+    }
 
 }
 

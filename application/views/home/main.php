@@ -1,9 +1,132 @@
-<br>
-<div class="container">
-    <!--TimeLine
-================================================== -->
+<script>
+    jQuery(document).ready(function ($) {
+       $("#wrapper").toggleClass("toggled");
+    });
+</script>
+<div id="wrapper" class="container-fluid">
+    <!-- Sidebar -->
+    <div id="sidebar-wrapper">
+        <ul class="sidebar-nav">
+            <li class="sidebar-brand">
+                <a href="#">
+                    เส้นทางเดินรถ
+                </a>
+            </li>
+            <li>
+                <a href="#">Dashboard</a>
+            </li>
+            <li>
+                <a href="#">Shortcuts</a>
+            </li>
+            <li>
+                <a href="#">Overview</a>
+            </li>
+            <li>
+                <a href="#">Events</a>
+            </li>
+            <li>
+                <a href="#">About</a>
+            </li>
+            <li>
+                <a href="#">Services</a>
+            </li>
+            <li>
+                <a href="#">Contact</a>
+            </li>
+        </ul>
+    </div>
+    <!-- /#sidebar-wrapper -->
+    <!-- Page Content -->
+    <div id="page-content-wrapper">
+        <div class="container-fluid">
+            <div class="row animated fadeInUp">
+                <div class="col-md-12">
+                    <a href="#menu-toggle" class="btn btn-default" id="menu-toggle">เลือกเส้นทาง</a>
+                </div>
+            </div>
+            <div class="row animated fadeInUp">
+                <div class="col-lg-3">  
+                    <div class="col-lg-12">
+                        <h3 class="">เลือกเวลา</h3>
+                    </div>
+                    <div class="col-lg-12">
+                        <ul class="list-group">
+                            <li class="list-group-item">
+                                <span class="badge">14</span>
+                                Cras justo odio
+                            </li>
+                            <li class="list-group-item">
+                                <span class="badge badge-default">91</span>
+                                Dapibus ac facilisis in
+                            </li>
+                            <li class="list-group-item">
+                                <span class="badge badge-primary">38</span>
+                                Morbi leo risus
+                            </li>
+                            <li class="list-group-item">
+                                <span class="badge badge-success">56</span>
+                                Porta ac consectetur ac
+                            </li>
+                            <li class="list-group-item">
+                                <span class="badge badge-warning">20</span>
+                                Vestibulum at eros
+                            </li>
+                            <li class="list-group-item">
+                                <span class="badge badge-danger">99+</span>
+                                Dapibus ac facilisis in
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-lg-3">  
+                    <div class="col-lg-12">
+                        <h3 class="">เลือกจุดจอด</h3>
+                    </div>
+                </div>
+                <div class="col-lg-3">  
+                    <div class="col-lg-12">
+                        <h3 class="">เลือกที่นั่ง</h3>
+                    </div>
+                    <div class="col-lg-12">
+                        <?php for ($i = 0; $i < 15; $i++) { ?>
+                            <div class="col-lg-3 col-md-4 col-xs-6" style="margin: 0px 0px 0px 0px">
+                                <a class="thumbnail" href="#">
+                                    <img class="img-responsive" src="http://placehold.it/400x300&text=<?= $i + 1 ?>" alt="">
+                                </a>
+                            </div>
+                            <!--<div class="" style="background-color: #009A93;">-->
+                            <!--<div style="background-color: red; height: 50px; width: 50px;margin: 10px 10px 10px 10px"><?= $i ?></div>-->   
+                            <!--</div>-->
+                        <?php } ?>
+                    </div>
+                </div>
+                <div class="col-lg-3">  
+                    <div class="col-lg-12">
+                        <h3 class="">ข้อมูลผู้โดยสาร</h3>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <!-- /#page-content-wrapper -->
+
+</div>
+<!-- /#wrapper -->
+
+<!-- Menu Toggle Script -->
+<script>
+    $("#menu-toggle").click(function (e) {
+        e.preventDefault();
+        $("#wrapper").toggleClass("toggled");
+    });
+</script>
+
+<!--<div class="container">
+    TimeLine
+================================================== 
     <div class="row">
-        <h2 class="example-title">TimeLine</h2>
+        <h3 class="example-title">TimeLine</h3>
         <div class="col-md-12">
             <div class="timeline">
                 <dl>
@@ -72,4 +195,4 @@
         </div>
 
     </div>   
-</div>
+</div>-->

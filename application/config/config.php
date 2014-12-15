@@ -17,7 +17,7 @@ if (!defined('BASEPATH'))
   | path to your installation.
   |
  */
-$config['base_url'] = 'http://localhost/hr_shmpt/';
+$config['base_url'] = 'http://localhost/ticket_shmpt/';
 
 /*
   |--------------------------------------------------------------------------

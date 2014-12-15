@@ -4,18 +4,16 @@
 <footer class="th-footer hidden-print hidden">
 
 </footer>
-<div class="th-footer-bottom">COPYRIGHT &copy; 2014</div>
-
+<div class="th-footer-bottom hidden">COPYRIGHT &copy; 2014</div>
 
 <script>
     jQuery(document).ready(function ($) {
         $('#top').click(function () {
             $("html, body").animate({scrollTop: 0}, 500);
         });
-        
-        
     });
 </script>
+<?php echo js('jasny-bootstrap.min.js?v=' . $version); ?>
 
 </body>
 </html>
