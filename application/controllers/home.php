@@ -16,11 +16,22 @@ class Home extends CI_Controller {
 
     public function index() {
         $data = array();
+
+        $this->m_template->set_Title('ระบบขายตั๋วหน้าเค้ฆาเตอร์');
         $this->m_template->set_Content('home/main', $data);
         $this->m_template->showTemplate();
     }
-    
-    public function test(){
+
+    public function sale_tickit() {
+
+        $data = array();
+
+        $this->m_template->set_Title('ระบบขายตั๋วหน้าเค้ฆาเตอร์');
+        $this->m_template->set_Content('home/main', $data);
+        $this->m_template->showTemplate();
+    }
+
+    public function test() {
         $this->load->view("home/test");
     }
 
