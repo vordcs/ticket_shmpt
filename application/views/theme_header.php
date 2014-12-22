@@ -19,7 +19,7 @@
         <!-- Bootstrap core CSS ans JS -->
         <?php echo js('pace.min.js?v=' . $version); ?>
         <?php echo css('bootstrap.css?v=' . $version); ?>
-        
+
         <?php echo css('bootflat.min.css?v=' . $version); ?>
         <?php echo css('pace.css?v=' . $version); ?>
         <?php echo css('theme.css?v=' . $version); ?>
@@ -33,11 +33,11 @@
         <?php echo js('bootstrap.js?v=' . $version); ?>
         <?php echo js('customJS.js?v=' . $version); ?>
         <?php echo js('site.min.js?v=' . $version); ?>
-        
-        <?php echo css('jasny-bootstrap.min.css?v=' . $version); ?>
-        <?php //echo css('navmenu-push.css?v=' . $version); ?>
-        <?php echo css('simple-sidebar.css?v=' . $version); ?>
-        
+       
+        <?php echo css('sidebar.css?v=' . $version); ?>
+        <?php echo css('plugins/metisMenu/metisMenu.min.css?v=' . $version); ?>        
+        <?php echo js('plugins/metisMenu/metisMenu.min.js?v=' . $version); ?> 
+
         <!--time picker-->    
         <?php echo css('bootstrap-timepicker.min.css?v=' . $version); ?>  
         <?php echo js('bootstrap-timepicker.min.js?v=' . $version); ?> 
@@ -49,8 +49,12 @@
         <?php echo js('bootstrap-datepicker-thai.js?v=' . $version); ?>  
         <?php echo js('/locales/bootstrap-datepicker.th.js?v=' . $version); ?>  
 
+        <!--off-canvas navigation menu-->
+        <?php //echo css('pushy.css?v=' . $version); ?>         
+        <?php //echo js('pushy.min.js?v=' . $version); ?> 
+
         <script type="text/javascript">
-            $(window).scroll(function () {               
+            $(window).scroll(function () {
                 $(".pace-progress").css("margin-top", "58px");
                 if ($(this).scrollTop() > $(window).height() / 2) {
                     $('#scroll-top').removeClass('hidden');
@@ -70,9 +74,12 @@
                     <span class="navbar-brand">ระบบขายตั๋วหน้าเคาเตอร์</span>
                 </div>
                 <div id="bs-example-navbar-collapse-3" class="collapse navbar-collapse">
-                    <p class="navbar-text navbar-right">
-                        <a class="navbar-link" href="">Signed in as Mark Otto</a>
-                    </p>
+                    <ul class="nav navbar-nav navbar-right">
+                        <li><a href="#">Dashboard</a></li>
+                        <li><a href="#">Settings</a></li>
+                        <li><a href="#">Profile</a></li>
+                        <li><a href="#">Help</a></li>
+                    </ul>
                 </div>
             </div>
         </nav>

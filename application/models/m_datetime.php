@@ -14,14 +14,15 @@ Class m_datetime extends CI_Model {
     function getDateToday() {
         return date('Y-m-d');
     }
-    function getDatetimeNowTH() {       
+
+    function getDatetimeNowTH() {
         $hour = date("H");
         $minute = date("i");
         $seconds = date("s");
         $day = date('d');
         $month = date('m');
         $year = date('Y') + 543;
-        $today = $year . '-' . $month . '-' . $day . ' ' . $hour.':'.$minute.':'.$seconds;
+        $today = $year . '-' . $month . '-' . $day . ' ' . $hour . ':' . $minute . ':' . $seconds;
         $dt = new DateTime($today);
         $datetime = $dt->format('Y-m-d H:i:s');
         return $datetime;
@@ -83,6 +84,35 @@ Class m_datetime extends CI_Model {
     }
 
     public function DateThai($strDate) {
+        if ($strDate == NULL) {
+            return '-';
+        } else {
+            $str = explode('-', $strDate);
+            $strYear = trim($str[0]) + 543;
+            $strMonthThai = $this->month_th[(int) $str[1]];
+            $strDay = $str[2];
+            return "$strDay $strMonthThai $strYear";
+        }
+    }
+
+    public function strDateThaiToDB($strDate) {
+        $date = NULL;
+//       $strDate input  22 ธันวาคม 2557
+        if ($strDate == NULL) {
+            return '-';
+        } else {
+            $str = explode(' ', $strDate);
+            $strYear = trim($str[2]) - 543;
+            $strMonth = $this->monthTHtoDB(trim($str[1]));
+            $strDay = $str[0];
+            $d = new DateTime($strYear . '-' . $strMonth . '-' . $strDay);
+            $date = $d->format('Y-m-d');
+            return $date;
+        }
+    }
+
+    public function setDateThai($str) {
+        $strDate = $str;
         if ($strDate == NULL) {
             return '-';
         } else {

@@ -1,198 +1,152 @@
-<script>
-    jQuery(document).ready(function ($) {
-       $("#wrapper").toggleClass("toggled");
-    });
-</script>
-<div id="wrapper" class="container-fluid">
-    <!-- Sidebar -->
-    <div id="sidebar-wrapper">
-        <ul class="sidebar-nav">
-            <li class="sidebar-brand">
-                <a href="#">
-                    เส้นทางเดินรถ
-                </a>
-            </li>
-            <li>
-                <a href="#">Dashboard</a>
-            </li>
-            <li>
-                <a href="#">Shortcuts</a>
-            </li>
-            <li>
-                <a href="#">Overview</a>
-            </li>
-            <li>
-                <a href="#">Events</a>
-            </li>
-            <li>
-                <a href="#">About</a>
-            </li>
-            <li>
-                <a href="#">Services</a>
-            </li>
-            <li>
-                <a href="#">Contact</a>
-            </li>
-        </ul>
-    </div>
-    <!-- /#sidebar-wrapper -->
-    <!-- Page Content -->
-    <div id="page-content-wrapper">
-        <div class="container-fluid">
-            <div class="row animated fadeInUp">
-                <div class="col-md-12">
-                    <a href="#menu-toggle" class="btn btn-default" id="menu-toggle">เลือกเส้นทาง</a>
-                </div>
-            </div>
-            <div class="row animated fadeInUp">
-                <div class="col-lg-3">  
-                    <div class="col-lg-12">
-                        <h3 class="">เลือกเวลา</h3>
-                    </div>
-                    <div class="col-lg-12">
-                        <ul class="list-group">
-                            <li class="list-group-item">
-                                <span class="badge">14</span>
-                                Cras justo odio
-                            </li>
-                            <li class="list-group-item">
-                                <span class="badge badge-default">91</span>
-                                Dapibus ac facilisis in
-                            </li>
-                            <li class="list-group-item">
-                                <span class="badge badge-primary">38</span>
-                                Morbi leo risus
-                            </li>
-                            <li class="list-group-item">
-                                <span class="badge badge-success">56</span>
-                                Porta ac consectetur ac
-                            </li>
-                            <li class="list-group-item">
-                                <span class="badge badge-warning">20</span>
-                                Vestibulum at eros
-                            </li>
-                            <li class="list-group-item">
-                                <span class="badge badge-danger">99+</span>
-                                Dapibus ac facilisis in
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="col-lg-3">  
-                    <div class="col-lg-12">
-                        <h3 class="">เลือกจุดจอด</h3>
-                    </div>
-                </div>
-                <div class="col-lg-3">  
-                    <div class="col-lg-12">
-                        <h3 class="">เลือกที่นั่ง</h3>
-                    </div>
-                    <div class="col-lg-12">
-                        <?php for ($i = 0; $i < 15; $i++) { ?>
-                            <div class="col-lg-3 col-md-4 col-xs-6" style="margin: 0px 0px 0px 0px">
-                                <a class="thumbnail" href="#">
-                                    <img class="img-responsive" src="http://placehold.it/400x300&text=<?= $i + 1 ?>" alt="">
-                                </a>
-                            </div>
-                            <!--<div class="" style="background-color: #009A93;">-->
-                            <!--<div style="background-color: red; height: 50px; width: 50px;margin: 10px 10px 10px 10px"><?= $i ?></div>-->   
-                            <!--</div>-->
-                        <?php } ?>
-                    </div>
-                </div>
-                <div class="col-lg-3">  
-                    <div class="col-lg-12">
-                        <h3 class="">ข้อมูลผู้โดยสาร</h3>
-                    </div>
-                </div>
-            </div>
-
+<div id="" class="container-fluid">
+    <div id="progress_step" class="row-fluid animated fadeInUp">        
+        <div class="col-lg-12" style="padding-bottom: 2%;" >
+            <ol class="progtrckr" data-progtrckr-steps="4">
+  <!--                <li class="progtrckr-done"><span class="lead">สถานีต้นทาง</span></li>
+                --><li id="step1" class="progtrckr-done"><span class="lead">เลือกเส้นทาง</span></li><!--                
+                --><li id="step2" class="progtrckr-todo"><span class="lead">เลือกเที่ยวเวลาเดินทาง</span></li><!--                 
+                --><li id="step3" class="progtrckr-todo"><span class="lead">เลือกที่นั่งการเดินทาง </span></li><!--                 
+                --><li id="step4" class="progtrckr-todo"><span class="lead">พิมพ์บัตรโดยสาร</span></li>
+            </ol>
         </div>
     </div>
-    <!-- /#page-content-wrapper -->
-
 </div>
-<!-- /#wrapper -->
-
-<!-- Menu Toggle Script -->
+<br>
 <script>
-    $("#menu-toggle").click(function (e) {
-        e.preventDefault();
-        $("#wrapper").toggleClass("toggled");
+    jQuery(document).ready(function () {
+        $("select[name='VTID']").change(function () {
+            var url_post = "<?= base_url(); ?>index.php/sale/get_route_by_vehicle_type";
+            var vtid = $("select[name='VTID'] option:selected").val();
+            var vt_name = $("select[name='VTID'] option:selected").text();
+//            alert(vtid + '  ' + vt_name + '  ' + url_post );
+            $.ajax({
+                url: url_post,
+                data: {'VTID': vtid},
+                dataType: 'json',
+                type: "post",
+                success: function (data) {
+                    $(".result").html(data);
+//                    response = jQuery.parseJSON(data);
+//                    console.log(response);
+                }
+            });
+
+
+        });
+        $("select[name='RCode']").change(function () {
+            var rcode = $("select[name='RCode'] option:selected").val();
+            var route_name = $("select[name='RCode'] option:selected").text();
+//            alert(rcode + '  ' + route_name);
+            $('#form_search_route').submit();
+        });
+        $("select[name='SourceID']").change(function () {
+            var s_id = $("select[name='SourceID'] option:selected").val();
+            var s_name = $("select[name='SourceID'] option:selected").text();
+//            alert(s_id + '  ' + s_name);
+            $('#form_search_route').submit();
+        });
     });
 </script>
-
-<!--<div class="container">
-    TimeLine
-================================================== 
+<div id="" class="container"> 
     <div class="row">
-        <h3 class="example-title">TimeLine</h3>
-        <div class="col-md-12">
-            <div class="timeline">
-                <dl>
-                    <dt>Apr 2014</dt>
-                    <dd class="pos-right clearfix">
-                        <div class="circ"></div>
-                        <div class="time">Apr 14</div>
-                        <div class="events">
-                            <div class="pull-left">
-                                <img class="events-object img-rounded" src="img/photo-1.jpg">
-                            </div>
-                            <div class="events-body">
-                                <h4 class="events-heading">Bootstrap</h4>
-                                <p>Raw denim you probably haven't heard of them jean shorts Austin. Nesciunt tofu stumptown aliqua, retro synth master cleanse. Mustache cliche tempor, williamsburg carles vegan helvetica.</p>
-                            </div>
-                        </div>
-                    </dd>
-                    <dd class="pos-left clearfix">
-                        <div class="circ"></div>
-                        <div class="time">Apr 10</div>
-                        <div class="events">
-                            <div class="pull-left">
-                                <img class="events-object img-rounded" src="img/photo-2.jpg">
-                            </div>
-                            <div class="events-body">
-                                <h4 class="events-heading">Bootflat</h4>
-                                <p>Raw denim you probably haven't heard of them jean shorts Austin. Nesciunt tofu stumptown aliqua, retro synth master cleanse. Mustache cliche tempor, williamsburg carles vegan helvetica.</p>
-                            </div>
-                        </div>
-                    </dd>
-                    <dt>Mar 2014</dt>
-                    <dd class="pos-right clearfix">
-                        <div class="circ"></div>
-                        <div class="time">Mar 15</div>
-                        <div class="events">
-                            <div class="pull-left">
-                                <img class="events-object img-rounded" src="img/photo-3.jpg">
-                            </div>
-                            <div class="events-body">
-                                <h4 class="events-heading">Flat UI</h4>
-                                <p>Raw denim you probably haven't heard of them jean shorts Austin. Nesciunt tofu stumptown aliqua, retro synth master cleanse. Mustache cliche tempor, williamsburg carles vegan helvetica.</p>
-                            </div>
-                        </div>
-                    </dd>
-                    <dd class="pos-left clearfix">
-                        <div class="circ"></div>
-                        <div class="time">Mar 8</div>
-                        <div class="events">
-                            <div class="pull-left">
-                                <img class="events-object img-rounded" src="img/photo-4.jpg">
-                            </div>
-                            <div class="events-body">
-                                <h4 class="events-heading">UI design</h4>
-                                <p>Raw denim you probably haven't heard of them jean shorts Austin. Nesciunt tofu stumptown aliqua, retro synth master cleanse. Mustache cliche tempor, williamsburg carles vegan helvetica.</p>
-                            </div>
-                        </div>
-                    </dd>
+        <p class="result">
 
-                </dl>
-            </div>
-        </div>
+        </p>
     </div>
-    <div class="row">
-        <div class="col-md-12">
+    <div id="select_route" class="row">       
+        <div class="col-md-12 well ">    
+            <div class="col-md-12 text-center">
+                <h3 class="fs-title">ค้นหาเที่ยวรถ</h3>
+                <p class="fs-subtitle lead">This is step 1</p>                    
+            </div>   
+            <div class="col-md-8 col-md-offset-2">
+                <?php echo $from_search['form']; ?>  
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="control-label">เส้นทาง</label>
+                        <?php echo $from_search['RCode']; ?> 
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="control-label">จุดขึ้นรถ</label>
+                        <?php echo $from_search['SourceID']; ?> 
+                    </div>
+                </div>
+                <?php echo form_close(); ?>
+            </div>
+            <hr>
+            <?php
+            if (count($route_detail) == 0 || $route_detail == '') {
+                ?>
+                <div class="col-md-12">
+                    <div class="" style="padding-bottom: 100px;padding-top: 100px;">
+                        <p class="lead text-center">กรุณาเลือกเส้นทาง</p>
+                    </div>
+                </div>  
+                <?php
+            } else {
+                $seq_start_id = '';
+                foreach ($stations as $s) {
+                    if ($SourceID == $s['SID']) {
+                        $seq_start_id = $s['Seq'];
+                    }
+                }
+                foreach ($route_detail as $rd) {
+                    $rcode = $rd['RCode'];
+                    $vtid = $rd['VTID'];
+                    $vt_name = $rd['VTDescription'];
+                    $rid = $rd['RID'];
+                    $source = $rd['RSource'];
+                    $destination = $rd['RDestination'];
+                    $schedule_type = $rd["ScheduleType"];
+                    $start_point = $rd['StartPoint'];
+                    $route_time = $rd['Time'];
+                    $route_name = " ตารางเวลาเดิน $vt_name เส้นทาง " . $rcode . ' ' . ' ' . $source . ' - ' . $destination;
+                    $last_seq_station = 0;
+                    ?>                   
+                    <div class="col-md-6">
+                        <div class="widget widget-nopad">
+                            <div class="widget-header">                     
+                                <span class=""><?= " เที่ยวไป $destination" ?></span>
+                            </div>   
+                            <div class="list-group" style="border: 1px;">
+                                <?php
+//                                ออกจาก ขอนแก่น
+                                if ($start_point == 'S') {
+                                    foreach ($stations as $s) {
+                                        if ($s['Seq'] > $seq_start_id) {
+                                            $destination_id = $s['SID'];
+                                            $station_name = $s['StationName'];
+                                            $go_to_step2 = array(
+                                                'class' => "list-group-item",
+                                            );
+                                            echo anchor("sale/step1/$rid/$SourceID/$destination_id", $station_name, $go_to_step2);
+                                        }
+                                    }
+                                } else {
+                                    for ($i = count($stations) - 1; $i >= 0; $i--) {
+                                        $destination_id = $stations[$i]['SID'];
+                                        $station_name = $stations[$i]['StationName'];
+                                        if ($stations[$i]['Seq'] < $seq_start_id) {
+                                            $go_to_step2 = array(
+                                                'class' => "list-group-item",
+                                            );
+                                            echo anchor("sale/step1/$rid/$SourceID/$destination_id", $station_name." -> $destination_id ", $go_to_step2);
+                                        }
+                                    }
+                                }
+                                ?>                               
+                            </div>
 
-        </div>
+                        </div>
+                    </div>
+                    <?php
+                }
+            }
+            ?>
+        </div>      
+    </div>  
+</div>
 
-    </div>   
-</div>-->
+
