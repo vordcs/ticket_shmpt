@@ -13,6 +13,7 @@ class sale extends CI_Controller {
         $this->load->model('m_station');
         $this->load->model('m_schedule');
         $this->load->model('m_fares');
+        $this->load->model('m_ticket');
         $this->load->library('form_validation');
 
 //Initial language
@@ -29,6 +30,7 @@ class sale extends CI_Controller {
         );
 
         $vtid = $this->session->userdata('sale_type');
+
         $rcode = $this->input->post('RCode');
         $source_id = $this->input->post('SourceID');
 
@@ -57,11 +59,11 @@ class sale extends CI_Controller {
         $this->m_template->set_Debug($data_debug);
 
         $this->m_template->set_Title('ระบบขายตั๋วหน้าเคาน์เตอร์ ');
-        $this->m_template->set_Content('sale/frm_sale', $data);
+        $this->m_template->set_Content('sale/frm_search', $data);
         $this->m_template->showTemplate();
     }
 
-    public function step1($rid = NULL, $source_id = NULL, $destination_id = NULL, $schedules_id = NULL) {
+    public function booking($rid = NULL, $source_id = NULL, $destination_id = NULL, $schedules_id = NULL) {
         if ($rid == NULL || $source_id == NULL || $destination_id == NULL) {
             redirect('sale/');
         }
@@ -98,7 +100,7 @@ class sale extends CI_Controller {
         $route = $this->m_route->get_route(NULL, NULL, $rid)[0];
         $schedule = $this->m_schedule->get_schedule($date, $rid, $schedules_id)[0];
         $fare = $this->m_fares->get_fares($rcode, $vtid, $source_id, $destination_id)[0];
-
+        $tickets_by_seller = $this->m_ticket->get_ticket_by_saller($schedules_id);
         $data = array(
             'form' => $this->m_sale->set_form_sale($route, $s_station, $d_station, $schedule, $fare),
             'date' => $this->m_datetime->setDateThai($date),
@@ -111,6 +113,7 @@ class sale extends CI_Controller {
             'schedule' => $schedule,
             'schedules_detail' => $schedules_detail,
             'fare' => $fare,
+            'tickets_by_seller' => $tickets_by_seller,
         );
         $data['vehicles_types'] = $this->m_route->get_vehicle_types();
 
@@ -128,54 +131,90 @@ class sale extends CI_Controller {
 //            'parameter' => "vtid = $vtid | source_id = $source_id |  destination_id = $destination_id | schedules_id = $schedules_id",
 //            'post' => $this->input->post(),
 //            'session' => $this->session->userdata('EID'),
+            'tickets_by_seller' => $data['tickets_by_seller'],
         );
 
         if ($this->m_sale->validate_form_sale() && $this->form_validation->run() == TRUE) {
-            $data_debug['form_data'] = $this->m_sale->get_post_form_sale();
+            $ticket = $this->m_sale->get_post_form_sale();
+            $data_debug['form_ticket'] = $ticket;
+//            $data_debug['update_resever_ticket'] = $this->m_ticket->update_resever_ticket($ticket);
+//            redirect("sale/print_ticket/$schedules_id");
         }
 
         $this->m_template->set_Debug($data_debug);
         $this->m_template->set_Title('ขายตั๋ว ' . $route_name);
-        $this->m_template->set_Content('sale/frm_sale_1', $data);
+        $this->m_template->set_Content('sale/frm_booking', $data);
         $this->m_template->showTemplate();
     }
 
-    public function step2($rid = NULL, $source_id = NULL, $destination_id = NULL) {
+    public function print_ticket($tsid = NULL) {
+        if ($tsid == NULL) {
+            echo "<script>window.location.href='javascript:history.back(-1);'</script>";
+        }
+        $eid = $this->session->userdata('EID');
+        $ticket = $this->m_ticket->get_ticket($tsid, 2, $eid);
+        $route = $this->m_route->get_route(NULL, NULL, $ticket[0]['RID']);
+
+        if (count($ticket) <= 0) {
+            echo "<script>window.location.href='javascript:history.back(-1);'</script>";
+        }
         $data = array(
-            'route' => $this->m_route->get_route(NULL, NULL, $rid),
-            'stations' => $this->m_station->get_stations(),
-            'schedules' => $this->m_schedule->get_schedule($this->m_datetime->getDateToday(), $rid),
-            'schedules_detail' => $this->m_schedule->get_schedule($this->m_datetime->getDateToday(), $rid),
+            'ticket' => $ticket,
+            'route' => $route[0],
         );
-        $data['vehicles_type'] = $this->m_route->get_vehicle_types();
-        $data['route'] = $this->m_route->get_route();
         $data_debug = array(
-//            'vehicles_type' => $data['vehicles_type'],
+//            'ticket' => $data['ticket'],
 //            'route' => $data['route'],
-//            'route_detail' => $data['route_detail'],
-//            'form_route' => $data['form_route'],
-//            'stations' => $data['stations'],
-//            'schedules' => $data['schedules'],
+//            '' => $data[''],
+//            '' => $data[''],
         );
 
         $this->m_template->set_Debug($data_debug);
-        $this->m_template->set_Title('Step 2');
-        $this->m_template->set_Content('sale/frm_sale_2', $data);
+        $this->m_template->set_Title('พิมพ์บัตรโดยสาร');
+        $this->m_template->set_Content('sale/frm_print', $data);
         $this->m_template->showTemplate();
     }
 
-    public function get_route_by_vehicle_type($vtid = NULL) {
-        header('Content-Type: application/json', true);
-        $vtid = $this->input->post('VTID');
-        $result = $this->m_route->get_route(NULL, $vtid);
-        echo json_encode($result);
+    function gen_qrcode($data = NULL) {
+        $this->load->library('ciqrcode');
+        if ($data != NULL) {
+            $params['data'] = 'This is a text to encode become QR Code';
+            $params['level'] = 'H';
+            $params['size'] = 5;
+            $params['savename'] = FCPATH . 'tes.png';
+            $this->ciqrcode->generate($params);
+//        echo '<img src="' . base_url() . 'tes.png" />';
+        }
+    }
+
+    public function booking_seat() {
+        $tsid = $this->input->post('TSID');
+        $seat = $this->input->post("Seat");
+        $vcode = $this->input->post("VCode");
+        $source_id = $this->input->post("SourceID");
+        $destination_id = $this->input->post("DestinationID");
+
+        $ticket_data = array(
+            'TSID' => $tsid,
+            'Seat' => $seat,
+            'VCode' => $vcode,
+            'SourceID' => $source_id,
+            'DestinationID' => $destination_id,
+        );
+
+        $ticket_id = $this->m_ticket->resever_ticket($ticket_data);
+        if ($ticket_id!=NULL||$ticket_id!='') {
+            $rs=true;
+        }  else {
+            $rs=FALSE;
+        }
+//        $rs = array(
+//            'TSID' => $tsid,
+//            'Seate' => $seat,
+//            'TicketID' => $ticket_id,
+//        );
+
+        echo json_encode($ticket_id);
     }
 
 }
-
-//        $destination_id = $this->input->post('DestinationID');
-//elseif ($rcode != '0' && $source_id != '0') {
-//            $data['from_search'] = $this->m_route->set_form_search_route($vtid, $rcode, $source_id);
-//        } elseif ($rcode != '0' && $source_id != 0 && $destination_id != 0) {
-//            $data['from_search'] = $this->m_route->set_form_search_route($vtid, $rcode, $source_id, $destination_id);            
-//        } 

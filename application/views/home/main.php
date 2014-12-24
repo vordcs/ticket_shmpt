@@ -3,11 +3,6 @@
 
     });
 </script>
-
-
-
-
-
 <div class="container">     
     <div class="jumbotron" style="padding-bottom: 2%;">
         <div class="container">

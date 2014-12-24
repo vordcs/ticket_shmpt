@@ -109,7 +109,7 @@ $autoload['language'] = array();
 |
 */
 
-$autoload['model'] = array('m_datetime');
+$autoload['model'] = array('m_datetime','m_barcode');
 
 
 /* End of file autoload.php */

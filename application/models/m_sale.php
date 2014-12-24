@@ -41,6 +41,7 @@ class m_sale extends CI_Model {
         $price_dis = 0;
 
 //        รถโดยสาร
+        $vid = 'XX';
         $vcode = 'xxx-x';
 
         if (count($schedule) > 0 && $schedule != NULL) {
@@ -52,7 +53,7 @@ class m_sale extends CI_Model {
             if (($source_seq == '1' || $source_seq == $num_station)) {
                 $time_depart = date('H:i', strtotime($schedule["TimeDepart"]));
             } else {
-                date('H:i', strtotime("+$source_travel_time minutes", strtotime($start_time)));
+                $time_depart = date('H:i', strtotime("+$source_travel_time minutes", strtotime($start_time)));
             }
 
             if (($source_seq != '1' || $source_seq != $num_station)) {
@@ -84,12 +85,12 @@ class m_sale extends CI_Model {
             'value' => $rid,
         );
         $i_VID = array(
-            'type' => "text",
-            'name' => "",
-            'id' => "",
+            'type' => "hidden",
+            'name' => "VID",
+            'id' => "VID ",
             'class' => "from-control",
             'readonly' => "TRUE",
-            'value' => set_value(""),
+            'value' => $vid,
         );
         $i_TSID = array(
             'type' => "hidden",
@@ -174,18 +175,19 @@ class m_sale extends CI_Model {
         );
         $i_VCode = array(
             'type' => "text",
-            'name' => "VID",
-            'id' => "VID",
+            'name' => "VCode",
+            'id' => "VCode",
             'class' => "form-control input-lg text-center",
             'readonly' => "",
             'value' => $vcode,
         );
 
         $form_sale_ticket = array(
-            'form' => form_open("sale/step1/$rid/$source_id/$destination_id/$tsid", array('class' => 'form', 'id' => 'form_sale')),
+            'form' => form_open("sale/booking/$rid/$source_id/$destination_id/$tsid", array('class' => 'form', 'id' => 'form_sale')),
             'route_name' => form_input($i_route_name),
             'RID' => form_input($i_RID),
             'VID' => form_input($i_VID),
+            'TSID' => form_input($i_TSID),
             'SourceID' => form_input($i_SourceID),
             'SourceName' => form_input($i_SourceName),
             'DestinationID' => form_input($i_DestinationID),
@@ -202,6 +204,19 @@ class m_sale extends CI_Model {
     }
 
     public function get_post_form_sale() {
+        
+        $route_name = $this->input->post('route_name');
+        $RID = $this->input->post('RID');
+        $VID = $this->input->post('VID');
+        $VCode = $this->input->post('VCode');
+        $TSID = $this->input->post('TSID');
+        $SourceID = $this->input->post('SourceID');
+        $SourceName = $this->input->post('SourceName');
+        $DestinationID = $this->input->post('DestinationID');
+        $DestinationName = $this->input->post('DestinationName');
+        $TimeDepart = $this->input->post('TimeDepart');
+        $TimeArrive = $this->input->post('TimeArrive');
+
         $Date = $this->m_datetime->strDateThaiToDB($this->input->post('Date'));
         $Price = $this->input->post('Price');
         $PriceDicount = $this->input->post('PriceDicount');
@@ -209,6 +224,7 @@ class m_sale extends CI_Model {
         $Seat = $this->input->post('Seat');
         $PriceSeat = $this->input->post('PriceSeat');
         $IsDiscount = array();
+//        0=ราคาเต็ม ,1 =ราคาลด
         for ($i = 0; $i < count($PriceSeat); $i++) {
             if ($PriceSeat[$i] == $Price) {
                 $IsDiscount[$i] = 0;
@@ -216,28 +232,56 @@ class m_sale extends CI_Model {
                 $IsDiscount[$i] = 1;
             }
         }
+        $note = "ตั๋วโดยสารเดินทางจาก $SourceName ไป $DestinationName เส้นทาง $route_name เวลาออก $TimeDepart เวลาถึง $TimeArrive ";
+        $ticket = array();
 
-        $form_data = array(
-            'RID' => "",
-            'VID' => "",
-            'SourceID' => "",
-            'SourceName' => "",
-            'DestinationID' => "",
-            'DestinationName' => "",
-            'TimeDepart' => "",
-            'TimeArrive' => "",
-            'Date' => $Date,
-            'Price' => $Price,
-            'PriceDicount' => $PriceDicount,
-            'Seat' => $Seat,
-            'PriceSeat' => $PriceSeat,
-            'IsDiscount' => $IsDiscount,
-        );
-        return $form_data;
+        for ($i = 0; $i < count($Seat); $i++) {
+            $temp_ticket = array(
+                'TSID' => $TSID,
+                'RID' => $RID,
+                'VID' => $VID,
+                'VCode' => $VCode,
+                'SourceID' => $SourceID,
+                'SourceName' => $SourceName,
+                'DestinationID' => $DestinationID,
+                'DestinationName' => $DestinationName,
+                'TimeDepart' => $TimeDepart,
+                'TimeArrive' => $TimeArrive,
+                'DateSale' => $Date,
+                'Seat' => $Seat[$i],
+                'PriceSeat' => $PriceSeat[$i],
+                'IsDiscount' => $IsDiscount[$i],
+                'Seller' => $this->session->userdata('EID'),
+                'TicketSaleNote' => $note,
+            );
+            array_push($ticket, $temp_ticket);
+        }
+
+//        $form_data = array(
+//            'TSID' => $TSID,
+//            'RID' => $RID,
+//            'VID' => $VID,
+//            'VCode' => $VCode,
+//            'SourceID' => $SourceID,
+//            'SourceName' => $SourceName,
+//            'DestinationID' => $DestinationID,
+//            'DestinationName' => $DestinationName,
+//            'TimeDepart' => $TimeDepart,
+//            'TimeArrive' => $TimeArrive,
+//            'DateSale' => $Date,
+//            'PriceDicount' => $PriceDicount,
+//            'Seat' => $Seat,
+//            'PriceSeat' => $PriceSeat,
+//            'IsDiscount' => $IsDiscount,
+//        );
+        return $ticket;
     }
 
     public function validate_form_sale() {
-
+        $Seat = $this->input->post('Seat');
+        if (count($Seat) <= 0 || $Seat == NULL) {
+            return FALSE;
+        }
         $this->form_validation->set_rules("Seat[]", "เวลาเดินทาง", 'trim|required|xss_clean');
 
         return TRUE;
