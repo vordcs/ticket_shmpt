@@ -11,7 +11,7 @@ class m_route extends CI_Model {
 
         if ($rid != NULL) {
             $this->db->where('RID', $rid);
-        }  else {
+        } else {
             $this->db->where('StartPoint', 'S');
         }
         if ($rcode != NULL) {
@@ -21,13 +21,13 @@ class m_route extends CI_Model {
             $this->db->where('t_routes.VTID', $vtid);
         }
         $this->db->group_by(array('RCode', 't_routes.VTID'));
-        
+
 //        $this->db->order_by('StartPoint');
         $query = $this->db->get('t_routes');
         return $query->result_array();
     }
 
-    public function search_route($rcode = NULL, $source = NULL, $destination = NULL,$rid = NULL) {
+    public function search_route($rcode = NULL, $source = NULL, $destination = NULL, $rid = NULL) {
 
         if ($rcode != NULL)
             $this->db->where('RCode', $rcode);

@@ -44,6 +44,7 @@ class m_login extends CI_Model {
         $flag = FALSE;
         $session = array(
             'name' => 'Admin',
+            'EID' => "E000000000",
             'login' => FALSE
         );
 

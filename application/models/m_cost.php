@@ -7,15 +7,15 @@ class m_cost extends CI_Model {
 
     public function get_cost($cid = null, $ctid = NULL) {
         $this->db->join('cost_type', 'cost_type.CostTypeID = cost.CostTypeID');
-        $this->db->join('cost_detail', 'cost_detail.CostDetailID = cost.CostDetailID');
-        $this->db->join('vehicles_has_cost', 'vehicles_has_cost.CostID = cost.CostID');
+        $this->db->join('cost_detail', 'cost_detail.CostDetailID = cost.CostDetailID','left');
+        $this->db->join('vehicles_has_cost', 'vehicles_has_cost.CostID = cost.CostID','left');
         if ($cid != NULL) {
             $this->db->where('cost.CostID', $cid);
         }
         if ($ctid != NULL) {
             $this->db->where('cost.CostTypeID', $ctid);
         }
-        $this->db->where('cost.CostDate', $this->m_datetime->getDateToday());
+        $this->db->where('cost.CostDate', $this->m_datetime->getDateToday());       
         $query = $this->db->get('cost');
         return $query->result_array();
     }
@@ -37,14 +37,18 @@ class m_cost extends CI_Model {
         return $query->result_array();
     }
 
-    function get_vehicle($vcode = NULL, $vtid = NULL) {
-        $this->db->join('vehicles_type', 'vehicles.VTID = vehicles_type.VTID');
+    function get_vehicle($vcode = NULL, $vtid = NULL, $rcode = NULL) {
         $this->db->join('t_routes_has_vehicles', 'vehicles.VID = t_routes_has_vehicles.VID', 'left');
+         $this->db->join('vehicles_type', 'vehicles.VTID = vehicles_type.VTID');
         if ($vcode != NULL) {
             $this->db->where('vehicles.VCode', $vcode);
         }
         if ($vtid != NULL) {
+           
             $this->db->where('vehicles_type.VTID', $vtid);
+        }
+        if ($rcode != NULL) {
+            $this->db->where('RCode', $rcode);
         }
 
         $query = $this->db->get('vehicles');
@@ -99,30 +103,51 @@ class m_cost extends CI_Model {
 //      insert vehicles has cost
         $vehicle_cost = array(
             'CostID' => $cost_id,
-            'VID' => $data['data_vehicle'][0]['VID'],
+            'VID' => $data['data_vehicle']['VID'],
         );
 
         $this->db->insert('vehicles_has_cost', $vehicle_cost);
 
         $rs = $this->get_cost($cost_id);
-        $rs[0]['VTID'] = $data['data_vehicle'][0]['VTID'];
-        $rs[0]['RCode'] = $data['data_vehicle'][0]['RCode'];
-        $rs[0]['VTDescription'] = $data['data_vehicle'][0]['VTDescription'];
+        $rs[0]['VTID'] = $data['data_vehicle']['VTID'];
+        $rs[0]['RCode'] = $data['data_vehicle']['RCode'];
+        $rs[0]['VTDescription'] = $data['data_vehicle']['VTDescription'];
 
         return $rs;
     }
 
     public function set_form_add($ctid) {
+        $date = $this->m_datetime->DateThaiToDay();
+
+        $i_RCode[0] = 'เลือกเส้นทาง';
+        foreach ($this->get_route() as $r) {
+            $rcode = $r['RCode'];
+            $source = $r['RSource'];
+            $desination = $r['RDestination'];
+            $vt_name = $r['VTDescription'];
+            $route_name = "$vt_name เส้นทาง " . $rcode . ' ' . ' ' . $source . ' - ' . $desination;
+            $i_RCode[$rcode] = $route_name;
+        }
+
         $i_CostDetailID[0] = 'เลือกรายการ';
         foreach ($this->get_cost_detail($ctid) as $value) {
             $i_CostDetailID[$value['CostDetailID']] = $value['CostDetail'];
         }
+
+        $i_OtherDetail = array(
+            'name' => 'OtherDetail',
+            'id' => 'OtherDetail',
+            'value' => set_value('OtherDetail'),
+            'placeholder' => 'รายการอื่นๆ',
+            'class' => 'form-control'
+        );
+
         $i_CostDate = array(
             'name' => 'CostDate',
             'value' => (set_value('CostDate') == NULL) ? $this->m_datetime->getDateTodayTH() : set_value('CostDate'),
             'placeholder' => 'วันที่ทำรายการ',
             'class' => 'form-control datepicker');
-      
+
         $i_VCode = array(
             'name' => 'VCode',
             'value' => set_value('VCode'),
@@ -139,13 +164,14 @@ class m_cost extends CI_Model {
             'placeholder' => 'หมายเหตุ',
             'rows' => '3',
             'class' => 'form-control');
-
         $dropdown = 'class="selecter_3" data-selecter-options = \'{"cover":"true"}\' ';
 
         $form_add = array(
             'form' => form_open('cost/add/' . $ctid, array('class' => 'form-horizontal', 'id' => 'form_cost')),
+            'RCode' => form_dropdown('RCode', $i_RCode, set_value('RCode'), $dropdown . 'id = "" '),
             'CostDate' => form_input($i_CostDate),
-            'CostDetailID' => form_dropdown('CostDetailID', $i_CostDetailID, set_value('CostDetailID'), $dropdown),           
+            'CostDetailID' => form_dropdown('CostDetailID', $i_CostDetailID, set_value('CostDetailID'), $dropdown . 'id = "CostDetailID" '),
+            'OtherDetail' => form_input($i_OtherDetail),
             'VCode' => form_input($i_VCode),
             'CostValue' => form_input($i_CostValue),
             'CostNote' => form_textarea($i_CostNote),
@@ -203,6 +229,25 @@ class m_cost extends CI_Model {
     }
 
     public function validation_form_add() {
+
+        $CostDetailID = $this->input->post('CostDetailID');
+        if ($CostDetailID == '999') {
+            $this->form_validation->set_rules('OtherDetail', 'รายการอื่นๆ', 'trim|required|xss_clean');
+        } else {
+            $this->form_validation->set_rules('OtherDetail', 'รายการอื่นๆ', 'trim|xss_clean');
+        }
+
+        $this->form_validation->set_rules('RCode', 'เส้นทาง', 'trim|required|xss_clean|callback_check_dropdown');
+        $this->form_validation->set_rules('CostDetailID', 'รายการ', 'trim|required|xss_clean|callback_check_dropdown');
+        $this->form_validation->set_rules('CostDate', 'วันที่ทำรายการ', 'trim|required|xss_clean');
+        $this->form_validation->set_rules('VCode', 'เบอร์รถ', 'trim|required|xss_clean|callback_check_vcode');
+        $this->form_validation->set_rules('CostValue', 'จำนวนเงิน', 'trim|required|xss_clean');
+        $this->form_validation->set_rules('CostNote', 'หมายเหตุ', 'trim|xss_clean');
+        return TRUE;
+    }
+
+    public function validation_form_edit() {
+        $this->form_validation->set_rules('RCode', 'เส้นทาง', 'trim|required|xss_clean|callback_check_dropdown');
         $this->form_validation->set_rules('CostDetailID', 'รายการ', 'trim|required|xss_clean|callback_check_dropdown');
         $this->form_validation->set_rules('CostDate', 'วันที่ทำรายการ', 'trim|required|xss_clean');
         $this->form_validation->set_rules('VTID', 'ประเภทรถ', 'trim|required|xss_clean|callback_check_dropdown');
@@ -211,31 +256,37 @@ class m_cost extends CI_Model {
         $this->form_validation->set_rules('CostNote', 'หมายเหตุ', 'trim|xss_clean');
         return TRUE;
     }
+
     public function varlidation_form_search() {
-        $this->form_validation->set_rules('RCode','เส้นทาง','trim|xss_clean');
-        $this->form_validation->set_rules('VTID','ประเภทรถ','trim|xss_clean');
-        $this->form_validation->set_rules('VCode','เบอร์รถ','trim|xss_clean');
-        $this->form_validation->set_rules('DateForm','จากวันที่','trim|xss_clean');
-        $this->form_validation->set_rules('DateTo','ถึงวันที่','trim|xss_clean');
-        
+        $this->form_validation->set_rules('RCode', 'เส้นทาง', 'trim|xss_clean');
+        $this->form_validation->set_rules('VTID', 'ประเภทรถ', 'trim|xss_clean');
+        $this->form_validation->set_rules('VCode', 'เบอร์รถ', 'trim|xss_clean');
+        $this->form_validation->set_rules('DateForm', 'จากวันที่', 'trim|xss_clean');
+        $this->form_validation->set_rules('DateTo', 'ถึงวันที่', 'trim|xss_clean');
+
         return TRUE;
     }
 
     public function get_post_form_add($ctid) {
         //ข้อมูลค่าใช้จ่าย
-
-        $data_cost = array(
+        $vcode = $this->input->post('VCode');
+        $data_cost = array(            
             'CostTypeID' => $ctid,
             'CostDetailID' => $this->input->post('CostDetailID'),
             'CostDate' => $this->m_datetime->setDateFomat($this->input->post('CostDate')),
             'CostValue' => $this->input->post('CostValue'),
             'CostNote' => $this->input->post('CostNote'),
+            'CreateBy' => $this->session->userdata('EID'),
+            'CreateDate' => $this->m_datetime->getDatetimeNow(),
         );
-        $vcode = $this->input->post('VCode');
-        $vtid = $this->input->post('VTID');
+        $OtherCost = $this->input->post('OtherDetail');
+        if ($OtherCost != '' || $OtherCost != null) {
+           $data_cost['OtherCostDetail'] = $OtherCost;
+        }  
+
         $form_data = array(
             'data_cost' => $data_cost,
-            'data_vehicle' => $this->get_vehicle($vcode, $vtid),
+            'data_vehicle' => $this->get_vehicle($vcode)[0],          
         );
 
         return $form_data;

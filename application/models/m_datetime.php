@@ -8,7 +8,7 @@ Class m_datetime extends CI_Model {
     private $month_th = array("", "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม");
 
     function getDatetimeNow() {
-        return date('Y-m-d H:i:s');
+        return (new \DateTime())->format('Y-m-d H:i:s');
     }
 
     function getDateToday() {

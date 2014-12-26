@@ -49,13 +49,13 @@
 
         <!--off-canvas navigation menu-->
 
-<?php echo css('admin/style.css?v=' . $version); ?>
+        <?php echo css('admin/style.css?v=' . $version); ?>
         <?php // echo css('/StickyTableHeaders/normalize.css?v=' . $version); ?> 
         <?php echo css('StickyTableHeaders/component.css?v=' . $version); ?>         
         <?php echo js('/StickyTableHeaders/jquery.ba-throttle-debounce.min.js?v=' . $version); ?>  
         <?php echo js('/StickyTableHeaders/jquery.stickyheader.js?v=' . $version); ?>  
 
-        
+
 
         <script type="text/javascript">
             $(window).scroll(function () {
@@ -73,7 +73,7 @@
                 }
             });
             jQuery(window).load(function () {
-//                $('.alert').delay(3000).fadeOut();
+                $('.alert').delay(3000).fadeOut();
             });
         </script>
         <style>
