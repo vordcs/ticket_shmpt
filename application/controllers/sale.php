@@ -60,7 +60,7 @@ class sale extends CI_Controller {
 
         $this->m_template->set_Title('ระบบขายตั๋วหน้าเคาน์เตอร์ ');
         $this->m_template->set_Content('sale/frm_search', $data);
-        $this->m_template->showTemplate();
+        $this->m_template->showSaleTemplate();
     }
 
     public function booking($rid = NULL, $source_id = NULL, $destination_id = NULL, $schedules_id = NULL) {
@@ -131,7 +131,7 @@ class sale extends CI_Controller {
 //            'parameter' => "vtid = $vtid | source_id = $source_id |  destination_id = $destination_id | schedules_id = $schedules_id",
 //            'post' => $this->input->post(),
 //            'session' => $this->session->userdata('EID'),
-            'tickets_by_seller' => $data['tickets_by_seller'],
+//            'tickets_by_seller' => $data['tickets_by_seller'],
         );
 
         if ($this->m_sale->validate_form_sale() && $this->form_validation->run() == TRUE) {
@@ -144,7 +144,7 @@ class sale extends CI_Controller {
         $this->m_template->set_Debug($data_debug);
         $this->m_template->set_Title('ขายตั๋ว ' . $route_name);
         $this->m_template->set_Content('sale/frm_booking', $data);
-        $this->m_template->showTemplate();
+        $this->m_template->showSaleTemplate();
     }
 
     public function print_ticket($tsid = NULL) {

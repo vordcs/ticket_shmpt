@@ -35,7 +35,8 @@
         <?php echo js('site.min.js?v=' . $version); ?>
 
         <?php echo css('sidebar.css?v=' . $version); ?>
-
+        <?php echo css('sale/style_sale.css?v=' . $version); ?>
+        
         <!--time picker-->    
         <?php echo css('bootstrap-timepicker.min.css?v=' . $version); ?>  
         <?php echo js('bootstrap-timepicker.min.js?v=' . $version); ?> 
@@ -46,15 +47,6 @@
         <!-- thai extension -->
         <?php echo js('bootstrap-datepicker-thai.js?v=' . $version); ?>  
         <?php echo js('/locales/bootstrap-datepicker.th.js?v=' . $version); ?>  
-
-        <!--off-canvas navigation menu-->
-
-        <?php echo css('admin/style.css?v=' . $version); ?>
-        <?php // echo css('/StickyTableHeaders/normalize.css?v=' . $version); ?> 
-        <?php echo css('StickyTableHeaders/component.css?v=' . $version); ?>         
-        <?php echo js('/StickyTableHeaders/jquery.ba-throttle-debounce.min.js?v=' . $version); ?>  
-        <?php echo js('/StickyTableHeaders/jquery.stickyheader.js?v=' . $version); ?>  
-
 
 
         <script type="text/javascript">
@@ -104,39 +96,9 @@
             }
         </style>
     </head>
-    <body>       
-        <!-- Fixed navbar -->
-        <div id="nav_genneral" class="navbar navbar-fixed-top sh-nav hidden-print" role="navigation">
-            <div id="top-nav" class="sh-top-nav">          
-                <h4 class="color-white" style="margin: 4px 0px 4px 4px;">บริษัท สหมิตรภาพ(2512) จำกัด</h4>
-                <p class="text-right" style="margin-top: -20px;">
-                    <a id="popoverMail" href="#" data-content="ติดต่อกับผู้ให้บริการ ผ่าน support@thaihubhosting.com" rel="popover" data-placement="bottom" data-original-title="ติดต่อผ่านอีเมล์" data-trigger="hover"><i class="fa fa-envelope"></i> Support |</a>
-                    <a id="popoverMobile" href="#" data-content="ติดต่อกับผู้ให้บริการ ผ่านเบอร์ <?= lang('phone_number1') ?>" rel="popover" data-placement="bottom" data-original-title="ติดต่อผ่านสายตรง" data-trigger="hover"><i class="fa fa fa-mobile-phone"></i> <?= lang('phone_number1') ?></a>
-                </p>
-            </div>
-            <!--navbar-collapse collapse genneral-->
-            <div  class="navbar-collapse collapse">
-                <div class="subnavbar">
-                    <div class="subnavbar-inner">
-                        <div class="container text-center" id="mainmenu">
-                            <ul class="mainnav ">
-                                <li class="active"><a href="<?= base_url('home/') ?>"><i class="fa fa-home"></i><span>หน้าหลัก</span> </a> </li>
-                                <li id="btnSale"><a href="<?= base_url('sale/') ?>"><i class="fa fa-bullhorn"></i><span>ขายตั๋วโดยสาร</span> </a> </li>
-                                <li id="btnSchedule"><a href="<?= base_url('/') ?>"><i class="fa fa-list"></i><span>ตารางเดินรถ</span> </a> </li>                                  
-                                <li id="btnCost"><a href="<?= base_url('cost/') ?>"><i class="fa fa-pencil-square-o"></i><span>ค่าใช้จ่าย</span></a></li>
-                                <li id="btnCheckIn"><a href="<?= base_url('checkin/') ?>"><i class="fa fa-clock-o"></i><span>ลงเวลา</span></a></li>
-                                <li id="btnReport"><a href="<?= base_url('/') ?>"><i class="fa fa-calendar-o"></i><span>รายงาน</span> </a> </li>                             
-                            </ul>    
-                        </div>
-                        <!-- /container --> 
-                    </div>
-                    <!-- /subnavbar-inner --> 
-                </div>
-            </div>                    
-            <!--/.nav-collapse -->
-        </div>
+    <body>          
         <!--for sale ticket only-->          
-        <nav id="nav_sale" class="navbar navbar-fixed-top navbar-default hidden-print hidden" role="navigation">
+        <nav id="nav_sale" class="navbar navbar-fixed-top navbar-default hidden-print" role="navigation">
             <div class="container-fluid">
                 <div class="navbar-header">                    
                     <span class="navbar-brand">ระบบขายตั๋วหน้าเคาเตอร์</span>

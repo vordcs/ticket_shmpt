@@ -44,22 +44,21 @@
         </div>
     </div>
 </div>
-<br>
 <div id="" class="container"> 
     <div class="row">
-        <div class="col-lg-6 col-lg-offset-3 well">
+        <div class="col-lg-8 col-lg-offset-2 well">
             <div class="col-lg-12 text-center">
                 <h3 class="fs-title">เลือกเส้นทาง</h3>
                 <p class="fs-subtitle"></p>                    
             </div> 
             <?php echo $from_search['form']; ?>  
-            <div class="col-lg-8 col-lg-offset-2">
+            <div class="col-lg-6 col-md-6">
                 <div class="form-group">
                     <label class="control-label">เส้นทาง</label>
                     <?php echo $from_search['RCode']; ?> 
                 </div>
             </div>  
-            <div class="col-lg-8 col-lg-offset-2">
+            <div class="col-lg-6 col-md-6">
                 <div class="form-group">
                     <label class="control-label">จุดขึ้นรถ</label>
                     <?php echo $from_search['SourceID']; ?> 
@@ -123,7 +122,7 @@
                                         $destination_id = $stations[$i]['SID'];
                                         $station_name = $stations[$i]['StationName'];
                                         if ($stations[$i]['Seq'] < $seq_start_id) {
-                                            $go_to_step2 = array(
+                                            $go_to_booking = array(
                                                 'class' => "list-group-item",
                                             );
                                             echo anchor("sale/booking/$rid/$SourceID/$destination_id", $station_name . "", $go_to_booking);
