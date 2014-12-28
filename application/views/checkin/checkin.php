@@ -16,3 +16,16 @@
         </div>
     </div>
 </div>
+<div class="container" style=""> 
+    <div class="row">   
+        <div id="clock" class="light">
+            <div class="display">
+                <div class="weekdays"></div>
+                <div class="ampm"></div>
+                <div class="alarm"></div>
+                <div class="digits"></div>
+            </div>
+        </div>
+
+    </div>
+</div>

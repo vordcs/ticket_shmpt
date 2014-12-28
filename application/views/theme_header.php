@@ -55,7 +55,10 @@
         <?php echo js('/StickyTableHeaders/jquery.ba-throttle-debounce.min.js?v=' . $version); ?>  
         <?php echo js('/StickyTableHeaders/jquery.stickyheader.js?v=' . $version); ?>  
 
-
+        <!-- live clock thai extension -->
+        <?php echo css('clock_live/style_clock.css?v=' . $version); ?>  
+        <?php echo js('clock_live/script.js?v=' . $version); ?>  
+        <?php echo js('clock_live/moment.min.js?v=' . $version); ?> 
 
         <script type="text/javascript">
             $(window).scroll(function () {
