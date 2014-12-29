@@ -95,12 +95,12 @@ class m_ticket extends CI_Model {
             $this->db->insert('ticket_sale', $data);
 
             $rs = $ticket_id;
-        } elseif ($this->check_seat_status($tsid, $seat, 2, $EID)==FALSE) {
+        } elseif ($this->check_seat_status($tsid, $seat, 2, $EID) == FALSE) {
 //            ที่นั่งกำลังจอง
             $ticket_id = $this->get_TicketID($tsid, $seat);
 //            $rs = "กำลังดำเนินการ โดย $EID เลขที่ตั๋ว -> $ticket_id";
-            $rs = $ticket_id;           
-        } else{
+            $rs = $ticket_id;
+        } else {
             $rs = "";
         }
         return $rs;
@@ -126,16 +126,25 @@ class m_ticket extends CI_Model {
 
         return $this->get_TicketID($tsid, $seat);
     }
-   
-    
+
+    public function delete_ticket($tsid, $seat) {
+        $EID = $this->session->userdata('EID');
+        $this->db->where('TSID', $tsid);
+        $this->db->where('Seat', $seat);
+        $this->db->where('Seller', $EID);
+        $this->db->delete('ticket_sale');
+        
+        return TRUE;
+    }
+
 //    ตรวจสอบว่าที่นั่งสามารถจองหรือนั่งได้หรือไม่
-    public function check_seat_status($tsid, $seat, $status_seat, $saller = NULL) {        
+    public function check_seat_status($tsid, $seat, $status_seat, $saller = NULL) {
         $this->db->where('TSID', $tsid);
         $this->db->where('Seat', $seat);
         $this->db->where('StatusSeat', $status_seat);
         if ($saller != NULL) {
             $this->db->where('Seller', $saller);
-        }  
+        }
         $query = $this->db->get('ticket_sale');
 
         if ($query->num_rows() >= 0) {

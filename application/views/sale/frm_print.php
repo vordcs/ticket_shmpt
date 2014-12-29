@@ -4,7 +4,7 @@
             $(this).attr("data-progtrckr-steps",
                     $(this).children("li").length);
         });
-    });   
+    });
 </script>
 <script>
     function print_ticket() {
@@ -37,7 +37,7 @@
         /*padding-left: 5%;*/
         background: white;
         font-family:'Times New Roman',Times,serif;
-        max-width: 200px;
+        /*max-width: 200px;*/
         /*overflow-x: scroll;*/
         page-break-inside: avoid;
     }   
@@ -131,7 +131,10 @@
     }
 
     @media print {
-        .page-break	{ display: block; page-break-before: always; }
+        .page-break	{ 
+            display: block; 
+            page-break-before: always; 
+        }
     }
 
 
@@ -151,7 +154,7 @@
 </div>
 <!--html preview--> 
 <!--html preview-->
-<div id="" class="container hidden-print" >
+<div id="" class="container hidden-print hidden" >
     <div class="row" style="padding-bottom: 50px;">        
         <?php
         $rcode = $route['RCode'];
@@ -289,7 +292,7 @@
         $rcode = $route['RCode'];
         $vtid = $route['VTID'];
         $vt_name = $route['VTDescription'];
-        $route_name = "$rcode " . $route['RSource'] . '-' . $route['RDestination'];
+        $route_name = "$vt_name $rcode " . $route['RSource'] . '-' . $route['RDestination'];
 
         foreach ($ticket as $t) {
             $ticket_id = $t['TicketID'];
@@ -303,14 +306,12 @@
             $price = $t['PriceSeat'];
             $barcode = $this->m_barcode->gen_barcode($ticket_id);
             ?>
-            <div class="page-break">
-
+            <div class="">
                 <div class="ticket-print" id="<?= $ticket_id ?>">
                     <table class="" border='0' style="width: 100%" >
                         <thead>
                             <tr>
                                 <th colspan="2">
-
                                 </th>
                             </tr>
                             <tr>
@@ -319,10 +320,7 @@
                                 </th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <tr >
-                                <td style="padding-left: 5px;padding-top: 10px;" class="title" colspan="2">เส้นทาง : </td>
-                            </tr>
+                        <tbody>                         
                             <tr class="">
                                 <td class="route-name" colspan="2"><strong><?= $route_name ?></strong></td>
                             </tr>
@@ -341,10 +339,7 @@
                             <tr class=""> 
                                 <td class="detail seat " colspan=""><strong><?= $seat ?></strong></td>
                                 <td class="detail" style="border-bottom: 1px solid;"><strong><?= $time_arrive ?></strong></td>
-                            </tr>                                                                   
-                            <tr class="title">
-                                <td class="" colspan="2" style="padding-left:5px;">วันที่เดินทาง  : </td>                            
-                            </tr> 
+                            </tr>   
                             <tr>
                                 <td class="detail" colspan="2" style="border-bottom: 1px solid;"><strong><?= $date ?></strong></td>   
                             </tr>
@@ -378,6 +373,11 @@
                                     <img src="<?= $barcode ?>" class="" alt=""> 
                                 </td>
                             </tr>
+                            <tr>
+                                <td style="width: 50%;">
+                                    <img src="<?= $barcode ?>" class="img-responsive" alt=""> 
+                                </td>
+                            </tr>
                             <tr class="title" >
                                 <td class=" text-left">
                                     <?php echo $this->m_datetime->getDatetimeNow(); ?>
@@ -385,7 +385,7 @@
                                 <td class="text-center">
                                     คนขายตั๋ว
                                 </td>
-                            </tr>
+                            </tr>                            
                             <tr>
                                 <td style="padding-bottom: 20px;"></td>
                             </tr>
@@ -397,7 +397,7 @@
                                 </td>
                             </tr> 
                             <tr class="title">
-                                <td class="text-center" colspan="2"><?= "$vt_name  " . $route_name ?></td>
+                                <td class="text-center" colspan="2"><?= "" . $route_name ?></td>
                             </tr>
                             <tr class="title">
                                 <td class="text-center" colspan=""><?= $source_name ?></td>
@@ -421,12 +421,10 @@
                     </table>
                 </div>  
             </div>
-
-
         <?php } ?>        
     </div>
 </div>
-<footer class="hidden-print"> 
+<footer class="hidden-print hidden"> 
     <button type="button" class="btn btn-info btn-lg"  onclick="print_ticket()"><span class="fa fa-print fa-2x"></span>&nbsp;พิมพ์ตั๋วโดยสาร</button> 
     <!--<button class="btn"  onclick="PrintElem('<?$ticket_id ?>')"><span class="fa fa-print fa-2x"></span>&nbsp;พิมพ์ตั๋วโดยสาร </button>-->  
 </footer>

@@ -136,9 +136,9 @@ class sale extends CI_Controller {
 
         if ($this->m_sale->validate_form_sale() && $this->form_validation->run() == TRUE) {
             $ticket = $this->m_sale->get_post_form_sale();
-            $data_debug['form_ticket'] = $ticket;
-//            $data_debug['update_resever_ticket'] = $this->m_ticket->update_resever_ticket($ticket);
-//            redirect("sale/print_ticket/$schedules_id");
+//            $data_debug['form_ticket'] = $ticket;
+            $data_debug['update_resever_ticket'] = $this->m_ticket->update_resever_ticket($ticket);
+            redirect("sale/print_ticket/$schedules_id");
         }
 
         $this->m_template->set_Debug($data_debug);
@@ -172,7 +172,7 @@ class sale extends CI_Controller {
         $this->m_template->set_Debug($data_debug);
         $this->m_template->set_Title('พิมพ์บัตรโดยสาร');
         $this->m_template->set_Content('sale/frm_print', $data);
-        $this->m_template->showTemplate();
+        $this->m_template->showSaleTemplate();
     }
 
     function gen_qrcode($data = NULL) {
@@ -217,4 +217,19 @@ class sale extends CI_Controller {
         echo json_encode($ticket_id);
     }
 
+    public function cancle_seat(){
+          $tsid = $this->input->post('TSID');
+        $seat = $this->input->post("Seat");
+        $vcode = $this->input->post("VCode");
+        $source_id = $this->input->post("SourceID");
+        $destination_id = $this->input->post("DestinationID");
+        $rs = $this->m_ticket->delete_ticket($tsid,$seat);
+        if ($rs) {
+            echo json_encode('true');
+        }  else {
+            echo json_encode('false');
+        }
+        
+    }
+    
 }

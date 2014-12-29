@@ -86,7 +86,9 @@
 
         var seat_id = $('#seat_' + seat_no);
         seat_id.css("background-color", "#33FF99");
-
+        
+        cancel(seat_no);
+        
         var seat_info = $('#seat_info_' + seat_no);
         var row = document.getElementById(row_id);
         row.parentNode.removeChild(row);
@@ -133,8 +135,26 @@
             return false;
         });
     }
-    function cancel() {
-
+    function cancel(seate_no) {
+//        alert(seate_no);
+        var seat_info = {
+            'TSID': schedules_id,
+            'Seat': seate_no,
+            'VCode': document.getElementById("VCode").value,
+            'SourceID': document.getElementById("SourceID").value,
+            'DestinationID': document.getElementById("DestinationID").value
+        };
+        $.ajax({
+            url: '<?= base_url() . "sale/cancle_seat" ?>',
+            type: 'POST',
+            ContentType: 'application/json',
+            data: seat_info
+        }).done(function (response) {
+            return true;
+        }).fail(function (jqXHR, textStatus, errorThrown) {
+            alert('FAILED! ERROR: ' + errorThrown);
+            return false;
+        });
     }
 </script>
 <style>  
@@ -399,7 +419,7 @@
                                                 $n++;
                                             }
                                             ?>
-                                            <td style="width:<?= 100 / $num_row ?>%; height: 100px;padding:1%;">                                                
+                                            <td style="width:<?= 100 / $num_row ?>%; height: 70px;padding:1%;">                                                
                                                 <div id="<?= $id_seat ?>" onclick="<?= $add_click ?>" ondblclick="<?= $remove_click ?>" class="<?php echo $class; ?>">
                                                     <span id="<?= $id_seat_info ?>">
                                                         <?php echo $user; ?> 
