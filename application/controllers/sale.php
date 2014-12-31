@@ -88,19 +88,20 @@ class sale extends CI_Controller {
         }
 
         $date = $this->m_datetime->getDateToday();
-        $schedules_detail = $this->m_schedule->get_schedule($date, $rid);
+        $schedules_detail = $this->m_schedule->get_schedule($date, $rcode, $vtid, $rid);
 
         if (count($schedules_detail) <= 0) {
             $alert['alert_message'] = "ไม่พบข้อมูลตารางเวลาเดิน $route_name กรุณาติดต่อผู้ดูแลระบบ";
             $alert['alert_mode'] = "warning";
             $this->session->set_flashdata('alert', $alert);
-            redirect('sale/');
+//            redirect('sale/');
         }
 
         $route = $this->m_route->get_route(NULL, NULL, $rid)[0];
-        $schedule = $this->m_schedule->get_schedule($date, $rid, $schedules_id)[0];
+        $schedule = $this->m_schedule->get_schedule($date, $rcode, $vtid, $rid, $schedules_id)[0];
         $fare = $this->m_fares->get_fares($rcode, $vtid, $source_id, $destination_id)[0];
         $tickets_by_seller = $this->m_ticket->get_ticket_by_saller($schedules_id);
+        $tickets = $this->m_ticket->get_ticket($schedules_id);
         $data = array(
             'form' => $this->m_sale->set_form_sale($route, $s_station, $d_station, $schedule, $fare),
             'date' => $this->m_datetime->setDateThai($date),
@@ -114,6 +115,7 @@ class sale extends CI_Controller {
             'schedules_detail' => $schedules_detail,
             'fare' => $fare,
             'tickets_by_seller' => $tickets_by_seller,
+            'tickets' => $tickets
         );
         $data['vehicles_types'] = $this->m_route->get_vehicle_types();
 
@@ -132,13 +134,14 @@ class sale extends CI_Controller {
 //            'post' => $this->input->post(),
 //            'session' => $this->session->userdata('EID'),
 //            'tickets_by_seller' => $data['tickets_by_seller'],
+//            'tickets' => $data['tickets'],
         );
 
         if ($this->m_sale->validate_form_sale() && $this->form_validation->run() == TRUE) {
             $ticket = $this->m_sale->get_post_form_sale();
 //            $data_debug['form_ticket'] = $ticket;
             $data_debug['update_resever_ticket'] = $this->m_ticket->update_resever_ticket($ticket);
-            redirect("sale/print_ticket/$schedules_id");
+//            redirect("sale/print_ticket/$schedules_id");
         }
 
         $this->m_template->set_Debug($data_debug);
@@ -192,44 +195,51 @@ class sale extends CI_Controller {
         $seat = $this->input->post("Seat");
         $vcode = $this->input->post("VCode");
         $source_id = $this->input->post("SourceID");
+        $source_name = $this->input->post("SourceName");
         $destination_id = $this->input->post("DestinationID");
-
+        $destination_name = $this->input->post("DestinationName");
+        $price_seat = $this->input->post("PriceSeat");  
+        $price_dicount = $this->input->post('PriceDicount');
+        
+        if ($price_seat==$price_dicount) {
+            $IsDiscount = 1;
+        }  else {
+            $IsDiscount = 0;
+        }
+        
         $ticket_data = array(
             'TSID' => $tsid,
             'Seat' => $seat,
             'VCode' => $vcode,
             'SourceID' => $source_id,
+            'SourceName' => $source_name,
             'DestinationID' => $destination_id,
-        );
-
+            'DestinationName' => $destination_name,
+            'PriceSeat'=>$price_seat,
+            'IsDiscount'=>$IsDiscount,
+        );       
         $ticket_id = $this->m_ticket->resever_ticket($ticket_data);
-        if ($ticket_id!=NULL||$ticket_id!='') {
-            $rs=true;
-        }  else {
-            $rs=FALSE;
+        if ($ticket_id != NULL || $ticket_id != '') {
+            $rs = true;
+        } else {
+            $rs = FALSE;
         }
-//        $rs = array(
-//            'TSID' => $tsid,
-//            'Seate' => $seat,
-//            'TicketID' => $ticket_id,
-//        );
 
         echo json_encode($ticket_id);
     }
 
-    public function cancle_seat(){
-          $tsid = $this->input->post('TSID');
+    public function cancle_seat() {
+        $tsid = $this->input->post('TSID');
         $seat = $this->input->post("Seat");
         $vcode = $this->input->post("VCode");
         $source_id = $this->input->post("SourceID");
         $destination_id = $this->input->post("DestinationID");
-        $rs = $this->m_ticket->delete_ticket($tsid,$seat);
+        $rs = $this->m_ticket->delete_ticket($tsid, $seat);
         if ($rs) {
             echo json_encode('true');
-        }  else {
+        } else {
             echo json_encode('false');
         }
-        
     }
-    
+
 }

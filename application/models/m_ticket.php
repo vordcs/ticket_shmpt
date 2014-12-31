@@ -30,11 +30,13 @@ class m_ticket extends CI_Model {
         return $query->result_array();
     }
 
-    public function gen_TicketID($tsid, $source_id, $destination_id, $vcode, $seat) {
+    public function generate_ticket_id($tsid, $source_id, $destination_id, $vcode, $seat) {
         $EID = $this->session->userdata('EID');
+        $str_vcode = explode('-', $vcode);
+        $vcode = $str_vcode[0] . $str_vcode[1];
         $ticket_id = '';
         $ticket_id .= $tsid;
-        $ticket_id .= $EID;
+//        $ticket_id .= $EID;
         $ticket_id .= str_pad($source_id, 3, '0', STR_PAD_LEFT);
         $ticket_id .= str_pad($destination_id, 3, '0', STR_PAD_LEFT);
         $ticket_id .= $vcode;
@@ -56,7 +58,13 @@ class m_ticket extends CI_Model {
         return $ticket_id;
     }
 
-//    SeatStatus -> 0=ว่าง ,1=ไม่ว่าง(ขายเเล้ว), 2=กำลังจอง(กำลังจะขาย)
+    /*
+     * SeatStatus -> 
+     * 0=ว่าง ,
+     * 1=ไม่ว่าง(ขายเเล้ว), 
+     * 2=กำลังจอง(กำลังจะขาย)
+     */
+
     public function resever_ticket($data) {
         $TicketID = $this->insert_ticket($data, 2);
         return $TicketID;
@@ -85,7 +93,7 @@ class m_ticket extends CI_Model {
 
         if ($this->check_seat_status($tsid, $seat, 0)) {
 //            นั่งว่าง
-            $ticket_id = $this->gen_TicketID($tsid, $source_id, $destination_id, $vcode, $seat);
+            $ticket_id = $this->generate_ticket_id($tsid, $source_id, $destination_id, $vcode, $seat);
             $data['TicketID'] = $ticket_id;
             $data['StatusSeat'] = $status_seat;
             $data['Seller'] = $EID;
@@ -133,7 +141,7 @@ class m_ticket extends CI_Model {
         $this->db->where('Seat', $seat);
         $this->db->where('Seller', $EID);
         $this->db->delete('ticket_sale');
-        
+
         return TRUE;
     }
 

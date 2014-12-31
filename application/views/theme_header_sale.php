@@ -65,7 +65,7 @@
                 }
             });
             jQuery(window).load(function () {
-                $('.alert').delay(3000).fadeOut();
+                $('#alert').delay(3000).fadeOut();
             });
         </script>
         <style>
@@ -74,9 +74,10 @@
                 bottom: 0;
                 left: 0;        
                 opacity: 0.7;
-                width: 100%;        
+                width: 30%;        
                 vertical-align: middle; 
                 margin-right:20%;
+                z-index: 50px;
 
                 -webkit-transition: all .2s ease-in-out;
                 -moz-transition: all .2s ease-in-out;
@@ -124,11 +125,11 @@
 
         if (isset($alert) && $alert != NULL) {
             if ($alert['alert_mode'] == 'success') {
-                echo '<div class="container alert alert-success animated pulse" style="margin-top: 60px;"><strong>สำเร็จ</strong> ';
+                echo '<div id="alert" class="container alert alert-success animated pulse" style="margin-top: 60px;"><strong>สำเร็จ</strong> ';
             } elseif ($alert['alert_mode'] == 'warning') {
-                echo '<div class="container alert alert-warning animated pulse" style="margin-top: 60px;"><strong>คำเตือน</strong> ';
+                echo '<div id="alert" class="container alert alert-warning animated pulse" style="margin-top: 60px;"><strong>คำเตือน</strong> ';
             } elseif ($alert['alert_mode'] == 'danger') {
-                echo '<div class="container alert alert-danger animated pulse" style="margin-top: 60px;"><strong>ผิดพลาด</strong> ';
+                echo '<div id="alert" class="container alert alert-danger animated pulse" style="margin-top: 60px;"><strong>ผิดพลาด</strong> ';
             } else {
                 echo '<div class="container alert alert-info animated pulse" style="margin-top: 60px;"><strong>เพิ่มเติม</strong> ';
             }

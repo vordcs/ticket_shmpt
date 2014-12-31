@@ -153,4 +153,15 @@ class m_route extends CI_Model {
         return $form_search_route;
     }
 
+    public function get_schedule_manual($rid = NULL, $smid = NULL) {
+        $this->db->join('t_routes_has_schedules_manual', 't_routes_has_schedules_manual.SMID = t_schedules_manual.SMID', 'left');
+        if ($rid != NULL) {
+            $this->db->where('RID', $rid);
+        }
+        $this->db->order_by('SeqNo');
+        $query = $this->db->get('t_schedules_manual');
+
+        return $query->result_array();
+    }
+
 }

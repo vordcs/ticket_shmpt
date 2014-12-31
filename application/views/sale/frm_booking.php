@@ -1,5 +1,7 @@
+
 <script>
-    $(window).load(function () {
+
+    jQuery(document).ready(function ($) {
         $("#wrapper").toggleClass("toggled");
         $("ol.progtrckr").each(function () {
             $(this).attr("data-progtrckr-steps",
@@ -37,15 +39,12 @@
         var tb_ticket_body = $('#ticket_guest tbody');
         var num = $('#tb_ticket_sale tbody tr').length;
         var seat_info = $('#seat_info_' + seat_no);
-
         var price = $('#Price').val();
         var price_dis = $('#PriceDicount').val();
-
         var fare_type = '<select id="FareType' + num + '" name="PriceSeat[]" class="form-control" onchange="calTotalFare()" >';
         fare_type += '<option value="' + price + '" selected="" >' + price + '(เต็ม)</option>';
         fare_type += '<option value="' + price_dis + '">' + price_dis + '(ลด)</option>';
         fare_type += '</select>';
-
         var row = '<tr id ="row_' + seat_no + '">';
         row += '<td class="text-center">';
         row += '<button type="button" class="btn btn-sm btn-danger" onclick="removeSeat(\'' + seat_no + '\')">';
@@ -57,44 +56,44 @@
         row += '</td>';
         row += '<td class="text-center">' + fare_type + '</td>';
         row += '</tr>';
-
         if (document.getElementById(seat_no) === null) {
 
             document.getElementById("user_action").innerHTML = schedules_id + ' กำลังเลือก ' + seat_no;
             document.getElementById("debug").style.background = 'green';
 
-            booking(seat_no);
 
             $('#guest_info').removeAttr('class');
             $('#guest_info').addClass('col-lg-12 animated zoomIn');
 
+            booking(seat_no);
+
             var seat_id = $('#seat_' + seat_no);
             seat_id.css("background-color", "#FFE5CC");
-
             tb_ticket_body.append(row);
             var info = '<i class="fa fa-user fa-2x"></i><br>';
             info += $('#DestinationName').val();
             seat_info.html(info);
             calTotalFare();
+
         }
+        return true;
     }
     function removeSeat(seat_no) {
         document.getElementById("user_action").innerHTML = 'ยกเลิกที่นั่ง ' + seat_no;
         document.getElementById("debug").style.background = 'red';
-        var num = $('#TicketSale tbody tr').length;
-        var row_id = 'row_' + seat_no;
 
+
+        var row_id = 'row_' + seat_no;
         var seat_id = $('#seat_' + seat_no);
         seat_id.css("background-color", "#33FF99");
-        
         cancel(seat_no);
-        
         var seat_info = $('#seat_info_' + seat_no);
         var row = document.getElementById(row_id);
         row.parentNode.removeChild(row);
         var info = seat_no;
         seat_info.html(info);
         calTotalFare();
+
 
     }
     function calTotalFare() {
@@ -112,14 +111,19 @@
         }
         $('#txt_total').val(total);
     }
-    function booking(seate_no) {
-//        alert(seate_no);
+    function booking(seat_no) {
+//        alert(seate_no);      
+        var PriceSeat = parseInt($('#Price').val());        
+
         var seat_info = {
             'TSID': schedules_id,
-            'Seat': seate_no,
+            'Seat': seat_no,
             'VCode': document.getElementById("VCode").value,
             'SourceID': document.getElementById("SourceID").value,
-            'DestinationID': document.getElementById("DestinationID").value
+            'SourceName': document.getElementById("SourceName").value,
+            'DestinationID': document.getElementById("DestinationID").value,
+            'DestinationName': document.getElementById("DestinationName").value,
+            'PriceSeat': PriceSeat
         };
         $.ajax({
             url: '<?= base_url() . "sale/booking_seat" ?>',
@@ -127,19 +131,23 @@
             ContentType: 'application/json',
             data: seat_info
         }).done(function (response) {
-//            var obj = jQuery.parseJSON(response);
-//            alert(obj['TicketID']+' success');
-            return true;
+            if (response !== '') {
+                show_message('message_success', ' เลือกที่นั่ง ' + seat_no);
+                return true;
+            } else {
+                show_message('message_danger', 'ไม่สามารถเลือกที่นั่ง ' + seat_no);
+                return false;
+            }
         }).fail(function (jqXHR, textStatus, errorThrown) {
-            alert('FAILED! ERROR: ' + errorThrown);
+            show_message('message_danger', 'ไม่สามารถเลือกที่นั่ง ' + seat_no);
             return false;
         });
     }
-    function cancel(seate_no) {
+    function cancel(seat_no) {
 //        alert(seate_no);
         var seat_info = {
             'TSID': schedules_id,
-            'Seat': seate_no,
+            'Seat': seat_no,
             'VCode': document.getElementById("VCode").value,
             'SourceID': document.getElementById("SourceID").value,
             'DestinationID': document.getElementById("DestinationID").value
@@ -150,12 +158,27 @@
             ContentType: 'application/json',
             data: seat_info
         }).done(function (response) {
-            return true;
+            show_message('message_warning', ' --ยกเลิกที่นั่ง ' + seat_no);
+
         }).fail(function (jqXHR, textStatus, errorThrown) {
-            alert('FAILED! ERROR: ' + errorThrown);
+            show_message('message_danger', 'ไม่สามารถยกเลิกที่นั่ง ' + seat_no);
             return false;
         });
     }
+
+    function show_message(alert_name, msg) {
+        var message_box = document.getElementById('message-box');
+        message_box.removeAttribute('class', 'hidden');
+        var alert = document.getElementById(alert_name);
+        alert.setAttribute('style', 'visibility:visible');
+
+        document.getElementById(alert_name + "-msg").innerHTML = msg;
+        setTimeout(function () {
+            alert.setAttribute('style', 'visibility:hidden');
+            message_box.setAttribute('class', 'hidden');
+        }, 5000);
+    }
+
 </script>
 <style>  
     .form-group .col-md-12{
@@ -189,17 +212,27 @@
         -webkit-box-sizing: border-box;
     }
     .seat{
-        display: table;
+        display: table;        
         width: 100%;
         height:100%;
         text-align: center;         
     }  
-    .seat span {
+    .seat-icon {
+        display: table-cell;             
+    }
+    .seat-no {
         display: table-cell;
-        vertical-align: middle;
-        /*font-size:1.14em;*/        
+        vertical-align: middle;        
+        font-size:1.34em;        
+    }
+    .seat-info {             
+        width: 100%;  
+        position: absolute;
+        bottom: 2px;
+        left: 0px;       
     }
     .seat:hover { 
+        cursor:pointer;
         opacity: 0.6; 
         filter: alpha(opacity=30);
 
@@ -207,7 +240,30 @@
         -webkit-box-shadow: 0 0 10px #ccc; 
         box-shadow: 0 0 10px #ccc;
     }
-
+    .price{
+        background: #57C5A0;        
+        width: 100%;     
+        font-size: 0.9725em;        
+        position: absolute;
+        bottom: 2px;
+        left: 0px;
+    }
+    .price1{
+        font-size: 1.1725em;
+        color: #ffffff;
+        padding: 5px 15px;
+        /*position: absolute;*/
+        top: 0px;
+        /*right: 10px;*/        
+        text-transform:uppercase;
+    }
+    .price1.bg{
+        background: #242424;
+    }
+    .price1.bg1{
+        background: #F27E4B;
+        width: 60px;
+    }
 </style>
 <div id="" class="container-fluid">
     <div class="row-fluid animated fadeInUp">        
@@ -233,25 +289,7 @@
             </li>
             <li>
                 <a href="#">Dashboard</a>
-            </li>
-            <li>
-                <a href="#">Shortcuts</a>
-            </li>
-            <li>
-                <a href="#">Overview</a>
-            </li>
-            <li>
-                <a href="#">Events</a>
-            </li>
-            <li>
-                <a href="#">About</a>
-            </li>
-            <li>
-                <a href="#">Services</a>
-            </li>
-            <li>
-                <a href="#">Contact</a>
-            </li>            
+            </li>                
         </ul>
     </div>
     <!-- /#sidebar-wrapper -->
@@ -384,56 +422,96 @@
                         <span class="text">
                             เลือกที่นั่ง
                         </span>
-                        <table class="" border="0" >
+
+                        <table id="SeatingPlanVan" class="" border="0" style="padding-top: 2%;">
                             <tbody>
                                 <?php
-                                $n = 1;
                                 $num_row = 5;
-                                for ($row = 1; $row <= 5; $row++) {
-                                    ?>
-                                    <tr>
-                                        <?php
-                                        for ($col = 1; $col <= 4; $col++) {
-                                            $seat_info = "";
-                                            $on_click = '';
-                                            $user = '';
-                                            $id_seat_info = '';
-                                            if ($row == 1 && ($col == 3 || $col == 4)) {
-                                                $class = '';
-                                            } elseif ($row == 2 && ($col == 1)) {
-                                                $class = '';
-                                            } elseif (($row == 3 || $row == 4) && ($col == 2)) {
-                                                $class = '';
-                                            } else {
-                                                $class = 'seat ';
-                                                $seat_no = "$n";
-                                                $seat_info = $seat_no;
-                                                $add_click = 'addSeat(\'' . $seat_no . '\')';
-                                                $remove_click = 'removeSeat(\'' . $seat_no . '\')';
-//                                                        $user = '<i class="fa fa-user fa-3x"></i><br>';                                                
-                                                $id_seat = "seat_$seat_no";
-                                                $id_seat_info = "seat_info_$seat_no";
-//                                              $seat_status
-                                                $class.= " bg-blank ";
+                                $num_col = 4;
+                                $seat_no = 1;
+                                for ($row = 1; $row <= $num_row; $row++) {
+                                    echo '<tr>';
+                                    for ($col = 1; $col <= $num_col; $col++) {
+                                        $width = 100 / $num_col;
+                                        $class = '';
+                                        $seat_info = "";
+                                        $add_click = '';
+                                        $remove_click = '';
+                                        $user = '';
+                                        $id_seat = "";
+                                        $id_seat_info = '';
+                                        $seat_status = '';
+                                        echo "<td style=\"width: $width%;height: 70px;padding:1%;\">";
+                                        if ($row == 1 && ($col == 3 || $col == 4)) {
+                                            $class = '';
+                                        } elseif ($row == 2 && ($col == 1)) {
+                                            $class = '';
+                                        } elseif (($row == 3 || $row == 4) && ($col == 2)) {
+                                            $class = '';
+                                        } else {
+                                            $seat_info = $seat_no;
+                                            $add_click = 'addSeat(\'' . $seat_no . '\')';
+                                            $remove_click = 'removeSeat(\'' . $seat_no . '\')';
+                                            $id_seat = "seat_$seat_no";
+                                            $id_seat_info = "seat_info_$seat_no";
+                                            $class = " bg-blank ";
 
-                                                $n++;
+                                            /*
+                                             * 0=ว่าง ,1=ไม่ว่าง,ขายเเล้ว, 2=กำลังจอง
+                                             */
+                                            foreach ($tickets as $ticket) {
+                                                $ticket_seat_no = $ticket['Seat'];
+                                                $status_seat = $ticket['StatusSeat'];
+                                                if ($seat_no == $ticket['Seat'] && ($status_seat == '1' )) {
+                                                    $add_click = '';
+                                                    $remove_click = '';
+                                                    $user = '<i class="fa fa-user fa-2x"></i><br>';
+                                                    $seat_info = $ticket['DestinationName'];
+                                                    $class = " bg-busy ";
+                                                } elseif ($seat_no == $ticket['Seat'] && $status_seat == '2') {
+                                                    $add_click = '';
+                                                    $remove_click = '';
+                                                    $user = '<i class="fa fa-user fa-2x"></i><br>';
+                                                    $seat_info = 'กำลังทำรายการ';
+                                                    $class = " bg-reserve ";
+                                                }
+                                            }
+
+                                            /*
+                                             * ตรวจสอบว่ามีการจองตั๋วแล้วยังไม่ปริ้นหรือไม่
+                                             * หรือถูจองโดยผู้ใช้อื่นหรือไม่ในขณะทำรายการ
+                                             */
+                                            if (count($tickets_by_seller) > 0) {
+                                                foreach ($tickets_by_seller as $ticket) {
+                                                    $ticket_seat_no = $ticket['Seat'];
+                                                    $status_seat = $ticket['StatusSeat'];
+                                                    if ($seat_no == $ticket['Seat'] && $status_seat == '2') {
+                                                        $add_click = 'addSeat(\'' . $seat_no . '\')';
+                                                        $remove_click = 'removeSeat(\'' . $seat_no . '\')';
+                                                        $user = '<i class="fa fa-user fa-2x"></i><br>';
+                                                        $seat_info = 'จอง';
+                                                        $class = " bg-reserve ";
+                                                    }
+                                                }
                                             }
                                             ?>
-                                            <td style="width:<?= 100 / $num_row ?>%; height: 70px;padding:1%;">                                                
-                                                <div id="<?= $id_seat ?>" onclick="<?= $add_click ?>" ondblclick="<?= $remove_click ?>" class="<?php echo $class; ?>">
-                                                    <span id="<?= $id_seat_info ?>">
-                                                        <?php echo $user; ?> 
-                                                        <?php echo $seat_info; ?> 
-                                                    </span>
-                                                </div>
-                                            </td>
-                                            <?php
-                                        }
-                                        ?>
-                                    </tr>
-                                <?php } ?> 
+                                        <div id="<?= $id_seat ?>" onclick="<?= $add_click ?>" ondblclick="<?= $remove_click ?>" class="col-xs-12 seat <?php echo $class; ?>">
+                                            <span class="seat-info" id="<?= $id_seat_info ?>">                                                
+                                                <?php echo $user; ?> 
+                                                <?php echo $seat_info; ?>                                                 
+                                            </span>
+                                        </div>
+                                        <?php
+                                        $seat_no++;
+                                    }
+                                    echo '</td>';
+                                }
+                                echo '</tr>';
+                            }
+                            ?>
                             </tbody>
-                        </table> 
+                        </table>                         
+
                     </div>
                 </div>
                 <div id='ticket_info' class="hidden">
@@ -451,11 +529,9 @@
                     </div>
                     <div id="debug" class="col-lg-12 text-center" style="margin: 2% auto;padding-top: 5%; padding-bottom: 5%;background-color: #FFFF99;">
                         <div id="user_action">
-
-                        </div>
-                        <span ></span>
-                    </div>
-                    <div id="guest_info" class="hidden" style="margin-top: 2%;">  
+                        </div>                      
+                    </div>                   
+                    <div id="guest_info" class="<?= ((count($tickets_by_seller) > 0) ? 'animated zoomIn' : 'hidden') ?>" style="margin-top: 2%;">  
                         <div id="guest_list" class="col-lg-12" style="max-height: 400px;overflow-y: scroll;">
                             <table id="ticket_guest" class="table">
                                 <thead>
@@ -469,6 +545,42 @@
                                     </tr>
                                 </thead>
                                 <tbody>  
+                                    <?php
+                                    if (count($tickets_by_seller) > 0) {
+                                        $total = 0;
+                                        foreach ($tickets_by_seller as $ticket) {
+                                            $seat_no = $ticket['Seat'];
+                                            $price_seat = $ticket['PriceSeat'];
+                                            $is_discount = $ticket['IsDiscount'];
+                                            $select_full = 'selected = ""';
+                                            $select_dis = '';
+                                            if ($is_discount == 1 || $is_discount == '1') {
+                                                $select_full = '';
+                                                $select_dis = 'selected = ""';
+                                            }
+                                            ?>
+                                            <tr id="row_<?= $seat_no ?>">
+                                                <td class="text-center">
+                                                    <button type="button" class="btn btn-sm btn-danger" onclick="removeSeat('<?= $seat_no ?>')"><i class="fa fa-times"></i></button>
+                                                </td>
+                                                <td class="text-center" id ="<?= $seat_no ?>">
+                                                    <?= $seat_no ?>
+                                                    <input type="hidden" name="Seat[]" value="<?= $seat_no ?>">
+                                                </td>
+                                                <td class="text-center">
+                                                    <select id="FareType<?= $seat_no ?>" name="PriceSeat[]" class="form-control" onchange="calTotalFare()" >
+                                                        <option value="<?= $fare['Price'] ?>" <?= $select_full ?> ><?= $fare['Price'] ?>(เต็ม)</option>
+                                                        <option value="<?= $fare['PriceDicount'] ?>" <?= $select_dis ?> ><?= $fare['PriceDicount'] ?>(ลด)</option>
+                                                    </select>
+                                                </td>
+                                            </tr>
+
+                                            <?php
+//                                            echo '</tr>';
+                                        }
+                                    }
+                                    ?>
+                                    <?php ?>
                                 </tbody>                               
                             </table>
                         </div>

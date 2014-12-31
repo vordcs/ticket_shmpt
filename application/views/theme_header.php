@@ -55,6 +55,10 @@
         <?php echo js('/StickyTableHeaders/jquery.ba-throttle-debounce.min.js?v=' . $version); ?>  
         <?php echo js('/StickyTableHeaders/jquery.stickyheader.js?v=' . $version); ?>  
 
+        <!--chart plugin-->
+         <?php echo js('/chart/highcharts.js?v=' . $version); ?>  
+        <?php echo js('/chart/jquery.highchartTable-min.js?v=' . $version); ?>  
+        
         <!-- live clock thai extension -->
         <?php echo css('clock_live/style_clock.css?v=' . $version); ?>  
         <?php echo js('clock_live/script.js?v=' . $version); ?>  
@@ -125,10 +129,10 @@
                             <ul class="mainnav ">
                                 <li class="active"><a href="<?= base_url('home/') ?>"><i class="fa fa-home"></i><span>หน้าหลัก</span> </a> </li>
                                 <li id="btnSale"><a href="<?= base_url('sale/') ?>"><i class="fa fa-bullhorn"></i><span>ขายตั๋วโดยสาร</span> </a> </li>
-                                <li id="btnSchedule"><a href="<?= base_url('/') ?>"><i class="fa fa-list"></i><span>ตารางเดินรถ</span> </a> </li>                                  
+                                <li id="btnSchedule"><a href="<?= base_url('schedule/') ?>"><i class="fa fa-list"></i><span>ตารางเดินรถ</span> </a> </li>                                  
                                 <li id="btnCost"><a href="<?= base_url('cost/') ?>"><i class="fa fa-pencil-square-o"></i><span>ค่าใช้จ่าย</span></a></li>
                                 <li id="btnCheckIn"><a href="<?= base_url('checkin/') ?>"><i class="fa fa-clock-o"></i><span>ลงเวลา</span></a></li>
-                                <li id="btnReport"><a href="<?= base_url('/') ?>"><i class="fa fa-calendar-o"></i><span>รายงาน</span> </a> </li>                             
+                                <li id="btnReport"><a href="<?= base_url('report/') ?>"><i class="fa fa-calendar-o"></i><span>รายงาน</span> </a> </li>                             
                             </ul>    
                         </div>
                         <!-- /container --> 

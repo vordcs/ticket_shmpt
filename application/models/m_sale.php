@@ -47,7 +47,8 @@ class m_sale extends CI_Model {
         if (count($schedule) > 0 && $schedule != NULL) {
 //            รหัสตารางเวลาเดินรถ
             $tsid = $schedule['TSID'];
-
+            $vid = $schedule['VID'];
+            $vcode = $schedule['VCode'];
 //            เวลาเริ่มต้นของการเดินทาง
             $start_time = $schedule["TimeDepart"];
             if (($source_seq == '1' || $source_seq == $num_station)) {
@@ -72,7 +73,7 @@ class m_sale extends CI_Model {
             'type' => "text",
             'name' => "route_name",
             'id' => "route_name",
-            'class' => "form-control input-lg text-center",
+            'class' => "form-control text-center",
             'readonly' => "",
             'value' => $route_name,
         );
@@ -112,7 +113,7 @@ class m_sale extends CI_Model {
             'type' => "text",
             'name' => "SourceName",
             'id' => "SourceName",
-            'class' => "form-control input-lg text-center",
+            'class' => "form-control  text-center",
             'readonly' => "TRUE",
             'value' => $source_name,
         );
@@ -128,7 +129,7 @@ class m_sale extends CI_Model {
             'type' => "text",
             'name' => "DestinationName",
             'id' => "DestinationName",
-            'class' => "form-control input-lg text-center",
+            'class' => "form-control text-center",
             'readonly' => "",
             'value' => $destination_name,
         );
@@ -204,7 +205,7 @@ class m_sale extends CI_Model {
     }
 
     public function get_post_form_sale() {
-        
+
         $route_name = $this->input->post('route_name');
         $RID = $this->input->post('RID');
         $VID = $this->input->post('VID');

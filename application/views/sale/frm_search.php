@@ -114,7 +114,7 @@
                                             $go_to_booking = array(
                                                 'class' => "list-group-item",
                                             );
-                                            echo anchor("sale/booking/$rid/$SourceID/$destination_id", $station_name, $go_to_booking);
+                                            echo anchor("sale/booking/$rid/$SourceID/$destination_id/", $station_name, $go_to_booking);
                                         }
                                     }
                                 } else {
@@ -125,7 +125,7 @@
                                             $go_to_booking = array(
                                                 'class' => "list-group-item",
                                             );
-                                            echo anchor("sale/booking/$rid/$SourceID/$destination_id", $station_name . "", $go_to_booking);
+                                            echo anchor("sale/booking/$rid/$SourceID/$destination_id/", $station_name, $go_to_booking);
                                         }
                                     }
                                 }
