@@ -16,9 +16,6 @@ class checkin extends CI_Controller {
         $this->load->model('m_route');
         $this->load->model('m_station');
         $this->load->model('m_schedule');
-        $this->load->model('m_fares');
-        $this->load->model('m_ticket');
-        $this->load->model('m_cost');
         $this->load->library('form_validation');
 
 //Initial language

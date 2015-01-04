@@ -46,14 +46,10 @@
         <!-- thai extension -->
         <?php echo js('bootstrap-datepicker-thai.js?v=' . $version); ?>  
         <?php echo js('/locales/bootstrap-datepicker.th.js?v=' . $version); ?>  
-
+ 
+            <?php echo css('admin/style.css?v=' . $version); ?>
         <!--off-canvas navigation menu-->
-
-        <?php echo css('admin/style.css?v=' . $version); ?>
-        <?php // echo css('/StickyTableHeaders/normalize.css?v=' . $version); ?> 
-        <?php echo css('StickyTableHeaders/component.css?v=' . $version); ?>         
-        <?php echo js('/StickyTableHeaders/jquery.ba-throttle-debounce.min.js?v=' . $version); ?>  
-        <?php echo js('/StickyTableHeaders/jquery.stickyheader.js?v=' . $version); ?>  
+      
 
         <!--chart plugin-->
          <?php echo js('/chart/highcharts.js?v=' . $version); ?>  
@@ -141,23 +137,7 @@
                 </div>
             </div>                    
             <!--/.nav-collapse -->
-        </div>
-        <!--for sale ticket only-->          
-        <nav id="nav_sale" class="navbar navbar-fixed-top navbar-default hidden-print hidden" role="navigation">
-            <div class="container-fluid">
-                <div class="navbar-header">                    
-                    <span class="navbar-brand">ระบบขายตั๋วหน้าเคาเตอร์</span>
-                </div>
-                <div id="bs-example-navbar-collapse-3" class="collapse navbar-collapse">
-                    <ul class="nav navbar-nav navbar-right">
-                        <li><a href="#">Dashboard</a></li>
-                        <li><a href="#">Settings</a></li>
-                        <li><a href="#">Profile</a></li>
-                        <li><a href="#">Help</a></li>
-                    </ul>
-                </div>
-            </div>
-        </nav>  
+        </div>  
         <?php
         if (isset($debug) && $debug != NULL) {
             echo '<div class="container" style="margin-top: 60px;">';

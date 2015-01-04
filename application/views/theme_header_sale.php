@@ -36,17 +36,7 @@
 
         <?php echo css('sidebar.css?v=' . $version); ?>
         <?php echo css('sale/style_sale.css?v=' . $version); ?>
-        
-        <!--time picker-->    
-        <?php echo css('bootstrap-timepicker.min.css?v=' . $version); ?>  
-        <?php echo js('bootstrap-timepicker.min.js?v=' . $version); ?> 
 
-        <!--date picker-->    
-        <?php echo css('datepicker.css?v=' . $version); ?>         
-        <?php echo js('bootstrap-datepicker.js?v=' . $version); ?> 
-        <!-- thai extension -->
-        <?php echo js('bootstrap-datepicker-thai.js?v=' . $version); ?>  
-        <?php echo js('/locales/bootstrap-datepicker.th.js?v=' . $version); ?>  
 
 
         <script type="text/javascript">
@@ -106,10 +96,12 @@
                 </div>
                 <div id="bs-example-navbar-collapse-3" class="collapse navbar-collapse">
                     <ul class="nav navbar-nav navbar-right">
-                        <li><a href="#">Dashboard</a></li>
-                        <li><a href="#">Settings</a></li>
-                        <li><a href="#">Profile</a></li>
-                        <li><a href="#">Help</a></li>
+                        <li ><a href="<?= base_url('home/') ?>"><i class="fa fa-home"></i><span>หน้าหลัก</span> </a> </li>
+                        <li id="btnSale"><a href="<?= base_url('sale/') ?>"><i class="fa fa-bullhorn"></i><span>ขายตั๋วโดยสาร</span> </a> </li>
+                        <li id="btnSchedule"><a href="<?= base_url('schedule/') ?>"><i class="fa fa-list"></i><span>ตารางเดินรถ</span> </a> </li>                                  
+                        <li id="btnCost"><a href="<?= base_url('cost/') ?>"><i class="fa fa-pencil-square-o"></i><span>ค่าใช้จ่าย</span></a></li>
+                        <li id="btnCheckIn"><a href="<?= base_url('checkin/') ?>"><i class="fa fa-clock-o"></i><span>ลงเวลา</span></a></li>
+                        <li id="btnReport"><a href="<?= base_url('report/') ?>"><i class="fa fa-calendar-o"></i><span>รายงาน</span> </a> </li>  
                     </ul>
                 </div>
             </div>

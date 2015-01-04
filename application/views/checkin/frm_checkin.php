@@ -2,7 +2,7 @@
 <script>
     jQuery(document).ready(function ($) {
         $("#mainmenu ul li").removeAttr('class');
-        $("#btnCost").addClass("active");
+        $("#btnCheckIn").addClass("active");
     });
 </script>
 <div class="container" style="">

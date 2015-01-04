@@ -141,7 +141,7 @@ class sale extends CI_Controller {
             $ticket = $this->m_sale->get_post_form_sale();
 //            $data_debug['form_ticket'] = $ticket;
             $data_debug['update_resever_ticket'] = $this->m_ticket->update_resever_ticket($ticket);
-//            redirect("sale/print_ticket/$schedules_id");
+            redirect("sale/print_ticket/$schedules_id");
         }
 
         $this->m_template->set_Debug($data_debug);
@@ -178,18 +178,6 @@ class sale extends CI_Controller {
         $this->m_template->showSaleTemplate();
     }
 
-    function gen_qrcode($data = NULL) {
-        $this->load->library('ciqrcode');
-        if ($data != NULL) {
-            $params['data'] = 'This is a text to encode become QR Code';
-            $params['level'] = 'H';
-            $params['size'] = 5;
-            $params['savename'] = FCPATH . 'tes.png';
-            $this->ciqrcode->generate($params);
-//        echo '<img src="' . base_url() . 'tes.png" />';
-        }
-    }
-
     public function booking_seat() {
         $tsid = $this->input->post('TSID');
         $seat = $this->input->post("Seat");
@@ -198,15 +186,15 @@ class sale extends CI_Controller {
         $source_name = $this->input->post("SourceName");
         $destination_id = $this->input->post("DestinationID");
         $destination_name = $this->input->post("DestinationName");
-        $price_seat = $this->input->post("PriceSeat");  
+        $price_seat = $this->input->post("PriceSeat");
         $price_dicount = $this->input->post('PriceDicount');
-        
-        if ($price_seat==$price_dicount) {
+
+        if ($price_seat == $price_dicount) {
             $IsDiscount = 1;
-        }  else {
+        } else {
             $IsDiscount = 0;
         }
-        
+
         $ticket_data = array(
             'TSID' => $tsid,
             'Seat' => $seat,
@@ -215,9 +203,9 @@ class sale extends CI_Controller {
             'SourceName' => $source_name,
             'DestinationID' => $destination_id,
             'DestinationName' => $destination_name,
-            'PriceSeat'=>$price_seat,
-            'IsDiscount'=>$IsDiscount,
-        );       
+            'PriceSeat' => $price_seat,
+            'IsDiscount' => $IsDiscount,
+        );
         $ticket_id = $this->m_ticket->resever_ticket($ticket_data);
         if ($ticket_id != NULL || $ticket_id != '') {
             $rs = true;

@@ -1,7 +1,8 @@
-
 <script>
-
     jQuery(document).ready(function ($) {
+        $("#mainmenu ul li").removeAttr('class');
+        $("#btnSale").addClass("active");
+
         $("#wrapper").toggleClass("toggled");
         $("ol.progtrckr").each(function () {
             $(this).attr("data-progtrckr-steps",
@@ -35,7 +36,6 @@
     });
     var schedules_id = '<?= $schedules_id ?>';
     function addSeat(seat_no) {
-        var timer;
         var tb_ticket_body = $('#ticket_guest tbody');
         var num = $('#tb_ticket_sale tbody tr').length;
         var seat_info = $('#seat_info_' + seat_no);
@@ -46,15 +46,15 @@
         fare_type += '<option value="' + price_dis + '">' + price_dis + '(ลด)</option>';
         fare_type += '</select>';
         var row = '<tr id ="row_' + seat_no + '">';
+        row += '<td class="text-center" id ="' + seat_no + '" >' + seat_no;
+        row += '<input type="hidden" name="Seat[]" value="' + seat_no + '">';
+        row += '</td>';
+        row += '<td class="text-center">' + fare_type + '</td>';
         row += '<td class="text-center">';
         row += '<button type="button" class="btn btn-sm btn-danger" onclick="removeSeat(\'' + seat_no + '\')">';
         row += '<i class="fa fa-times"></i>';
         row += '</button>';
         row += '</td>';
-        row += '<td class="text-center" id ="' + seat_no + '" >' + seat_no;
-        row += '<input type="hidden" name="Seat[]" value="' + seat_no + '">';
-        row += '</td>';
-        row += '<td class="text-center">' + fare_type + '</td>';
         row += '</tr>';
         if (document.getElementById(seat_no) === null) {
 
@@ -68,7 +68,7 @@
             booking(seat_no);
 
             var seat_id = $('#seat_' + seat_no);
-            seat_id.css("background-color", "#FFE5CC");
+            seat_id.css("background-color", "#F3C13A");
             tb_ticket_body.append(row);
             var info = '<i class="fa fa-user fa-2x"></i><br>';
             info += $('#DestinationName').val();
@@ -85,7 +85,7 @@
 
         var row_id = 'row_' + seat_no;
         var seat_id = $('#seat_' + seat_no);
-        seat_id.css("background-color", "#33FF99");
+        seat_id.css("background-color", "#26C281");
         cancel(seat_no);
         var seat_info = $('#seat_info_' + seat_no);
         var row = document.getElementById(row_id);
@@ -113,7 +113,7 @@
     }
     function booking(seat_no) {
 //        alert(seate_no);      
-        var PriceSeat = parseInt($('#Price').val());        
+        var PriceSeat = parseInt($('#Price').val());
 
         var seat_info = {
             'TSID': schedules_id,
@@ -194,10 +194,10 @@
         margin-top: 2%;
     }
     .bg-blank{
-        background: #33FF99;
+        background: #26C281;
     }
     .bg-reserve{
-        background: #FFFF99;
+        background: #F3C13A;
     }
     .bg-busy{
         background: #FFA5A5;
@@ -206,6 +206,7 @@
         width: 100%;
         height: 60px;
         margin: 0px;
+        padding-right: 10px;
         font-size:2em;         
         box-sizing: border-box;
         -moz-box-sizing: border-box;
@@ -422,6 +423,12 @@
                         <span class="text">
                             เลือกที่นั่ง
                         </span>
+                        <p class="pull-right">
+                            <span class="badge badge-info">&nbsp;ว่าง&nbsp;</span> 
+                            <span class="badge badge-warning">&nbsp;กำลังเลือก&nbsp;</span>
+                            <span class="badge badge-danger">&nbsp;ขาย&nbsp;</span>  
+                        </p>
+
 
                         <table id="SeatingPlanVan" class="" border="0" style="padding-top: 2%;">
                             <tbody>
@@ -457,7 +464,9 @@
                                             $class = " bg-blank ";
 
                                             /*
-                                             * 0=ว่าง ,1=ไม่ว่าง,ขายเเล้ว, 2=กำลังจอง
+                                             * 0=ว่าง ,
+                                             * 1=ไม่ว่าง,ขายเเล้ว, 
+                                             * 2=กำลังจอง
                                              */
                                             foreach ($tickets as $ticket) {
                                                 $ticket_seat_no = $ticket['Seat'];
@@ -479,7 +488,7 @@
 
                                             /*
                                              * ตรวจสอบว่ามีการจองตั๋วแล้วยังไม่ปริ้นหรือไม่
-                                             * หรือถูจองโดยผู้ใช้อื่นหรือไม่ในขณะทำรายการ
+                                             * หรือถูกจองโดยผู้ใช้อื่นหรือไม่ในขณะทำรายการ
                                              */
                                             if (count($tickets_by_seller) > 0) {
                                                 foreach ($tickets_by_seller as $ticket) {
@@ -538,31 +547,29 @@
                                     <tr>
                                         <th colspan="3">ค่าโดยสาร</th>
                                     </tr>
-                                    <tr>
-                                        <th style="width: 10%"></th>
+                                    <tr>                                        
                                         <th style="width: 30%">เลขที่นั่ง</th>
-                                        <th style="width: 40%">ราคา</th>                                                
+                                        <th style="width: 30%">ราคา</th> 
+                                        <th style="width: 10%"></th>                                               
                                     </tr>
                                 </thead>
                                 <tbody>  
                                     <?php
+                                    $total = 0;
                                     if (count($tickets_by_seller) > 0) {
-                                        $total = 0;
                                         foreach ($tickets_by_seller as $ticket) {
                                             $seat_no = $ticket['Seat'];
                                             $price_seat = $ticket['PriceSeat'];
                                             $is_discount = $ticket['IsDiscount'];
                                             $select_full = 'selected = ""';
                                             $select_dis = '';
+                                            $total+=$price_seat;
                                             if ($is_discount == 1 || $is_discount == '1') {
                                                 $select_full = '';
                                                 $select_dis = 'selected = ""';
                                             }
                                             ?>
-                                            <tr id="row_<?= $seat_no ?>">
-                                                <td class="text-center">
-                                                    <button type="button" class="btn btn-sm btn-danger" onclick="removeSeat('<?= $seat_no ?>')"><i class="fa fa-times"></i></button>
-                                                </td>
+                                            <tr id="row_<?= $seat_no ?>">                                               
                                                 <td class="text-center" id ="<?= $seat_no ?>">
                                                     <?= $seat_no ?>
                                                     <input type="hidden" name="Seat[]" value="<?= $seat_no ?>">
@@ -572,6 +579,9 @@
                                                         <option value="<?= $fare['Price'] ?>" <?= $select_full ?> ><?= $fare['Price'] ?>(เต็ม)</option>
                                                         <option value="<?= $fare['PriceDicount'] ?>" <?= $select_dis ?> ><?= $fare['PriceDicount'] ?>(ลด)</option>
                                                     </select>
+                                                </td>
+                                                <td class="text-center">
+                                                    <button type="button" class="btn btn-sm btn-danger" onclick="removeSeat('<?= $seat_no ?>')"><i class="fa fa-times"></i></button>
                                                 </td>
                                             </tr>
 
@@ -589,7 +599,7 @@
                                 <span class="lead">รวม</span>
                             </div> 
                             <div class="col-sm-6">
-                                <input type="text" class="text-right" id="txt_total" placeholder="" value="0"> 
+                                <input type="text" class="text-right" id="txt_total" placeholder="" value="<?= $total ?>"> 
                             </div>                            
                         </div>
                         <div class="col-lg-12 col-sm-12 text-center" style="margin-top: 5%;">                            

@@ -29,20 +29,18 @@
         /*height: 300px;*/
     }
     .vertically-centered {
-        display: table;
-        background-color: red;
+        display: table;        
         margin: auto;
     }  
-    .ticket-print{
-        /*padding-left: 5%;*/
+    .ticket-print{    
         background: white;
+        /*font-family:Arial, "times New Roman", tahoma;*/
         font-family:'Times New Roman',Times,serif;
-        /*max-width: 200px;*/
-        /*overflow-x: scroll;*/
+        width: 100%;
         page-break-inside: avoid;
-    }   
+    }       
     table .title{      
-        font-size: 6pt;        
+        font-size: 2pt;        
     }
     table .detail{ 
         padding-bottom: 5px;
@@ -51,7 +49,7 @@
     }
     table thead{       
         text-align: center;
-        font-size: 8pt;
+        font-size: 6pt;
     }
     table tbody .route-name{  
         border-bottom: 1px solid; 
@@ -125,18 +123,17 @@
         vertical-align: middle;
         text-align: center;
     }
-
-    @media all {
-        .page-break	{ display: none; }
+    /* css ส่วนสำหรับการแบ่งหน้าข้อมูลสำหรับการพิมพ์ */
+    @media all
+    {
+        .page-break	{ display:none; }
+        .page-break-no{ display:none; }
     }
-
-    @media print {
-        .page-break	{ 
-            display: block; 
-            page-break-before: always; 
-        }
+    @media print
+    {
+        .page-break	{ display:block;height:1px; page-break-before:always; }
+        .page-break-no{ display:block;height:1px; page-break-after:avoid; }	
     }
-
 
 </style>
 <div id="" class="container-fluid hidden-print">
@@ -152,10 +149,10 @@
         </div>
     </div>
 </div>
-<!--html preview--> 
+
 <!--html preview-->
-<div id="" class="container hidden-print hidden" >
-    <div class="row" style="padding-bottom: 50px;">        
+<div id="" class="container hidden-print" >
+    <div class="row" style="">        
         <?php
         $rcode = $route['RCode'];
         $vtid = $route['VTID'];
@@ -165,73 +162,63 @@
             $ticket_id = $t['TicketID'];
             $source_name = $t['SourceName'];
             $destination_name = $t['DestinationName'];
-            $VCode = $t['VCode'];
+            $vcode = $t['VCode'];
             $seat = $t['Seat'];
-            $time_depart = $t['TimeDepart'];
-            $time_arrive = $t['TimeArrive'];
-            $barcode = $this->m_barcode->gen_barcode($ticket_id);
+            $time_depart = date('H:i', strtotime($t['TimeDepart']));
+            $time_arrive = date('H:i', strtotime($t['TimeArrive']));
+            $date = $this->m_datetime->DateThai($t['DateSale']);
+            $price = $t['PriceSeat'];
+            $name_seller = $this->session->userdata('EID');
             ?>
-            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12 well">
+            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 well" style="border:1px solid black;padding-left: 20px;padding-right: 20px;margin: 5px 10px auto;">
                 <fieldset disabled >
                     <div class="ticket" id="">                    
-                        <div class="ticket-title" style="text-align: center;">
-                            <img data-src="holder.js/100%x180" alt="...">
-                            <p class="lead">บริษัท สหมิตรภาพ จำกัด</p>                       
+                        <div class="ticket-title" style="text-align: center; margin-bottom: 15px;">
+                            <img data-src="holder.js/vine/100x100" class="img-rounded" alt="logo" >                                            
                         </div>
                         <div class="ticket-body">  
                             <div class="row">
                                 <div class="form-group">
-                                    <div class="col-xs-12 text-center">
-                                        <input type="text" class="form-control text-center" id="" placeholder= "รถตู้ xxx ต้นทาง - ปลายทาง">  
-                                        <input type="hidden" class="form-control input-lg text-center" id="" name="ticket_id" placeholder="" value="<?php echo $t['TicketID'] ?>">
+                                    <div class="col-md-10 col-md-offset-1 text-center">
+                                        <input type="text" class="form-control text-center" id="" placeholder= "รถตู้ xxx ต้นทาง - ปลายทาง" value="<?= $route_name ?>">  
+                                        <input type="hidden" class="form-control input-lg text-center" id="" name="ticket_id" placeholder="" value="<?php echo $ticket_id ?>">
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <div class="col-xs-6">
-                                        <label for="">เบอร์รถ</label>
-                                        <input type="text" class="form-control input-lg text-center" id="" placeholder="xxx-x" value="<?php echo $t['VCode'] ?>">
+                                        <label for="">เบอร์รถ</label>                                   
+                                        <input type="text" class="form-control text-center" id="" placeholder="xxx-x" value="<?php echo $vcode ?>">
                                         <label for="">เลขที่นั่ง</label>
-                                        <input type="text" class="form-control input-lg text-center" id="" placeholder="ที่นั่ง" value="<?php echo $t['Seat'] ?>">
+                                        <input type="text" class="form-control text-center" id="" placeholder="ที่นั่ง" value="<?php echo $seat ?>">                        
                                     </div>
                                     <div class="col-xs-6">
                                         <label for="">เวลาออก</label>
-                                        <input type="text" class="form-control input-lg text-center" id="" placeholder="เวลาออก" value="<?php echo $t['TimeDepart'] ?>">                                    
+                                        <input type="text" class="form-control input-lg  text-center" id="" placeholder="เวลาออก" value="<?php echo $time_depart ?>">                                    
                                         <label for="">เวลาถึง</label>
-                                        <input type="text" class="form-control text-center" id="" placeholder="เวลาถึง" value="<?php echo $t['TimeArrive'] ?>">                              
+                                        <input type="text" class="form-control text-center" id="" placeholder="เวลาถึง" value="<?php echo $time_arrive ?>">                              
                                     </div>
                                 </div> 
                                 <div class="form-group">
-                                    <div class="col-xs-12">
+                                    <div class="col-xs-6">
                                         <label for="">ต้นทาง</label>
-                                        <div class="col-xs-10 col-xs-offset-1">
-                                            <input type="text" class="form-control text-center" id="" placeholder="ต้นทาง" value="<?php echo $t['SourceName'] ?>">
-                                        </div>                                        
+                                        <input type="text" class="form-control text-center" id="" placeholder="ต้นทาง" value="<?php echo $source_name ?>">
                                     </div>
-                                </div>
-                                <div class="form-group">
-                                    <div class="col-xs-12">
-                                        <label for="">ปลายทาง</label>
-                                        <div class="col-xs-10 col-xs-offset-1">
-                                            <input type="text" class="form-control input-lg text-center" id="" placeholder="ปลายทาง" value="<?php echo $t['DestinationName'] ?>">
-                                        </div>
+                                    <div class="col-xs-6">
+                                        <label for="">ปลายทาง</label>                                       
+                                        <input type="text" class="form-control text-center" id="" placeholder="ปลายทาง" value="<?php echo $destination_name ?>">
                                     </div>
-                                </div>  
+                                </div>                               
                                 <div class="form-group">
                                     <div class="col-xs-6">
                                         <label for="">วันที่เดินทาง</label>
-                                        <input type="text" class="form-control text-center" id="" placeholder="วันที่เดินทาง" value="<?php echo $t['DateSale'] ?>">
+                                        <input type="text" class="form-control text-center" id="" placeholder="วันที่เดินทาง" value="<?php echo $date ?>">
                                     </div>
                                     <div class="col-xs-6">
                                         <label for="">ราคา</label>
-                                        <input type="text" class="form-control input-lg text-center" id="" placeholder="ราคา" value="<?php echo $t['PriceSeat'] ?>">
-                                    </div>
-                                </div> 
-                                <div class="form-group">
-                                    <div class="col-xs-12 text-center" style="padding-top: 5px;"> 
-                                        <img src="<?php echo $barcode; ?>">
-
+                                        <input type="text" class="form-control input-lg text-center" id="" placeholder="ราคา" value="<?php echo $price . '  .-' ?>">
                                     </div>
                                 </div>
+                                <hr>
                                 <div class="form-group">
                                     <div class="col-xs-6 text-left">
                                         <span class="small"><?php echo $this->m_datetime->getDatetimeNow(); ?></span>                               
@@ -241,43 +228,7 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="ticket-footer">
-                            <div class="row">
-                                <div class="col-xs-12">
-                                    <table class="table">
-                                        <tbody>
-                                            <tr class="">
-                                                <td colspan="2" class="cut-foot">
-                                                    <span></span>
-                                                </td>
-                                            </tr> 
-                                            <tr class="title">
-                                                <td class="text-center" colspan="2"><?= "$vt_name  " . $route_name ?></td>
-                                            </tr>
-                                            <tr class="title">
-                                                <td class="text-center" colspan=""><?= $source_name ?></td>
-                                                <td class="text-center" colspan=""><?= "$destination_name" ?></td>
-                                            </tr>
-
-                                            <tr class="title">
-                                                <td colspan="2" class="text-center">
-                                                    <img src="<?= $barcode ?>" class="" alt=""> 
-                                                </td>
-                                            </tr>                        
-                                            <tr class="title">
-                                                <td class=" text-left">
-                                                    <?php echo $this->m_datetime->getDatetimeNow(); ?>
-                                                </td>
-                                                <td class="text-center">
-                                                    คนขายตั๋ว
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>                    
+                        </div>                                        
                     </div>
                 </fieldset>    
             </div>
@@ -305,20 +256,16 @@
             $date = $this->m_datetime->DateThai($t['DateSale']);
             $price = $t['PriceSeat'];
             $barcode = $this->m_barcode->gen_barcode($ticket_id);
+            $qrcode = $this->m_qrcode->gen_qrcode($ticket_id);
+            $name_seller = $this->session->userdata('EID');
             ?>
-            <div class="">
+            <div class="page-break">
                 <div class="ticket-print" id="<?= $ticket_id ?>">
                     <table class="" border='0' style="width: 100%" >
-                        <thead>
-                            <tr>
-                                <th colspan="2">
-                                </th>
-                            </tr>
-                            <tr>
-                                <th colspan="2">
-                                    บริษัท สหมิตรภาพ(2512) จำกัด
-                                </th>
-                            </tr>
+                        <thead>   
+                        <th colspan="3">
+                            <img data-src="holder.js/vine/100x60" class="img-rounded" alt="logo" >  
+                        </th>
                         </thead>
                         <tbody>                         
                             <tr class="">
@@ -370,24 +317,25 @@
                             </tr>
                             <tr>
                                 <td colspan="2">
-                                    <img src="<?= $barcode ?>" class="" alt=""> 
+                                    <img src="<?= $barcode ?>" class="" width="100%" height="30px" alt=""> 
                                 </td>
-                            </tr>
-                            <tr>
-                                <td style="width: 50%;">
-                                    <img src="<?= $barcode ?>" class="img-responsive" alt=""> 
-                                </td>
-                            </tr>
-                            <tr class="title" >
-                                <td class=" text-left">
-                                    <?php echo $this->m_datetime->getDatetimeNow(); ?>
-                                </td>
+                            </tr>                             
+                            <tr class="title">   
                                 <td class="text-center">
-                                    คนขายตั๋ว
+                                    <?= date('Y-m-d H:i:s') ?>
+                                    <br>
+                                    <?= $name_seller ?>
                                 </td>
-                            </tr>                            
-                            <tr>
-                                <td style="padding-bottom: 20px;"></td>
+                                <td class="text-center" >
+                                    <img src="<?= $qrcode ?>" class="" width="50px" height="50px" alt=""> 
+                                </td>
+                            </tr>   
+                            <tr class="title">
+                                <td colspan="2" class="text-center" style="padding-bottom: 10px;">
+                                    **ขอสงวนสิทธิ์**
+                                    <br>
+                                    **ไม่รับเปลี่ยนหรือคืนตั๋วโดยสาร**
+                                </td>
                             </tr>
                         </tbody>
                         <tfoot>
@@ -398,25 +346,31 @@
                             </tr> 
                             <tr class="title">
                                 <td class="text-center" colspan="2"><?= "" . $route_name ?></td>
-                            </tr>
+                            </tr>    
                             <tr class="title">
                                 <td class="text-center" colspan=""><?= $source_name ?></td>
                                 <td class="text-center" colspan=""><?= "$destination_name" ?></td>
                             </tr>
-
                             <tr class="title">
                                 <td colspan="2" class="text-center">
-                                    <img src="<?= $barcode ?>" class="" alt=""> 
+                                    <img src="<?= $barcode ?>" class="" width="100%" height="30px" alt=""> 
                                 </td>
-                            </tr>                        
-                            <tr class="title">
-                                <td class=" text-left">
-                                    <?php echo $this->m_datetime->getDatetimeNow(); ?>
+                            </tr>  
+                            <tr class="title">   
+                                <td class="text-center">
+                                    <?= $vcode?>
+                                    <br>
+                                    <?= $vt_name?>
                                 </td>
                                 <td class="text-center">
-                                    คนขายตั๋ว
+                                    <img src="<?= $qrcode ?>" class="" width="50px" height="50px" alt=""> 
                                 </td>
                             </tr>
+                            <tr style="font-size: 1pt ! important;">
+                                <td class="text-right"><?= date('Y-m-d H:i:s') ?></td>
+                                <td class="text-center"><?= $name_seller ?></td>
+                            </tr>
+
                         </tfoot>
                     </table>
                 </div>  
@@ -424,7 +378,9 @@
         <?php } ?>        
     </div>
 </div>
-<footer class="hidden-print hidden"> 
+<footer class="hidden-print"> 
     <button type="button" class="btn btn-info btn-lg"  onclick="print_ticket()"><span class="fa fa-print fa-2x"></span>&nbsp;พิมพ์ตั๋วโดยสาร</button> 
     <!--<button class="btn"  onclick="PrintElem('<?$ticket_id ?>')"><span class="fa fa-print fa-2x"></span>&nbsp;พิมพ์ตั๋วโดยสาร </button>-->  
 </footer>
+
+<?php echo js('docs.min.js?v=' . $version); ?>  

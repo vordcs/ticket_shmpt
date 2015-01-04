@@ -138,7 +138,7 @@ class m_sale extends CI_Model {
             'type' => "text",
             'name' => "TimeDepart",
             'id' => "TimeDepart",
-            'class' => "form-control input-lg text-center",
+            'class' => "form-control text-center",
             'readonly' => "TRUE",
             'value' => $time_depart,
         );
@@ -146,7 +146,7 @@ class m_sale extends CI_Model {
             'type' => "text",
             'name' => "TimeArrive",
             'id' => "TimeArrive",
-            'class' => "form-control input-lg text-center",
+            'class' => "form-control text-center",
             'readonly' => "",
             'value' => $time_arrive,
         );
@@ -154,7 +154,7 @@ class m_sale extends CI_Model {
             'type' => "text",
             'name' => "Date",
             'id' => "Date",
-            'class' => "form-control input-lg text-center",
+            'class' => "form-control text-center",
             'readonly' => "",
             'value' => $date,
         );
@@ -162,15 +162,15 @@ class m_sale extends CI_Model {
             'type' => "text",
             'name' => "Price",
             'id' => "Price",
-            'class' => "form-control input-lg text-center",
-            'readonly' => "input-lg",
+            'class' => "form-control  text-center",
+            'readonly' => "",
             'value' => $price,
         );
         $i_PriceDicount = array(
             'type' => "text",
             'name' => "PriceDicount",
             'id' => "PriceDicount",
-            'class' => "form-control input-lg text-center",
+            'class' => "form-control text-center",
             'readonly' => "",
             'value' => $price_dis,
         );
@@ -178,7 +178,7 @@ class m_sale extends CI_Model {
             'type' => "text",
             'name' => "VCode",
             'id' => "VCode",
-            'class' => "form-control input-lg text-center",
+            'class' => "form-control text-center",
             'readonly' => "",
             'value' => $vcode,
         );
