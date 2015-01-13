@@ -1,14 +1,15 @@
 $(document).ready(function () {
     // Create two variable with the names of the months and days in an array
-    var monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "ธันวาคม"];
-    var dayNames = ["อาทิตย์", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    var monthNames = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "คุลาคม", "พฤศจิกายน", "ธันวาคม"];
+    var dayNames = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์"];
 
     // Create a newDate() object
     var newDate = new Date();
     // Extract the current date from Date object
     newDate.setDate(newDate.getDate());
-    // Output the day, date, month and year    
-    $('#Date').html(dayNames[newDate.getDay()] + " " + newDate.getDate() + ' ' + monthNames[newDate.getMonth()] + ' ' + newDate.getFullYear());
+    // Output the day, date, month and year+545
+    var year_th = parseInt(newDate.getFullYear())  + 543; 
+    $('#Date').html(dayNames[newDate.getDay()] + " " + newDate.getDate() + ' ' + monthNames[newDate.getMonth()] + ' ' + year_th);
 
     setInterval(function () {
         // Create a newDate() object and extract the seconds of the current time on the visitor's

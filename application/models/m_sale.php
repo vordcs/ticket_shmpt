@@ -41,8 +41,8 @@ class m_sale extends CI_Model {
         $price_dis = 0;
 
 //        รถโดยสาร
-        $vid = 'XX';
-        $vcode = 'xxx-x';
+        $vid = '-';
+        $vcode = '-';
 
         if (count($schedule) > 0 && $schedule != NULL) {
 //            รหัสตารางเวลาเดินรถ

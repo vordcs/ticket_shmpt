@@ -64,6 +64,8 @@ class sale extends CI_Controller {
     }
 
     public function booking($rid = NULL, $source_id = NULL, $destination_id = NULL, $schedules_id = NULL) {
+        $date = $this->m_datetime->getDateToday();
+
         if ($rid == NULL || $source_id == NULL || $destination_id == NULL) {
             redirect('sale/');
         }
@@ -79,6 +81,8 @@ class sale extends CI_Controller {
         $s_station = $this->m_station->get_stations($rcode, $vtid, $source_id)[0];
         $d_station = $this->m_station->get_stations($rcode, $vtid, $destination_id)[0];
 
+        $schedule = $this->m_schedule->get_schedule($date, $rcode, $vtid, $rid, $schedules_id)[0];
+        $schedules_detail = $this->m_schedule->get_schedule($date, $rcode, $vtid, $rid);
 
         if (count($s_station) <= 0) {
             redirect('sale/');
@@ -87,18 +91,14 @@ class sale extends CI_Controller {
             redirect('sale/');
         }
 
-        $date = $this->m_datetime->getDateToday();
-        $schedules_detail = $this->m_schedule->get_schedule($date, $rcode, $vtid, $rid);
-
-        if (count($schedules_detail) <= 0) {
+        if (count($schedule) <= 0 || count($schedules_detail) <= 0) {
             $alert['alert_message'] = "ไม่พบข้อมูลตารางเวลาเดิน $route_name กรุณาติดต่อผู้ดูแลระบบ";
             $alert['alert_mode'] = "warning";
             $this->session->set_flashdata('alert', $alert);
-//            redirect('sale/');
+            redirect('sale/');
         }
 
         $route = $this->m_route->get_route(NULL, NULL, $rid)[0];
-        $schedule = $this->m_schedule->get_schedule($date, $rcode, $vtid, $rid, $schedules_id)[0];
         $fare = $this->m_fares->get_fares($rcode, $vtid, $source_id, $destination_id)[0];
         $tickets_by_seller = $this->m_ticket->get_ticket_by_saller($schedules_id);
         $tickets = $this->m_ticket->get_ticket($schedules_id);

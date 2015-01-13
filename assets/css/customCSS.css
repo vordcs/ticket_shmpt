@@ -21,6 +21,9 @@ tr th{
 td{
     vertical-align: middle ! important;
 }
+table tbody tr td{               
+    color: #333333;
+}
 
 .container-fluid .row .page-header{
     padding-left: 30px;
@@ -93,35 +96,8 @@ ol.progtrckr li.progtrckr-todo:before {
     bottom: -1.6em;
 }
 /*table fixheader */
-thead, tbody, tr, td, th { display: block; }
-
-tr:after {
-    content: ' ';
-    display: block;
-    visibility: hidden;
-    clear: both;
-}
-
-thead th {
-    height: 30px;
-
-    /*text-align: left;*/
-}
-
-tbody {
-    height: 320px;
-    overflow-y: auto;
-}
-
-thead {
-    /* fallback */
-}
 
 
-tbody td, thead th {
-    width: 19.2%;
-    /*float: left;*/
-}
 /*clock live*/
 
 
@@ -152,7 +128,7 @@ tbody td, thead th {
     font-size:3em; 
     text-align:center; 
     font-family:'BebasNeueRegular', Arial, Helvetica, sans-serif; 
-    text-shadow:0 0 5px #86f890 ;
+    text-shadow:0 0 5px #cccccc;
 
 }
 
@@ -160,13 +136,14 @@ tbody td, thead th {
     position:relative; 
     -moz-animation:mymove 1s ease infinite; 
     -webkit-animation:mymove 1s ease infinite; 
-    padding-left:10px; padding-right:10px; }
+    padding-left:10px; padding-right:10px;
+}
 
 @-webkit-keyframes mymove 
 {
-    0% {opacity:1.0; text-shadow:0 0 20px #00c6ff;}
+    0% {opacity:1.0; text-shadow:0 0 20px #cccccc;}
     50% {opacity:0; text-shadow:none; }
-    100% {opacity:1.0; text-shadow:0 0 20px #00c6ff; }	
+    100% {opacity:1.0; text-shadow:0 0 20px #cccccc; }	
 }
 @-moz-keyframes mymove 
 {
@@ -222,8 +199,6 @@ tbody td, thead th {
     font-weight: 400;
     color: #545454;
 }
-
-
 
 /*------------------------------------------------------------------
 [2. Stats / .stats]

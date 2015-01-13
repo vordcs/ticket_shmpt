@@ -26,6 +26,27 @@ class m_station extends CI_Model {
         return $rs;
     }
 
+    public function get_station_sale_ticket($rcode = null, $vtid = null, $sid = NULL) {
+        if ($rcode != NULL) {
+            $this->db->where('RCode', $rcode);
+        }
+        if ($vtid != NULL) {
+            $this->db->where('VTID', $vtid);
+        }
+        if ($sid != NULL) {
+            $this->db->where('SID', $sid);
+        }
+
+        $this->db->where('IsSaleTicket', 1);
+
+        $this->db->order_by('Seq', 'asc');
+        $query = $this->db->get('t_stations');
+
+        $rs = $query->result_array();
+
+        return $rs;
+    }
+
     public function get_stations_detail($rcode = null, $vtid = null, $sid = NULL, $seq = NULL) {
         if ($rcode != NULL) {
             $this->db->where('RCode', $rcode);
@@ -65,7 +86,6 @@ class m_station extends CI_Model {
 
         return $query->result_array();
     }
-
 
     public function is_exits_station($rcode, $vtid, $station_name, $seq = NULL) {
 

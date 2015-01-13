@@ -40,7 +40,7 @@
         page-break-inside: avoid;
     }       
     table .title{      
-        font-size: 2pt;        
+        font-size: 6pt;        
     }
     table .detail{ 
         padding-bottom: 5px;
@@ -320,23 +320,32 @@
                                     <img src="<?= $barcode ?>" class="" width="100%" height="30px" alt=""> 
                                 </td>
                             </tr>                             
-                            <tr class="title">   
+                            <tr class="title" style="font-size: 4pt ! important;">   
                                 <td class="text-center">
-                                    <?= date('Y-m-d H:i:s') ?>
+                                    **ขอสงวนสิทธิ์**
                                     <br>
-                                    <?= $name_seller ?>
+                                    ไม่รับเปลี่ยน
+                                    <br>
+                                    หรือ
+                                    <br>
+                                    คืนตั๋วโดยสาร
                                 </td>
                                 <td class="text-center" >
                                     <img src="<?= $qrcode ?>" class="" width="50px" height="50px" alt=""> 
                                 </td>
                             </tr>   
-                            <tr class="title">
-                                <td colspan="2" class="text-center" style="padding-bottom: 10px;">
-                                    **ขอสงวนสิทธิ์**
-                                    <br>
-                                    **ไม่รับเปลี่ยนหรือคืนตั๋วโดยสาร**
-                                </td>
+                          
+                             <tr style="font-size: 4pt ! important;">
+                                <td class="text-center"><?= date('Y-m-d H:i:s') ?></td>
+                                <td class="text-center"><?= $name_seller ?></td>
                             </tr>
+                            
+                            <tr class="title">
+                                <td colspan="2" class="cut-foot">
+                                    <span></span>
+                                </td>
+                            </tr> 
+                            
                         </tbody>
                         <tfoot>
                             <tr class="title">
@@ -366,8 +375,8 @@
                                     <img src="<?= $qrcode ?>" class="" width="50px" height="50px" alt=""> 
                                 </td>
                             </tr>
-                            <tr style="font-size: 1pt ! important;">
-                                <td class="text-right"><?= date('Y-m-d H:i:s') ?></td>
+                            <tr style="font-size: 4pt ! important;">
+                                <td class="text-center"><?= date('Y-m-d H:i:s') ?></td>
                                 <td class="text-center"><?= $name_seller ?></td>
                             </tr>
 

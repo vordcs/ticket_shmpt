@@ -25,17 +25,17 @@ class report extends CI_Controller {
             'routes' => $this->m_route->get_route(),
             'routes_detail' => $this->m_route->get_route_detail(),
             'page_title' => 'รายงาน',
-            'page_title_small' => ' ',
+            'page_title_small' => ': สถานนีที่ขายตั๋ว ',
             'previous_page' => "",
             'next_page' => "",
         );
-        $data['stations'] = $this->m_station->get_stations();
+        $data['stations'] = $this->m_station->get_station_sale_ticket();
         $data['schedules'] = $this->m_schedule->get_schedule($this->m_datetime->getDateToday());
         $data['schedule_master'] = $this->m_route->get_schedule_manual();
         $data_debug = array(
 //            'from_search' => $data['from_search'],
 //    'route'=>$data['route'],
-//    ''=>$data[''],
+//            'stations' => $data['stations'],
 //    ''=>$data[''],
         );
         $this->m_template->set_Debug($data_debug);

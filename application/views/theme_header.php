@@ -33,9 +33,7 @@
         <?php echo js('bootstrap.js?v=' . $version); ?>
         <?php echo js('customJS.js?v=' . $version); ?>
         <?php echo js('site.min.js?v=' . $version); ?>
-
-        <?php echo css('sidebar.css?v=' . $version); ?>
-
+       
         <!--time picker-->    
         <?php echo css('bootstrap-timepicker.min.css?v=' . $version); ?>  
         <?php echo js('bootstrap-timepicker.min.js?v=' . $version); ?> 
@@ -46,19 +44,20 @@
         <!-- thai extension -->
         <?php echo js('bootstrap-datepicker-thai.js?v=' . $version); ?>  
         <?php echo js('/locales/bootstrap-datepicker.th.js?v=' . $version); ?>  
- 
-            <?php echo css('admin/style.css?v=' . $version); ?>
-        <!--off-canvas navigation menu-->
-      
+
+        <?php echo css('admin/style.css?v=' . $version); ?>
+
+
 
         <!--chart plugin-->
-         <?php echo js('/chart/highcharts.js?v=' . $version); ?>  
+        <?php echo js('/chart/highcharts.js?v=' . $version); ?>  
         <?php echo js('/chart/jquery.highchartTable-min.js?v=' . $version); ?>  
-        
-        <!-- live clock thai extension -->
-        <?php echo css('clock_live/style_clock.css?v=' . $version); ?>  
-        <?php echo js('clock_live/script.js?v=' . $version); ?>  
-        <?php echo js('clock_live/moment.min.js?v=' . $version); ?> 
+
+        <!-- fix header -->
+        <?php echo css('StickyTableHeaders/component.css?v=' . $version); ?>
+        <?php // echo css('StickyTableHeaders/normalize.css?v=' . $version); ?>
+        <?php echo js('StickyTableHeaders/jquery.ba-throttle-debounce.min.js?v=' . $version); ?>
+        <?php echo js('StickyTableHeaders/jquery.stickyheader.js?v=' . $version); ?>
 
         <script type="text/javascript">
             $(window).scroll(function () {
@@ -102,9 +101,7 @@
                 -o-transform: scale(1);
                 transform: scale(1);
             } 
-            table tbody tr td{               
-                color: #333333;
-            }
+
         </style>
     </head>
     <body>       

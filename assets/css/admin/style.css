@@ -89,6 +89,7 @@ Bootstrap Admin Template by EGrappler.com
 .widget-header {	
     position: relative;
     padding-left: 2%;
+    padding-right: 2%;
     height: 50px;
     line-height: 45px;    
     font-size: 18px;

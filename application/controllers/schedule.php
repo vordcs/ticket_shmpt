@@ -1,4 +1,3 @@
-
 <?php
 
 if (!defined('BASEPATH'))
@@ -21,10 +20,13 @@ class schedule extends CI_Controller {
 
     public function index() {
         $data = array(
+            'page_title' => 'ตารางเวลาเดินรถ : ',
+            'page_title_small' => 'จุดจอดของคนขาย',
 //            'from_search' => $this->m_schedule->set_form_search_route(),
             'vehicle_types' => $this->m_route->get_vehicle_types(),
             'routes' => $this->m_route->get_route(),
             'routes_detail' => $this->m_route->get_route_detail(),
+            'vehicle_types' => $this->m_route->get_vehicle_types(),
         );
         $data['stations'] = $this->m_station->get_stations();
         $data['schedules'] = $this->m_schedule->get_schedule($this->m_datetime->getDateToday());
