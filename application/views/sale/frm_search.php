@@ -1,10 +1,10 @@
 <script>
     jQuery(document).ready(function () {
+         $("#mainmenu ul li").removeAttr('class');
+        $("#btnSale").addClass("active");
         $("select[name='VTID']").change(function () {
             var url_post = "<?= base_url(); ?>index.php/sale/get_route_by_vehicle_type";
             var vtid = $("select[name='VTID'] option:selected").val();
-            var vt_name = $("select[name='VTID'] option:selected").text();
-//            alert(vtid + '  ' + vt_name + '  ' + url_post );
             $.ajax({
                 url: url_post,
                 data: {'VTID': vtid},
@@ -12,8 +12,6 @@
                 type: "post",
                 success: function (data) {
                     $(".result").html(data);
-//                    response = jQuery.parseJSON(data);
-//                    console.log(response);
                 }
             });
         });
@@ -31,7 +29,7 @@
         });
     });
 </script>
-<div id="" class="container-fluid">
+<div id="" class="container-fluid" style="padding-top: 50px;">
     <div id="progress_step" class="row-fluid animated fadeInUp">        
         <div class="col-lg-12" style="padding-bottom: 2%;" >
             <ol class="progtrckr" data-progtrckr-steps="4">

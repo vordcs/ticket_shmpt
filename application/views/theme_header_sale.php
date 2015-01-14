@@ -3,12 +3,10 @@
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="keywords"
-              content="thaihubhosting, hosting, host, high perfomance">
+        <meta name="viewport" content="width=device-width, initial-scale=1">        
         <meta name="description"
-              content="เว็บโฮสติ้งคุณภาพสูง ที่ได้รับการออกแบบติดตั้งและผู้แลจากผู้เชี่ยวชาญตลอด 24 ชั่วโมง">
-        <meta name="author" content="CBNUKE">
+              content="ระบบขายตั๋วโดยสาร">
+        <meta name="author" content="VoRDCSCBNUKE">
 
 
         <title><?php echo $title; ?></title>
@@ -17,26 +15,21 @@
               href="<?= asset_url() ?>img/apple-touch-icon-144-precomposed.png<?= '?v=' . $version ?>">
         <link rel="shortcut icon" href="<?= asset_url() ?>img/favicon.ico<?= '?v=' . $version ?>">
         <!-- Bootstrap core CSS ans JS -->
-        <?php echo js('pace.min.js?v=' . $version); ?>
         <?php echo css('bootstrap.css?v=' . $version); ?>
-
         <?php echo css('bootflat.min.css?v=' . $version); ?>
-        <?php echo css('pace.css?v=' . $version); ?>
         <?php echo css('theme.css?v=' . $version); ?>
-        <?php echo css('label.min.css?v=' . $version); ?>
-        <?php echo css('segment.min.css?v=' . $version); ?>
-        <?php echo css('font-awesome.css?v=' . $version); ?>
         <?php echo css('animate.css?v=' . $version); ?>
+        <?php echo css('font-awesome.css?v=' . $version); ?>
         <?php echo css('customCSS.css?v=' . $version); ?>
-        <?php echo css('site.min.css?v=' . $version); ?>
         <?php echo js('jquery.js?v=' . $version); ?>
         <?php echo js('bootstrap.js?v=' . $version); ?>
-        <?php echo js('customJS.js?v=' . $version); ?>
-        <?php echo js('site.min.js?v=' . $version); ?>
 
-        <?php echo css('sidebar.css?v=' . $version); ?>
+        <?php echo js('customJS.js?v=' . $version); ?>
+
         <?php echo css('sale/style_sale.css?v=' . $version); ?>
 
+        <?php echo css('sale/navmenu-push.css?v=' . $version); ?>
+        <?php echo css('sale/jasny-bootstrap.min.css?v=' . $version); ?>
 
 
         <script type="text/javascript">
@@ -59,6 +52,9 @@
             });
         </script>
         <style>
+            body{
+                padding-top: 1%;
+            }
             .message-box{
                 position: fixed;
                 bottom: 0;
@@ -87,28 +83,10 @@
             }
         </style>
     </head>
-    <body>          
-        <!--for sale ticket only-->          
-        <nav id="nav_sale" class="navbar navbar-fixed-top navbar-default hidden-print" role="navigation">
-            <div class="container-fluid">
-                <div class="navbar-header">                    
-                    <span class="navbar-brand">ระบบขายตั๋วหน้าเคาเตอร์</span>
-                </div>
-                <div id="bs-example-navbar-collapse-3" class="collapse navbar-collapse">
-                    <ul class="nav navbar-nav navbar-right">
-                        <li ><a href="<?= base_url('home/') ?>"><i class="fa fa-home"></i><span>หน้าหลัก</span> </a> </li>
-                        <li id="btnSale"><a href="<?= base_url('sale/') ?>"><i class="fa fa-bullhorn"></i><span>ขายตั๋วโดยสาร</span> </a> </li>
-                        <li id="btnSchedule"><a href="<?= base_url('schedule/') ?>"><i class="fa fa-list"></i><span>ตารางเดินรถ</span> </a> </li>                                  
-                        <li id="btnCost"><a href="<?= base_url('cost/') ?>"><i class="fa fa-pencil-square-o"></i><span>ค่าใช้จ่าย</span></a></li>
-                        <li id="btnCheckIn"><a href="<?= base_url('checkin/') ?>"><i class="fa fa-clock-o"></i><span>ลงเวลา</span></a></li>
-                        <li id="btnReport"><a href="<?= base_url('report/') ?>"><i class="fa fa-calendar-o"></i><span>รายงาน</span> </a> </li>  
-                    </ul>
-                </div>
-            </div>
-        </nav>  
+    <body onload="document.refresh();">        
         <?php
         if (isset($debug) && $debug != NULL) {
-            echo '<div class="container" style="margin-top: 60px;">';
+            echo '<div class="container hidden-print" style="margin-top: 60px;">';
             print '<pre>';
             print_r($debug);
             print '</pre>';

@@ -28,16 +28,6 @@ table tbody tr td{
 .container-fluid .row .page-header{
     padding-left: 30px;
 }
-
-
-#list {      
-    width: 100%;
-    max-height: 450px;
-    overflow-y: scroll;
-    /*margin-top: 2%;*/
-}
-
-
 /* Progress Step  */
 ol.progtrckr {
     margin: 0;
@@ -95,11 +85,13 @@ ol.progtrckr li.progtrckr-todo:before {
     font-size: 1.5em;
     bottom: -1.6em;
 }
-/*table fixheader */
 
-
-/*clock live*/
-
+#list {      
+    width: 100%;
+    max-height: 450px;
+    overflow-y: scroll;
+    /*margin-top: 2%;*/
+}
 
 .clock {
     width:100%; 

@@ -68,10 +68,14 @@
             booking(seat_no);
 
             var seat_id = $('#seat_' + seat_no);
-            seat_id.css("background-color", "#F3C13A");
+            seat_id.removeClass('bg-blank');
+            seat_id.addClass('bg-reserve');
+//            seat_id.css("background-color", "#F3C13A");
             tb_ticket_body.append(row);
             var info = '<i class="fa fa-user fa-2x"></i><br>';
+            info += '<span class="badge badge-warning">';
             info += $('#DestinationName').val();
+            info += '</span>';
             seat_info.html(info);
             calTotalFare();
 
@@ -85,12 +89,16 @@
 
         var row_id = 'row_' + seat_no;
         var seat_id = $('#seat_' + seat_no);
-        seat_id.css("background-color", "#26C281");
+
+        seat_id.removeClass('bg-reserve');
+        seat_id.addClass('bg-blank');
         cancel(seat_no);
         var seat_info = $('#seat_info_' + seat_no);
         var row = document.getElementById(row_id);
         row.parentNode.removeChild(row);
-        var info = seat_no;
+        var info = '<span class="badge badge-info">';
+        info += seat_no;
+        info += '</span>';
         seat_info.html(info);
         calTotalFare();
 
@@ -181,6 +189,9 @@
 
 </script>
 <style>  
+    body{
+        padding-top: 1%;
+    }
     .form-group .col-md-12{
         margin-top: 2%;
     }
@@ -194,13 +205,23 @@
         margin-top: 2%;
     }
     .bg-blank{
-        background: #26C281;
+
+        background-image: url(<?= base_url() . 'assets/img/seat_blank.jpg' ?>);
+        background-repeat: no-repeat;
+        background-size: 100% 100%;
+        /*background: #26C281;*/
     }
     .bg-reserve{
-        background: #F3C13A;
+        background-image: url(<?= base_url() . 'assets/img/seat_reserve.jpg' ?>);
+        background-repeat: no-repeat;
+        background-size: 100% 100%;
+        /*background: #F3C13A;*/
     }
     .bg-busy{
-        background: #FFA5A5;
+        background-image: url(<?= base_url() . 'assets/img/seat_busy.jpg' ?>);
+        background-repeat: no-repeat;
+        background-size: 100% 100%;
+        /*background: #FFA5A5;*/
     }
     #txt_total{
         width: 100%;
@@ -241,33 +262,45 @@
         -webkit-box-shadow: 0 0 10px #ccc; 
         box-shadow: 0 0 10px #ccc;
     }
-    .price{
-        background: #57C5A0;        
-        width: 100%;     
-        font-size: 0.9725em;        
-        position: absolute;
-        bottom: 2px;
-        left: 0px;
-    }
-    .price1{
-        font-size: 1.1725em;
-        color: #ffffff;
-        padding: 5px 15px;
-        /*position: absolute;*/
-        top: 0px;
-        /*right: 10px;*/        
-        text-transform:uppercase;
-    }
-    .price1.bg{
-        background: #242424;
-    }
-    .price1.bg1{
-        background: #F27E4B;
-        width: 60px;
-    }
 </style>
+
+<nav id="myNavmenu" class="navmenu navmenu-default navmenu-fixed-left offcanvas" role="navigation">
+    <a class="navmenu-brand" href="#">สถานี : </a> 
+    <ul class="nav navmenu-nav">
+        <?php
+        foreach ($routes_all as $r) {
+            $RCode = $r['RCode'];
+            $vt_name = $r['VTDescription'];
+            $RSource = $r['RSource'];
+            $RDestination = $r['RDestination'];
+            $route_name = $vt_name . '  ' . $RCode . ' ' . ' ' . $RSource . ' - ' . $RDestination;           
+            
+            ?>
+            <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown"><?= $route_name ?> <b class="caret"></b></a>
+                <ul class="dropdown-menu navmenu-nav">
+                    <li class="dropdown-header">ไป  <?= $RSource ?></li>
+                    
+                    <li class="dropdown-header">ไป <?= $RDestination ?></li>
+                    
+                </ul>
+            </li>
+            <?php
+        }
+        ?>
+        <li class="divider"></li>
+        <li><a href="#">Link</a></li>     
+    </ul>
+</nav>
+<div class="navbar navbar-default navbar-fixed-top">
+    <button type="button" class="navbar-toggle" data-toggle="offcanvas" data-target="#myNavmenu" data-canvas="body">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+    </button>
+</div>
 <div id="" class="container-fluid">
-    <div class="row-fluid animated fadeInUp">        
+    <div class="row-fluid animated fadeInUp">             
         <div class="col-lg-12">
             <ol class="progtrckr" data-progtrckr-steps="4">
   <!--                <li class="progtrckr-done"><span class="lead">สถานีต้นทาง</span></li>id="menu-toggle"
@@ -279,349 +312,347 @@
         </div>
     </div>
 </div>
-<div id="wrapper" class="container-fluid" style="margin-top: 0%;">
-    <!-- Sidebar -->
-    <div id="sidebar-wrapper">
-        <ul class="sidebar-nav">
-            <li class="sidebar-brand">
-                <a href="#">
-                    จุดขึ้นรถ :
-                </a>
-            </li>
-            <li>
-                <a href="#">Dashboard</a>
-            </li>                
-        </ul>
-    </div>
-    <!-- /#sidebar-wrapper -->
-
-    <!-- Page Content -->
-    <div id="page-content-wrapper" onclick=""> 
-        <div id="" class="container-fluid">
-            <?php echo $form['form']; ?>
-            <?php echo validation_errors() ?>
-            <div class="row-fluid">
-                <div id="select_time" class="col-lg-4 col-lg-offset-4">
-                    <div id="route_info"  class="col-lg-12">
-                        <div class="form-group">
-                            <div class="col-md-12">
-                                <label for="">เส้นทาง</label>
-                                <?php echo $form['route_name'] ?>
-                                <?php echo $form['RID'] ?>
-                                <?php echo $form['TSID'] ?>
-                            </div>
-                        </div>  
-                        <div class="form-group">
-                            <div class="col-md-6">
-                                <label for="">ต้นทาง</label>                                
-                                <?php echo $form['SourceID'] ?>
-                                <?php echo $form['SourceName'] ?>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="">ปลายทาง</label>
-                                <?php echo $form['DestinationID'] ?>
-                                <?php echo $form['DestinationName'] ?>
-                            </div>
-                        </div>  
+<div id="" class="container-fluid">
+    <?php echo $form['form']; ?>
+    <?php echo validation_errors() ?>
+    <div class="row-fluid">
+        <div id="select_time" class="col-lg-4 col-lg-offset-4">
+            <div id="route_info"  class="col-lg-12">
+                <div class="form-group">
+                    <div class="col-md-12">
+                        <label for="">เส้นทาง</label>
+                        <?php echo $form['route_name'] ?>
+                        <?php echo $form['RID'] ?>
+                        <?php echo $form['TSID'] ?>
                     </div>
-                    <div id="time_list" class="col-lg-12"> 
-                        <div style="">                        
-                            <?php
-                            $rid = $route['RID'];
-                            $route_name = $route['VTDescription'] . "  เส้นทาง " . $route['RCode'] . ' ' . ' ' . $route['RSource'] . ' - ' . $route['RDestination'];
-                            $route_first_seq = '1';
-
-                            $route_last_seq = count($stations);
-                            $num_station = count($stations);
-
-                            $source_id = $s_station['SID'];
-                            $source_name = $s_station['StationName'];
-                            $source_seq = $s_station['Seq'];
-                            $source_travel_time = $s_station['TravelTime'];
-
-                            $destination_id = $d_station['SID'];
-                            $destination_name = $d_station['StationName'];
-                            $destination_seq = $d_station['Seq'];
-                            ?>
-                            <table class="table" >   
-                                <thead>
-                                    <tr>
-                                        <th colspan="2">
-                                            <?php echo $date; ?>     
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr class="">
-                                        <td colspan="" class="">                              
-                                            <span class="text">เวลาเดินทาง&nbsp;&nbsp; :</span>                                
-                                        </td>
-                                        <td class="list-group-item">
-                                            <span class="badge badge-danger">&nbsp;เต็ม&nbsp;</span>
-                                            <span class="badge badge-success">&nbsp;ว่าง&nbsp;</span> 
-                                        </td>
-                                    </tr>                
-                                </tbody>                                             
-                            </table>                  
-                        </div>             
-                        <div id = "list">
-                            <div class = "list-group">
-                                <?php
-                                foreach ($schedules_detail as $sd) {
-                                    $tsid = $sd['TSID'];
-                                    $schedule_seq_no = $sd['SeqNo'];
-                                    $start_time = $sd['TimeDepart'];
-//                      สถานีต้นทาง หรือ สถานีปลายทาง ไม่บวกเวลาเดินทางเพิ่ม
-                                    if ($source_seq == '1' || $source_seq == $num_station) {
-                                        $time_depart = strtotime($start_time);
-                                    } else {
-                                        $temp = $source_travel_time;
-                                        $time_depart = strtotime("+$temp minutes", strtotime($start_time));
-                                    }
-//                        เวลาออกจากสถานีต้นทาง
-                                    $time_depart = date('H:i', $time_depart);
-
-                                    $class = "";
-                                    if ($schedules_id == $tsid) {
-                                        $class = "active";
-                                    }
-                                    ?>
-                                    <a class="list-group-item <?= $class ?>" name="<?= "schedulet$tsid" ?>" href="<?= base_url("sale/booking/$rid/$source_id/$destination_id") . "/$tsid" ?>">  
-                                        <span class="badge badge-success"><?= $schedule_seq_no ?></span>                          
-                                        <?= $time_depart ?>
-                                    </a> 
-                                <?php } ?>
-                            </div>  
-                        </div> 
+                </div>  
+                <div class="form-group">
+                    <div class="col-md-6">
+                        <label for="">ต้นทาง</label>                                
+                        <?php echo $form['SourceID'] ?>
+                        <?php echo $form['SourceName'] ?>
                     </div>
-                </div>
-                <div id="select_seat" class="hidden">
-                    <div id="time_info" class="col-lg-12">
-                        <div class="form-group">
-                            <div class="col-md-6">
-                                <label for="">เวลาออก</label>
-                                <?php echo $form['TimeDepart'] ?>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="">เวลาถึง</label>
-                                <?php echo $form['TimeArrive'] ?>
-                            </div>
-                        </div>
-                        <div class="form-group"> 
-                            <div class="col-md-8">
-                                <label for="">วันที่เดินทาง</label>
-                                <?php echo $form['Date'] ?>
-                            </div> 
-                            <div class="col-md-4">
-                                <label for="">เบอร์รถ</label>  
-                                <?php echo $form['VID'] ?>
-                                <?php echo $form['VCode'] ?>
-                            </div>
-                        </div>  
+                    <div class="col-md-6">
+                        <label for="">ปลายทาง</label>
+                        <?php echo $form['DestinationID'] ?>
+                        <?php echo $form['DestinationName'] ?>
                     </div>
-                    <div id="seat_list" class="col-lg-12" style="padding-top: 5%;">
-                        <span class="text">
-                            เลือกที่นั่ง
-                        </span>
-                        <p class="pull-right">
-                            <span class="badge badge-info">&nbsp;ว่าง&nbsp;</span> 
-                            <span class="badge badge-warning">&nbsp;กำลังเลือก&nbsp;</span>
-                            <span class="badge badge-danger">&nbsp;ขาย&nbsp;</span>  
-                        </p>
+                </div>  
+            </div>
+            <div id="time_list" class="col-lg-12"> 
+                <div style="">                        
+                    <?php
+                    $rid = $route['RID'];
+                    $route_name = $route['VTDescription'] . "  เส้นทาง " . $route['RCode'] . ' ' . ' ' . $route['RSource'] . ' - ' . $route['RDestination'];
+                    $route_first_seq = '1';
 
+                    $route_last_seq = count($stations);
+                    $num_station = count($stations);
 
-                        <table id="SeatingPlanVan" class="" border="0" style="padding-top: 2%;">
-                            <tbody>
-                                <?php
-                                $num_row = 5;
-                                $num_col = 4;
-                                $seat_no = 1;
-                                for ($row = 1; $row <= $num_row; $row++) {
-                                    echo '<tr>';
-                                    for ($col = 1; $col <= $num_col; $col++) {
-                                        $width = 100 / $num_col;
-                                        $class = '';
-                                        $seat_info = "";
-                                        $add_click = '';
-                                        $remove_click = '';
-                                        $user = '';
-                                        $id_seat = "";
-                                        $id_seat_info = '';
-                                        $seat_status = '';
-                                        echo "<td style=\"width: $width%;height: 70px;padding:1%;\">";
-                                        if ($row == 1 && ($col == 3 || $col == 4)) {
-                                            $class = '';
-                                        } elseif ($row == 2 && ($col == 1)) {
-                                            $class = '';
-                                        } elseif (($row == 3 || $row == 4) && ($col == 2)) {
-                                            $class = '';
-                                        } else {
-                                            $seat_info = $seat_no;
-                                            $add_click = 'addSeat(\'' . $seat_no . '\')';
-                                            $remove_click = 'removeSeat(\'' . $seat_no . '\')';
-                                            $id_seat = "seat_$seat_no";
-                                            $id_seat_info = "seat_info_$seat_no";
-                                            $class = " bg-blank ";
+                    $source_id = $s_station['SID'];
+                    $source_name = $s_station['StationName'];
+                    $source_seq = $s_station['Seq'];
+                    $source_travel_time = $s_station['TravelTime'];
 
-                                            /*
-                                             * 0=ว่าง ,
-                                             * 1=ไม่ว่าง,ขายเเล้ว, 
-                                             * 2=กำลังจอง
-                                             */
-                                            foreach ($tickets as $ticket) {
-                                                $ticket_seat_no = $ticket['Seat'];
-                                                $status_seat = $ticket['StatusSeat'];
-                                                if ($seat_no == $ticket['Seat'] && ($status_seat == '1' )) {
-                                                    $add_click = '';
-                                                    $remove_click = '';
-                                                    $user = '<i class="fa fa-user fa-2x"></i><br>';
-                                                    $seat_info = $ticket['DestinationName'];
-                                                    $class = " bg-busy ";
-                                                } elseif ($seat_no == $ticket['Seat'] && $status_seat == '2') {
-                                                    $add_click = '';
-                                                    $remove_click = '';
-                                                    $user = '<i class="fa fa-user fa-2x"></i><br>';
-                                                    $seat_info = 'กำลังทำรายการ';
-                                                    $class = " bg-reserve ";
-                                                }
-                                            }
-
-                                            /*
-                                             * ตรวจสอบว่ามีการจองตั๋วแล้วยังไม่ปริ้นหรือไม่
-                                             * หรือถูกจองโดยผู้ใช้อื่นหรือไม่ในขณะทำรายการ
-                                             */
-                                            if (count($tickets_by_seller) > 0) {
-                                                foreach ($tickets_by_seller as $ticket) {
-                                                    $ticket_seat_no = $ticket['Seat'];
-                                                    $status_seat = $ticket['StatusSeat'];
-                                                    if ($seat_no == $ticket['Seat'] && $status_seat == '2') {
-                                                        $add_click = 'addSeat(\'' . $seat_no . '\')';
-                                                        $remove_click = 'removeSeat(\'' . $seat_no . '\')';
-                                                        $user = '<i class="fa fa-user fa-2x"></i><br>';
-                                                        $seat_info = 'จอง';
-                                                        $class = " bg-reserve ";
-                                                    }
-                                                }
-                                            }
-                                            ?>
-                                        <div id="<?= $id_seat ?>" onclick="<?= $add_click ?>" ondblclick="<?= $remove_click ?>" class="col-xs-12 seat <?php echo $class; ?>">
-                                            <span class="seat-info" id="<?= $id_seat_info ?>">                                                
-                                                <?php echo $user; ?> 
-                                                <?php echo $seat_info; ?>                                                 
-                                            </span>
-                                        </div>
-                                        <?php
-                                        $seat_no++;
-                                    }
-                                    echo '</td>';
+                    $destination_id = $d_station['SID'];
+                    $destination_name = $d_station['StationName'];
+                    $destination_seq = $d_station['Seq'];
+                    ?>
+                    <table class="table" >   
+                        <thead>
+                            <tr>
+                                <th colspan="2">
+                                    <?php echo $date; ?>     
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="">
+                                <td colspan="" class="">                              
+                                    <span class="text">เวลาเดินทาง&nbsp;&nbsp; :</span>                                
+                                </td>
+                                <td class="list-group-item">
+                                    <span class="badge badge-danger">&nbsp;เต็ม&nbsp;</span>
+                                    <span class="badge badge-success">&nbsp;ว่าง&nbsp;</span> 
+                                </td>
+                            </tr>                
+                        </tbody>                                             
+                    </table>                  
+                </div>             
+                <div id = "list">
+                    <div class = "list-group">
+                        <?php
+                        foreach ($schedules_detail as $sd) {
+                            $tsid = $sd['TSID'];
+                            $schedule_seq_no = $sd['SeqNo'];
+                            $seat_blank = $sd['VSeat'];
+                            $start_time = $sd['TimeDepart'];
+                            foreach ($tickets_today as $ticket) {
+                                if ($tsid == $ticket['TSID']) {
+                                    $seat_blank--;
                                 }
-                                echo '</tr>';
+                            }
+                            $class_seat = 'badge-success';
+                            if ($seat_blank <= 0) {
+                                $class_seat = 'badge-danger';
+                                $seat_blank = 'เต็ม';
+                            }
+
+//                      สถานีต้นทาง หรือ สถานีปลายทาง ไม่บวกเวลาเดินทางเพิ่ม
+                            if ($source_seq == '1' || $source_seq == $num_station) {
+                                $time_depart = strtotime($start_time);
+                            } else {
+                                $temp = $source_travel_time;
+                                $time_depart = strtotime("+$temp minutes", strtotime($start_time));
+                            }
+//                        เวลาออกจากสถานีต้นทาง
+                            $time_depart = date('H:i', $time_depart);
+
+                            $class = "";
+                            if ($schedules_id == $tsid) {
+                                $class = "active";
                             }
                             ?>
-                            </tbody>
-                        </table>                         
-
-                    </div>
-                </div>
-                <div id='ticket_info' class="hidden">
-                    <div id="fare_info" class="col-lg-12">
-                        <div  class="form-group ">                         
-                            <div class="col-md-6">
-                                <label for="">ราคาเต็ม</label>   
-                                <?php echo $form['Price'] ?>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="">ราคาลด</label>                                
-                                <?php echo $form['PriceDicount'] ?>
-                            </div>
-                        </div>  
-                    </div>
-                    <div id="debug" class="col-lg-12 text-center" style="margin: 2% auto;padding-top: 5%; padding-bottom: 5%;background-color: #FFFF99;">
-                        <div id="user_action">
-                        </div>                      
-                    </div>                   
-                    <div id="guest_info" class="<?= ((count($tickets_by_seller) > 0) ? 'animated zoomIn' : 'hidden') ?>" style="margin-top: 2%;">  
-                        <div id="guest_list" class="col-lg-12" style="max-height: 400px;overflow-y: scroll;">
-                            <table id="ticket_guest" class="table">
-                                <thead>
-                                    <tr>
-                                        <th colspan="3">ค่าโดยสาร</th>
-                                    </tr>
-                                    <tr>                                        
-                                        <th style="width: 30%">เลขที่นั่ง</th>
-                                        <th style="width: 30%">ราคา</th> 
-                                        <th style="width: 10%"></th>                                               
-                                    </tr>
-                                </thead>
-                                <tbody>  
-                                    <?php
-                                    $total = 0;
-                                    if (count($tickets_by_seller) > 0) {
-                                        foreach ($tickets_by_seller as $ticket) {
-                                            $seat_no = $ticket['Seat'];
-                                            $price_seat = $ticket['PriceSeat'];
-                                            $is_discount = $ticket['IsDiscount'];
-                                            $select_full = 'selected = ""';
-                                            $select_dis = '';
-                                            $total+=$price_seat;
-                                            if ($is_discount == 1 || $is_discount == '1') {
-                                                $select_full = '';
-                                                $select_dis = 'selected = ""';
-                                            }
-                                            ?>
-                                            <tr id="row_<?= $seat_no ?>">                                               
-                                                <td class="text-center" id ="<?= $seat_no ?>">
-                                                    <?= $seat_no ?>
-                                                    <input type="hidden" name="Seat[]" value="<?= $seat_no ?>">
-                                                </td>
-                                                <td class="text-center">
-                                                    <select id="FareType<?= $seat_no ?>" name="PriceSeat[]" class="form-control" onchange="calTotalFare()" >
-                                                        <option value="<?= $fare['Price'] ?>" <?= $select_full ?> ><?= $fare['Price'] ?>(เต็ม)</option>
-                                                        <option value="<?= $fare['PriceDicount'] ?>" <?= $select_dis ?> ><?= $fare['PriceDicount'] ?>(ลด)</option>
-                                                    </select>
-                                                </td>
-                                                <td class="text-center">
-                                                    <button type="button" class="btn btn-sm btn-danger" onclick="removeSeat('<?= $seat_no ?>')"><i class="fa fa-times"></i></button>
-                                                </td>
-                                            </tr>
-
-                                            <?php
-//                                            echo '</tr>';
-                                        }
-                                    }
-                                    ?>
-                                    <?php ?>
-                                </tbody>                               
-                            </table>
-                        </div>
-                        <div class="col-lg-12" style="margin-top: 0%;">
-                            <div class="col-sm-6 text-right">
-                                <span class="lead">รวม</span>
-                            </div> 
-                            <div class="col-sm-6">
-                                <input type="text" class="text-right" id="txt_total" placeholder="" value="<?= $total ?>"> 
-                            </div>                            
-                        </div>
-                        <div class="col-lg-12 col-sm-12 text-center" style="margin-top: 5%;">                            
-                            <button type="submit" class="btn btn-block btn-lg">พิมพ์บัตรโดยสาร</button>
-                        </div>
-                    </div>      
-                </div>
-            </div>  
-            <?php echo form_close(); ?>
+                            <a class="list-group-item <?= $class ?>" name="<?= "schedulet$tsid" ?>" href="<?= base_url("sale/booking/$rid/$source_id/$destination_id") . "/$tsid" ?>">  
+                                <?= $time_depart ?>
+                                <span class="badge <?= $class_seat ?>"><?= $seat_blank ?></span>                          
+                            </a> 
+                        <?php } ?>
+                    </div>  
+                </div> 
+            </div>
         </div>
-    </div>
-    <!-- /#page-content-wrapper -->
+        <div id="select_seat" class="hidden">
+            <div id="time_info" class="col-lg-12">
+                <div class="form-group">
+                    <div class="col-md-6">
+                        <label for="">เวลาออก</label>
+                        <?php echo $form['TimeDepart'] ?>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="">เวลาถึง</label>
+                        <?php echo $form['TimeArrive'] ?>
+                    </div>
+                </div>
+                <div class="form-group"> 
+                    <div class="col-md-8">
+                        <label for="">วันที่เดินทาง</label>
+                        <?php echo $form['Date'] ?>
+                    </div> 
+                    <div class="col-md-4">
+                        <label for="">เบอร์รถ</label>  
+                        <?php echo $form['VID'] ?>
+                        <?php echo $form['VCode'] ?>
+                    </div>
+                </div>  
+            </div>
+            <div id="seat_list" class="col-lg-12" style="padding-top: 5%;">
+                <span class="text">
+                    เลือกที่นั่ง
+                </span>
+                <p class="pull-right">
+                    <span class="badge badge-info">&nbsp;ว่าง&nbsp;</span> 
+                    <span class="badge badge-warning">&nbsp;กำลังเลือก&nbsp;</span>
+                    <span class="badge badge-danger">&nbsp;ขาย&nbsp;</span>  
+                </p>
 
+                <div class="" style="
+                     padding-top: 2%; 
+                     background-image: url(<?= base_url() . 'assets/img/bg_van.jpg' ?>);
+                     background-size: 100% 100%;
+                     background-repeat:no-repeat;
+                     ">
+                    <br>
+                    <table id="SeatingPlanVan" class="" border="0"  style="width:75%;padding-top: 5% ; margin: 0 auto;">
+                        <tbody>
+                            <?php
+                            $num_row = 5;
+                            $num_col = 4;
+                            $seat_no = 1;
+                            for ($row = 1; $row <= $num_row; $row++) {
+                                echo '<tr>';
+                                for ($col = 1; $col <= $num_col; $col++) {
+                                    $width = 100 / $num_col;
+                                    $class = '';
+                                    $seat_info = "";
+                                    $add_click = '';
+                                    $remove_click = '';
+                                    $user = '';
+                                    $id_seat = "";
+                                    $id_seat_info = '';
+                                    $seat_status = '';
+                                    echo "<td style=\"width: $width%;height: 70px;padding:1%;\">";
+                                    if ($row == 1 && ($col == 3 || $col == 4)) {
+                                        $class = '';
+                                    } elseif ($row == 2 && ($col == 1)) {
+                                        $class = '';
+                                    } elseif (($row == 3 || $row == 4) && ($col == 2)) {
+                                        $class = '';
+                                    } else {
+                                        $seat_info = $seat_no;
+                                        $add_click = 'addSeat(\'' . $seat_no . '\')';
+                                        $remove_click = 'removeSeat(\'' . $seat_no . '\')';
+                                        $id_seat = "seat_$seat_no";
+                                        $id_seat_info = "seat_info_$seat_no";
+                                        $class_seat = " bg-blank ";
+                                        $class_info = "badge-info";
+
+                                        /*
+                                         * 0=ว่าง ,
+                                         * 1=ไม่ว่าง,ขายเเล้ว, 
+                                         * 2=กำลังจอง
+                                         */
+                                        foreach ($tickets as $ticket) {
+                                            $ticket_seat_no = $ticket['Seat'];
+                                            $status_seat = $ticket['StatusSeat'];
+                                            if ($seat_no == $ticket['Seat'] && ($status_seat == '1' )) {
+                                                $add_click = '';
+                                                $remove_click = '';
+                                                $user = '<i class="fa fa-user fa-2x"></i><br>';
+                                                $seat_info = $ticket['DestinationName'];
+                                                $class_seat = " bg-busy ";
+                                                $class_info = "badge-danger";
+                                            } elseif ($seat_no == $ticket['Seat'] && $status_seat == '2') {
+                                                $add_click = '';
+                                                $remove_click = '';
+                                                $user = '<i class="fa fa-user fa-2x"></i><br>';
+                                                $seat_info = 'กำลังทำรายการ';
+                                                $class_seat = " bg-reserve ";
+                                                $class_info = "badge-warning";
+                                            }
+                                        }
+
+                                        /*
+                                         * ตรวจสอบว่ามีการจองตั๋วแล้วยังไม่ปริ้นหรือไม่
+                                         * หรือถูกจองโดยผู้ใช้อื่นหรือไม่ในขณะทำรายการ
+                                         */
+                                        if (count($tickets_by_seller) > 0) {
+                                            foreach ($tickets_by_seller as $ticket) {
+                                                $ticket_seat_no = $ticket['Seat'];
+                                                $status_seat = $ticket['StatusSeat'];
+                                                $destination_name = $ticket['DestinationName'];
+                                                if ($seat_no == $ticket['Seat'] && $status_seat == '2') {
+                                                    $add_click = 'addSeat(\'' . $seat_no . '\')';
+                                                    $remove_click = 'removeSeat(\'' . $seat_no . '\')';
+                                                    $user = '<i class="fa fa-user fa-2x"></i><br>';
+                                                    $seat_info = $destination_name;
+                                                    $class_seat = " bg-reserve ";
+                                                    $class_info = "badge-warning";
+                                                }
+                                            }
+                                        }
+                                        ?>
+                                    <div id="<?= $id_seat ?>" onclick="<?= $add_click ?>" ondblclick="<?= $remove_click ?>" class="col-xs-12 seat <?php echo $class_seat; ?>">
+                                        <span class="seat-info" id="<?= $id_seat_info ?>">                                                
+                                            <?php echo $user; ?>
+                                            <span class="badge <?= $class_info ?>">
+                                                <?php echo $seat_info; ?>
+                                            </span>                                                                                                     
+                                        </span>
+                                    </div>
+                                    <?php
+                                    $seat_no++;
+                                }
+                                echo '</td>';
+                            }
+                            echo '</tr>';
+                        }
+                        ?>
+                        </tbody>
+                    </table>       
+                </div>
+
+
+            </div>
+        </div>
+        <div id='ticket_info' class="hidden">
+            <div id="fare_info" class="col-lg-12">
+                <div  class="form-group ">                         
+                    <div class="col-md-6">
+                        <label for="">ราคาเต็ม</label>   
+                        <?php echo $form['Price'] ?>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="">ราคาลด</label>                                
+                        <?php echo $form['PriceDicount'] ?>
+                    </div>
+                </div>  
+            </div>
+            <div id="debug" class="col-lg-12 text-center" style="margin: 2% auto;padding-top: 5%; padding-bottom: 5%;background-color: #FFFF99;">
+                <div id="user_action">
+                </div>                      
+            </div>                   
+            <div id="guest_info" class="<?= ((count($tickets_by_seller) > 0) ? 'animated zoomIn' : 'hidden') ?>" style="margin-top: 2%;">  
+                <div id="guest_list" class="col-lg-12" style="max-height: 200px;overflow-y: scroll;">
+                    <table id="ticket_guest" class="table">
+                        <thead>
+                            <tr>
+                                <th colspan="3">ค่าโดยสาร</th>
+                            </tr>
+                            <tr>                                        
+                                <th style="width: 30%">เลขที่นั่ง</th>
+                                <th style="width: 30%">ราคา</th> 
+                                <th style="width: 10%"></th>                                               
+                            </tr>
+                        </thead>
+                        <tbody>  
+                            <?php
+                            $total = 0;
+                            if (count($tickets_by_seller) > 0) {
+                                foreach ($tickets_by_seller as $ticket) {
+                                    $status_seat = $ticket['StatusSeat'];
+                                    if ($status_seat != 1) {
+                                        $seat_no = $ticket['Seat'];
+                                        $price_seat = $ticket['PriceSeat'];
+                                        $is_discount = $ticket['IsDiscount'];
+                                        $select_full = 'selected = ""';
+                                        $select_dis = '';
+                                        $total+=$price_seat;
+                                        if ($is_discount == 1 || $is_discount == '1') {
+                                            $select_full = '';
+                                            $select_dis = 'selected = ""';
+                                        }
+                                        ?>
+                                        <tr id="row_<?= $seat_no ?>">                                               
+                                            <td class="text-center" id ="<?= $seat_no ?>">
+                                                <?= $seat_no ?>
+                                                <input type="hidden" name="Seat[]" value="<?= $seat_no ?>">
+                                            </td>
+                                            <td class="text-center">
+                                                <select id="FareType<?= $seat_no ?>" name="PriceSeat[]" class="form-control" onchange="calTotalFare()" >
+                                                    <option value="<?= $fare['Price'] ?>" <?= $select_full ?> ><?= $fare['Price'] ?>(เต็ม)</option>
+                                                    <option value="<?= $fare['PriceDicount'] ?>" <?= $select_dis ?> ><?= $fare['PriceDicount'] ?>(ลด)</option>
+                                                </select>
+                                            </td>
+                                            <td class="text-center">
+                                                <button type="button" class="btn btn-sm btn-danger" onclick="removeSeat('<?= $seat_no ?>')"><i class="fa fa-times"></i></button>
+                                            </td>
+                                        </tr>
+
+                                        <?php
+                                    }
+                                }
+                            }
+                            ?>
+                            <?php ?>
+                        </tbody>                               
+                    </table>
+                </div>
+                <div class="col-lg-12" style="margin-top: 0%;">
+                    <div class="col-sm-6 text-right">
+                        <span class="lead">รวม</span>
+                    </div> 
+                    <div class="col-sm-6">
+                        <input type="text" class="text-right" id="txt_total" placeholder="" value="<?= $total ?>"> 
+                    </div>                            
+                </div>
+                <div class="col-lg-12 col-sm-12 text-center" style="margin-top: 5%;">                            
+                    <button type="submit" class="btn btn-block btn-lg">พิมพ์บัตรโดยสาร</button>
+                </div>
+            </div>      
+        </div>
+    </div>  
+    <?php echo form_close(); ?>
 </div>
-<!-- /#wrapper -->
 
-<!-- Menu Toggle Script -->
 
-<!-- Menu Toggle Script -->
-<script>
-    $("#menu-toggle").click(function (e) {
-        e.preventDefault();
-        $("#wrapper").toggleClass("toggled");
-    });
-</script>

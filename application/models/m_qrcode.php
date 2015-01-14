@@ -11,6 +11,10 @@ Class m_qrcode extends CI_Model {
             if (!is_dir($folder_qrcode)) {
                 mkdir($folder_qrcode, 0777, TRUE);
             }
+            
+            $this->load->helper("file");
+            delete_files($folder_qrcode);
+            
             $this->load->library('ciqrcode');
 
             $params['data'] = "$code";

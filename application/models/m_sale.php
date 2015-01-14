@@ -253,7 +253,7 @@ class m_sale extends CI_Model {
                 'PriceSeat' => $PriceSeat[$i],
                 'IsDiscount' => $IsDiscount[$i],
                 'Seller' => $this->session->userdata('EID'),
-                'TicketSaleNote' => $note,
+//                'StatusSeat' => 1,                'TicketSaleNote' => $note,
             );
             array_push($ticket, $temp_ticket);
         }
@@ -289,25 +289,3 @@ class m_sale extends CI_Model {
     }
 
 }
-
-//
-//            'RID' => "",
-//            'VID' => "",
-//            'SourceID' => "",
-//            'SourceName' => "",
-//            'DestinationID' => "",
-//            'DestinationName' => "",
-//            'TimeDepart' => "",
-//            'TimeArrive' => "",
-//            'DateSale' => "",
-//            'Price' => "",
-//            'PriceDiscount' => "",
-//            'Seat' => "", 
-// $i_ = array(
-//            'type' => "text",
-//            'name' => "",
-//            'id' => "",
-//            'class' => "form-control",
-//            'readonly' => "TRUE",
-//            'value' => ,
-//        );

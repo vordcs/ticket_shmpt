@@ -32,10 +32,10 @@ class checkin extends CI_Controller {
             'next_page' => '',
             'routes_detail' => $this->m_route->get_route_detail(),
         );
-
+        $date = $this->m_datetime->getDateToday();
         $vehicle_types = $this->m_route->get_vehicle_types();
         $routes = $this->m_route->get_route();
-        $schedules = $this->m_schedule->get_schedule();
+        $schedules = $this->m_schedule->get_schedule($date);
         $stations = $this->m_station->get_stations();
         $stations_sale_ticket = $this->m_station->get_station_sale_ticket();
 

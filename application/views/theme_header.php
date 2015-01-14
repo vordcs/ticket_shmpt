@@ -33,7 +33,7 @@
         <?php echo js('bootstrap.js?v=' . $version); ?>
         <?php echo js('customJS.js?v=' . $version); ?>
         <?php echo js('site.min.js?v=' . $version); ?>
-       
+
         <!--time picker-->    
         <?php echo css('bootstrap-timepicker.min.css?v=' . $version); ?>  
         <?php echo js('bootstrap-timepicker.min.js?v=' . $version); ?> 
@@ -54,10 +54,10 @@
         <?php echo js('/chart/jquery.highchartTable-min.js?v=' . $version); ?>  
 
         <!-- fix header -->
-        <?php echo css('StickyTableHeaders/component.css?v=' . $version); ?>
+        <?php // echo css('StickyTableHeaders/component.css?v=' . $version); ?>
         <?php // echo css('StickyTableHeaders/normalize.css?v=' . $version); ?>
-        <?php echo js('StickyTableHeaders/jquery.ba-throttle-debounce.min.js?v=' . $version); ?>
-        <?php echo js('StickyTableHeaders/jquery.stickyheader.js?v=' . $version); ?>
+        <?php // echo js('StickyTableHeaders/jquery.ba-throttle-debounce.min.js?v=' . $version); ?>
+        <?php // echo js('StickyTableHeaders/jquery.stickyheader.js?v=' . $version); ?>
 
         <script type="text/javascript">
             $(window).scroll(function () {
@@ -123,8 +123,8 @@
                                 <li class="active"><a href="<?= base_url('home/') ?>"><i class="fa fa-home"></i><span>หน้าหลัก</span> </a> </li>
                                 <li id="btnSale"><a href="<?= base_url('sale/') ?>"><i class="fa fa-bullhorn"></i><span>ขายตั๋วโดยสาร</span> </a> </li>
                                 <li id="btnSchedule"><a href="<?= base_url('schedule/') ?>"><i class="fa fa-list"></i><span>ตารางเดินรถ</span> </a> </li>                                  
-                                <li id="btnCost"><a href="<?= base_url('cost/') ?>"><i class="fa fa-pencil-square-o"></i><span>ค่าใช้จ่าย</span></a></li>
                                 <li id="btnCheckIn"><a href="<?= base_url('checkin/') ?>"><i class="fa fa-clock-o"></i><span>ลงเวลา</span></a></li>
+                                <li id="btnCost"><a href="<?= base_url('cost/') ?>"><i class="fa fa-pencil-square-o"></i><span>ค่าใช้จ่าย</span></a></li>
                                 <li id="btnReport"><a href="<?= base_url('report/') ?>"><i class="fa fa-calendar-o"></i><span>รายงาน</span> </a> </li>                             
                             </ul>    
                         </div>

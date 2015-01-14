@@ -5,8 +5,11 @@ if (!defined('BASEPATH'))
 
 class m_ticket extends CI_Model {
 
-    public function get_ticket($tsid, $status_seat = NULL, $eid = NULL) {
-        $this->db->where('TSID', $tsid);
+    public function get_ticket($date, $tsid = null, $status_seat = NULL, $eid = NULL) {
+        $this->db->where('DateSale', $date);
+        if ($tsid != NULL) {
+            $this->db->where('TSID', $tsid);
+        }
         if ($status_seat != NULL) {
             $this->db->where('StatusSeat', $status_seat);
         }
@@ -20,6 +23,8 @@ class m_ticket extends CI_Model {
     }
 
     public function get_ticket_by_saller($tsid) {
+        $this->check_ticket();
+
         $eid = $this->session->userdata('EID');
 
         $this->db->where('TSID', $tsid);
@@ -31,7 +36,6 @@ class m_ticket extends CI_Model {
     }
 
     public function generate_ticket_id($tsid, $source_id, $destination_id, $vcode, $seat) {
-        $EID = $this->session->userdata('EID');
         $str_vcode = explode('-', $vcode);
         $vcode = $str_vcode[0] . $str_vcode[1];
         $ticket_id = '';
@@ -143,6 +147,43 @@ class m_ticket extends CI_Model {
         $this->db->delete('ticket_sale');
 
         return TRUE;
+    }
+
+    /*
+     * อัปเดทข้อมูลตั๋วโดยสาร สถานะที่กำลังจอง ให้เป็น ขายเเล้ว
+     */
+
+    public function sale_ticket($ticket_id) {
+        $data = array(
+            'StatusSeat' => 1,
+        );
+        $this->db->where('TicketID', $ticket_id);
+        $this->db->update('ticket_sale', $data);
+        if ($this->db->affected_rows() == 1) {
+            return TRUE;
+        } else {
+            return FALSE;
+        }
+    }
+
+    /*
+     * ตรวจสอบสถานะการจอง เมื่อเกิน 2 นาทีจะถูกลบ
+     */
+
+    public function check_ticket() {
+        $today = $this->m_datetime->getDateToday();
+        $tickets_reseve = $this->get_ticket($today, NULL, 2);
+        foreach ($tickets_reseve as $ticket) {
+            $tsid = $ticket['TSID'];
+            $seat = $ticket['Seat'];
+            $now = $this->m_datetime->getDateTimeNow();
+            $date_time_sale = $ticket['CreateDate'];
+            $diff = strtotime($now) - strtotime($date_time_sale);
+            $minutes = floor($diff / (60));
+            if ((int) $minutes > 2) {
+                $this->delete_ticket($tsid, $seat);
+            }
+        }
     }
 
 //    ตรวจสอบว่าที่นั่งสามารถจองหรือนั่งได้หรือไม่

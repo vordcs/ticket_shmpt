@@ -4,22 +4,43 @@
             $(this).attr("data-progtrckr-steps",
                     $(this).children("li").length);
         });
+        loadPrint();
     });
-</script>
-<script>
     function print_ticket() {
         window.print();
-        window.onafterprint = function () {
-            var i = 0;
-            $('.ticket-print').each(function () {
-                var ticket_id = $(this).attr('id');
-                console.log('printing ticket ' + ticket);
-                i++;
-                console.log(ticket_id + "  Printing completed...");
-            });
-//            alert(i);
-        }
-        return true;
+//        $('.ticket-print').each(function () {
+//            var ticket_id = $(this).attr('id');
+//            var rs = ticket_sale(ticket_id);
+//            alert(ticket_id + ' -> ' + rs);
+//        });
+//        window.location.reload(history.go(-1));
+//        return true;
+//        document.body.onmousemove = doneyet;
+    }
+    function loadPrint() {
+        window.print();
+        setTimeout(function () {
+            window.close();
+        }, 100);
+    }
+    function ticket_sale(ticket_id) {
+        var data_ticket = {
+            'TicketID': ticket_id
+        };
+        $.ajax({
+            url: '<?= base_url() . "sale/sale_seat" ?>',
+            type: 'POST',
+            ContentType: 'application/json',
+            data: data_ticket
+        }).done(function (response) {
+            if (response !== '') {
+                return true;
+            } else {
+                return false;
+            }
+        }).fail(function (jqXHR, textStatus, errorThrown) {
+            return false;
+        });
     }
 </script>
 <style> 
@@ -127,12 +148,10 @@
     @media all
     {
         .page-break	{ display:none; }
-        .page-break-no{ display:none; }
     }
     @media print
     {
         .page-break	{ display:block;height:1px; page-break-before:always; }
-        .page-break-no{ display:block;height:1px; page-break-after:avoid; }	
     }
 
 </style>
@@ -152,13 +171,14 @@
 
 <!--html preview-->
 <div id="" class="container hidden-print" >
-    <div class="row" style="">        
+    <?= form_open("sale/print_ticket/$tsid", array('class' => 'form', 'id' => 'form_print_ticket')) ?>
+    <div class="row" style="padding-bottom: 10%">
         <?php
         $rcode = $route['RCode'];
         $vtid = $route['VTID'];
         $vt_name = $route['VTDescription'];
         $route_name = "$rcode " . $route['RSource'] . '-' . $route['RDestination'];
-        foreach ($ticket as $t) {
+        foreach ($tickets as $t) {
             $ticket_id = $t['TicketID'];
             $source_name = $t['SourceName'];
             $destination_name = $t['DestinationName'];
@@ -174,14 +194,14 @@
                 <fieldset disabled >
                     <div class="ticket" id="">                    
                         <div class="ticket-title" style="text-align: center; margin-bottom: 15px;">
-                            <img data-src="holder.js/vine/100x100" class="img-rounded" alt="logo" >                                            
+                            <?= img('ticket_logo_small.png') ?>                                          
                         </div>
                         <div class="ticket-body">  
                             <div class="row">
                                 <div class="form-group">
                                     <div class="col-md-10 col-md-offset-1 text-center">
-                                        <input type="text" class="form-control text-center" id="" placeholder= "รถตู้ xxx ต้นทาง - ปลายทาง" value="<?= $route_name ?>">  
-                                        <input type="hidden" class="form-control input-lg text-center" id="" name="ticket_id" placeholder="" value="<?php echo $ticket_id ?>">
+                                        <input type="text" class="form-control text-center" id="" name="Route" placeholder= "รถตู้ xxx ต้นทาง - ปลายทาง" value="<?= $route_name ?>">  
+                                        <input type="hidden" class="form-control text-center" id="TicketID" name="TicketID" placeholder="" value="<?php echo $ticket_id ?>">
                                     </div>
                                 </div>
                                 <div class="form-group">
@@ -230,10 +250,12 @@
                             </div>
                         </div>                                        
                     </div>
-                </fieldset>    
+                </fieldset>   
+
             </div>
         <?php } ?>              
     </div>
+    <?= form_close(); ?>
 </div>
 
 <!--html print--> 
@@ -245,7 +267,7 @@
         $vt_name = $route['VTDescription'];
         $route_name = "$vt_name $rcode " . $route['RSource'] . '-' . $route['RDestination'];
 
-        foreach ($ticket as $t) {
+        foreach ($tickets as $t) {
             $ticket_id = $t['TicketID'];
             $source_name = $t['SourceName'];
             $destination_name = $t['DestinationName'];
@@ -261,10 +283,10 @@
             ?>
             <div class="page-break">
                 <div class="ticket-print" id="<?= $ticket_id ?>">
-                    <table class="" border='0' style="width: 100%" >
+                    <table class="" border='0' style="width: 98%;margin: 0 auto;" >
                         <thead>   
                         <th colspan="3">
-                            <img data-src="holder.js/vine/100x60" class="img-rounded" alt="logo" >  
+                            <?= img('ticket_logo.png') ?>   
                         </th>
                         </thead>
                         <tbody>                         
@@ -334,18 +356,20 @@
                                     <img src="<?= $qrcode ?>" class="" width="50px" height="50px" alt=""> 
                                 </td>
                             </tr>   
-                          
-                             <tr style="font-size: 4pt ! important;">
+
+                            <tr style="font-size: 4pt ! important;">
                                 <td class="text-center"><?= date('Y-m-d H:i:s') ?></td>
                                 <td class="text-center"><?= $name_seller ?></td>
                             </tr>
-                            
+                            <tr>
+                                <td colspan="">&nbsp;</td>
+                            </tr>                            
                             <tr class="title">
                                 <td colspan="2" class="cut-foot">
                                     <span></span>
                                 </td>
                             </tr> 
-                            
+
                         </tbody>
                         <tfoot>
                             <tr class="title">
@@ -367,9 +391,9 @@
                             </tr>  
                             <tr class="title">   
                                 <td class="text-center">
-                                    <?= $vcode?>
+                                    <?= $vcode ?>
                                     <br>
-                                    <?= $vt_name?>
+                                    <?= $vt_name ?>
                                 </td>
                                 <td class="text-center">
                                     <img src="<?= $qrcode ?>" class="" width="50px" height="50px" alt=""> 
@@ -387,9 +411,6 @@
         <?php } ?>        
     </div>
 </div>
-<footer class="hidden-print"> 
-    <button type="button" class="btn btn-info btn-lg"  onclick="print_ticket()"><span class="fa fa-print fa-2x"></span>&nbsp;พิมพ์ตั๋วโดยสาร</button> 
-    <!--<button class="btn"  onclick="PrintElem('<?$ticket_id ?>')"><span class="fa fa-print fa-2x"></span>&nbsp;พิมพ์ตั๋วโดยสาร </button>-->  
+<footer class="hidden-print" style=""> 
+    <button type="button" class="btn btn-info"  onclick="print_ticket()"><span class="fa fa-print fa-2x"></span>&nbsp;พิมพ์ตั๋วโดยสาร</button> 
 </footer>
-
-<?php echo js('docs.min.js?v=' . $version); ?>  

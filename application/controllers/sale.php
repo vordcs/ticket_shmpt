@@ -60,7 +60,7 @@ class sale extends CI_Controller {
 
         $this->m_template->set_Title('ระบบขายตั๋วหน้าเคาน์เตอร์ ');
         $this->m_template->set_Content('sale/frm_search', $data);
-        $this->m_template->showSaleTemplate();
+        $this->m_template->showTemplate();
     }
 
     public function booking($rid = NULL, $source_id = NULL, $destination_id = NULL, $schedules_id = NULL) {
@@ -81,7 +81,11 @@ class sale extends CI_Controller {
         $s_station = $this->m_station->get_stations($rcode, $vtid, $source_id)[0];
         $d_station = $this->m_station->get_stations($rcode, $vtid, $destination_id)[0];
 
-        $schedule = $this->m_schedule->get_schedule($date, $rcode, $vtid, $rid, $schedules_id)[0];
+        $schedules = $this->m_schedule->get_schedule($date, $rcode, $vtid, $rid, $schedules_id);
+        if (count($schedules) <= 0) {
+            redirect('sale/');
+        }
+        $schedule = $schedules[0];
         $schedules_detail = $this->m_schedule->get_schedule($date, $rcode, $vtid, $rid);
 
         if (count($s_station) <= 0) {
@@ -101,12 +105,15 @@ class sale extends CI_Controller {
         $route = $this->m_route->get_route(NULL, NULL, $rid)[0];
         $fare = $this->m_fares->get_fares($rcode, $vtid, $source_id, $destination_id)[0];
         $tickets_by_seller = $this->m_ticket->get_ticket_by_saller($schedules_id);
-        $tickets = $this->m_ticket->get_ticket($schedules_id);
+        $tickets = $this->m_ticket->get_ticket($date, $schedules_id);
+        $tickets_today = $this->m_ticket->get_ticket($date);
+
         $data = array(
             'form' => $this->m_sale->set_form_sale($route, $s_station, $d_station, $schedule, $fare),
             'date' => $this->m_datetime->setDateThai($date),
             'route' => $route,
-            'route_detail' => $this->m_route->get_route_detail(),
+            'routes_all' => $this->m_route->get_route(),
+            'route_details' => $this->m_route->get_route_detail(),
             'stations' => $stations,
             's_station' => $s_station,
             'd_station' => $d_station,
@@ -115,7 +122,8 @@ class sale extends CI_Controller {
             'schedules_detail' => $schedules_detail,
             'fare' => $fare,
             'tickets_by_seller' => $tickets_by_seller,
-            'tickets' => $tickets
+            'tickets' => $tickets,
+            'tickets_today' => $tickets_today,
         );
         $data['vehicles_types'] = $this->m_route->get_vehicle_types();
 
@@ -135,12 +143,13 @@ class sale extends CI_Controller {
 //            'session' => $this->session->userdata('EID'),
 //            'tickets_by_seller' => $data['tickets_by_seller'],
 //            'tickets' => $data['tickets'],
+//            'tickets_today' => $data['tickets_today'],
         );
 
         if ($this->m_sale->validate_form_sale() && $this->form_validation->run() == TRUE) {
-            $ticket = $this->m_sale->get_post_form_sale();
-//            $data_debug['form_ticket'] = $ticket;
-            $data_debug['update_resever_ticket'] = $this->m_ticket->update_resever_ticket($ticket);
+            $tickets = $this->m_sale->get_post_form_sale();
+//            $data_debug['data_form_sale'] = $tickets;
+            $data_debug['update_resever_ticket'] = $this->m_ticket->update_resever_ticket($tickets);
             redirect("sale/print_ticket/$schedules_id");
         }
 
@@ -154,21 +163,24 @@ class sale extends CI_Controller {
         if ($tsid == NULL) {
             echo "<script>window.location.href='javascript:history.back(-1);'</script>";
         }
+        $date = $this->m_datetime->getDateToday();
         $eid = $this->session->userdata('EID');
-        $ticket = $this->m_ticket->get_ticket($tsid, 2, $eid);
-        $route = $this->m_route->get_route(NULL, NULL, $ticket[0]['RID']);
+        $tickets = $this->m_ticket->get_ticket($date, $tsid, 2, $eid);
 
-        if (count($ticket) <= 0) {
+
+        if (count($tickets) <= 0) {
             echo "<script>window.location.href='javascript:history.back(-1);'</script>";
         }
+        $route = $this->m_route->get_route(NULL, NULL, $tickets[0]['RID']);
         $data = array(
-            'ticket' => $ticket,
+            'tsid' => $tsid,
+            'tickets' => $tickets,
             'route' => $route[0],
         );
         $data_debug = array(
-//            'ticket' => $data['ticket'],
+//            'tickets' => $data['tickets'],
 //            'route' => $data['route'],
-//            '' => $data[''],
+//            'data_post' => $this->input->post(),
 //            '' => $data[''],
         );
 
@@ -203,6 +215,7 @@ class sale extends CI_Controller {
             'SourceName' => $source_name,
             'DestinationID' => $destination_id,
             'DestinationName' => $destination_name,
+            'DateSale' => $this->m_datetime->getDateToday(),
             'PriceSeat' => $price_seat,
             'IsDiscount' => $IsDiscount,
         );
@@ -223,6 +236,17 @@ class sale extends CI_Controller {
         $source_id = $this->input->post("SourceID");
         $destination_id = $this->input->post("DestinationID");
         $rs = $this->m_ticket->delete_ticket($tsid, $seat);
+        if ($rs) {
+            echo json_encode('true');
+        } else {
+            echo json_encode('false');
+        }
+    }
+
+    public function sale_seat() {
+        $ticket_id = $this->input->post('TicketID');
+        $rs = $this->m_ticket->sale_ticket($ticket_id);
+
         if ($rs) {
             echo json_encode('true');
         } else {

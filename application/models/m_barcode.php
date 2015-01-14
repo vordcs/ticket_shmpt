@@ -26,6 +26,9 @@ Class m_barcode extends CI_Model {
                 mkdir($folder_barcode, 0777, TRUE);
             }
 
+            $this->load->helper("file");
+            delete_files($folder_barcode);
+
             $this->load->library('zend');
             $this->zend->load('Zend/Barcode');
             $imageResource = Zend_Barcode::draw('code128', 'image', array('text' => $code), array());
@@ -41,8 +44,8 @@ Class m_barcode extends CI_Model {
             rename($oldDir . $file, $newDir . $file_new);
             imagedestroy($imageResource);
 
-            $file_path = base_url(). "assets/barcode/$eid/$file_new";
-            
+            $file_path = base_url() . "assets/barcode/$eid/$file_new";
+
             return $file_path;
         }
     }

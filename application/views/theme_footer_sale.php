@@ -3,13 +3,16 @@
 </ul>
 
 <div class="container-fluid hidden-print" style="z-index: 1;background-color: transparent;">
-    
+
     <div id="message-box" class="row message-box">
         <div class="col-md-4 col-xs-4 pull-right" style="">          
         </div>
     </div>
 </div>
 <div class="th-footer-bottom hidden hidden-print">COPYRIGHT &copy; 2014</div>
+
+<?php echo js('jasny-bootstrap.min.js?v=' . $version); ?>
+<?php echo js('foundation.offcanvas.js?v=' . $version); ?>
 <script>
     jQuery(document).ready(function ($) {
         $('#top').click(function () {
@@ -17,5 +20,6 @@
         });
     });
 </script>
+
 </body>
 </html>
