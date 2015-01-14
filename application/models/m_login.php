@@ -43,7 +43,7 @@ class m_login extends CI_Model {
         //Intial data
         $flag = FALSE;
         $session = array(
-            'name' => 'Admin',
+            'user_name' => 'Admin',
             'EID' => "E000000000",
             'login' => FALSE
         );
@@ -54,8 +54,27 @@ class m_login extends CI_Model {
             $this->session->set_userdata($session);
             return TRUE;
         } else {
+            $temp = $this->check_sellers($data['user'], $data['pass']);
+            if ($temp != NULL) {
+                $session['user_name'] = $temp[0]['Title'] . $temp[0]['FirstName'] . ' ' . $temp[0]['LastName'];
+                $session['EID'] = $temp[0]['EID'];
+                $session['login'] = TRUE;
+                $this->session->set_userdata($session);
+                return TRUE;
+            }
             return FALSE;
         }
+    }
+
+    function check_sellers($user, $pass) {
+        $this->db->from('username AS una');
+        $this->db->join('employees AS em', 'em.EID = una.UserName');
+        $this->db->where('em.PID', '4'); // 4 = พนักงานขายตั๋ว(นายท่า)
+        $this->db->where('una.UserName', $user);
+        $this->db->where('una.Password', md5($pass));
+        $this->db->where('una.IsNormal', '1');
+        $query = $this->db->get();
+        return $query->result_array();
     }
 
 }

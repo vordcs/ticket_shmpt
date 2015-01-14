@@ -71,8 +71,7 @@ Class m_template extends CI_Model {
         $data['alert'] = $this->session->userdata('alert');
         $this->session->unset_userdata('alert');
 
-        $user = $this->session->userdata('user');
-        $data['u_name'] = $user['u_name'];
+        $data['user_name'] = $this->session->userdata('user_name');
         $data['form_login'] = form_open('logout', array('class' => 'navbar-form pull-right', 'style' => 'height: 40px;'));
 
         $data['title'] = $this->title;
