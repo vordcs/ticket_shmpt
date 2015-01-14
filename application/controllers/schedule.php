@@ -30,12 +30,12 @@ class schedule extends CI_Controller {
         );
         $data['stations'] = $this->m_station->get_stations();
         $data['schedules'] = $this->m_schedule->get_schedule($this->m_datetime->getDateToday());
-        $data['schedule_master'] = $this->m_route->get_schedule_manual();
         $data_debug = array(
 //            'from_search' => $data['from_search'],
-//    'route'=>$data['route'],
-//    ''=>$data[''],
-//    ''=>$data[''],
+//            'routes' => $data['routes'],
+//            'stations' => $data['stations'],
+//            'schedules' => $data['schedules'],
+                //    ''=>$data[''],
         );
         $this->m_template->set_Debug($data_debug);
         $this->m_template->set_Title('ตารางเวลาเดินรถ');

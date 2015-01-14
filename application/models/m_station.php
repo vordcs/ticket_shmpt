@@ -68,6 +68,26 @@ class m_station extends CI_Model {
         return $rs;
     }
 
+    public function get_stations_by_start_point($start_point, $rcode = null, $vtid = null) {
+        if ($rcode != NULL) {
+            $this->db->where('RCode', $rcode);
+        }
+        if ($vtid != NULL) {
+            $this->db->where('VTID', $vtid);
+        }
+        if ($start_point == 'S') {
+            $this->db->order_by('Seq', 'asc');
+        }
+        if ($start_point == 'D') {
+            $this->db->order_by('Seq', 'desc');
+        }
+        
+        $query = $this->db->get('t_stations');
+        $rs = $query->result_array();
+
+        return $rs;
+    }
+
     public function get_fares($rcode, $vtid, $source_id = NULL, $destination_id = NULL) {
 
         $this->db->join('f_fares_has_rate', 'f_fares_has_rate.FID=f_fares.FID');

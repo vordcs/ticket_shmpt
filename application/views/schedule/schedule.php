@@ -92,38 +92,38 @@
                                     <table class="table table-hover table-striped table-bordered">
                                         <thead>
                                             <?php
+                                            $stations_in_route = array();
+
                                             if ($start_point == "S") {
-                                                //start point s
-                                                for ($i = 0; $i <= $num_station; $i++) {
-                                                    foreach ($stations as $s) {
-                                                        if ($rcode == $s['RCode'] && $vtid == $s['VTID'] && $s['IsSaleTicket'] == '1' && $s['Seq'] == $i) {
-                                                            $station_name = $s['StationName'];
-                                                            $last_seq_station = $s['Seq'];
-                                                            $pre_string = "";
-                                                            if ($s['Seq'] == 1) {
-                                                                $pre_string = "ออกจาก "; //$pre_string, $station_name;
-                                                            }
-                                                            $width = 80 / $num_sale_station;
-                                                            echo "<th style=\"width: $width%\"> $pre_string $station_name</th>";
-                                                        }
+                                                $n = 0;
+                                                foreach ($stations as $station) {
+                                                    if ($rcode == $station['RCode'] && $vtid == $station['VTID'] && $station['IsSaleTicket'] == '1') {
+                                                        $stations_in_route[$n] = $station;
+                                                        $n++;
                                                     }
                                                 }
-                                            } else {
-                                                //start point D
+                                            }
+                                            if ($start_point == "D") {
+                                                $n = 0;
                                                 for ($i = $num_station; $i >= 0; $i--) {
-                                                    foreach ($stations as $s) {
-                                                        if ($rcode == $s['RCode'] && $vtid == $s['VTID'] && $s['IsSaleTicket'] == '1' && $s['Seq'] == $i) {
-                                                            $station_name = $s['StationName'];
-                                                            $last_seq_station = $s['Seq'];
-                                                            $pre_string = "";
-                                                            if ($s['Seq'] == $num_station) {
-                                                                $pre_string = "ออกจาก "; //$pre_string, $station_name;
-                                                            }
-                                                            $width = 80 / $num_sale_station;
-                                                            echo "<th style=\"width: $width%\">$pre_string $station_name</th>";
+                                                    foreach ($stations as $station) {
+                                                        if ($rcode == $station['RCode'] && $vtid == $station['VTID'] && $station['Seq'] == $i && $station['IsSaleTicket'] == '1') {
+                                                            $stations_in_route[$n] = $station;
+                                                            $n++;
                                                         }
                                                     }
                                                 }
+                                            }
+                                            $i = 0;
+                                            foreach ($stations_in_route as $station) {
+                                                $station_name = $station['StationName'];
+                                                $pre_string = "";
+                                                if ($i == 0) {
+                                                    $pre_string = "ออกจาก ";
+                                                }
+                                                $width = 80 / count($stations_in_route);
+                                                echo "<th style=\"width: $width%\"> $pre_string $station_name</th>";
+                                                $i++;
                                             }
                                             ?>
                                         <th style="width: 10%">เบอร์รถ</th>
@@ -131,11 +131,12 @@
                                         </thead>
                                         <tbody>
                                             <?php
-                                            foreach ($schedules as $sd) {
-                                                if ($rid == $sd['RID']) {
-                                                    $seq_no_schedule = $sd['SeqNo'];
-                                                    $start_time = $sd['TimeDepart'];
-                                                    $vcode = $sd['VCode'];
+                                            foreach ($schedules as $schedule) {
+                                                $s_rid = $schedule['RID'];
+                                                if ($rid == $schedule['RID']) {
+                                                    $seq_no_schedule = $schedule['SeqNo'];
+                                                    $start_time = $schedule['TimeDepart'];
+                                                    $vcode = $schedule['VCode'];
                                                     if ($vcode == '') {
                                                         $vcode = '-';
                                                     }
@@ -169,8 +170,7 @@
                                                     <?php
                                                 }
                                             }
-                                            ?>                                                   
-
+                                            ?>                                   
                                         </tbody>
                                     </table>                                    
                                     <?php
