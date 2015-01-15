@@ -21,40 +21,20 @@ class sale extends CI_Controller {
     }
 
     public function index() {
-        $source_id = '0';
         $data = array(
             'SourceID' => '',
-            'route' => '', //$this->m_route->get_route(),
-            'route_detail' => '', // $this->m_route->get_route_detail(),
-            'stations' => '', //$this->m_station->get_stations(),
+            'routes' => $this->m_route->get_route_by_seller(),
+            'routes_detail' => $this->m_route->get_route_detail_by_seller(),
+            'stations' => $this->m_station->get_stations(),
         );
-
-        $vtid = $this->session->userdata('sale_type');
-
-        $rcode = $this->input->post('RCode');
-        $source_id = $this->input->post('SourceID');
-
-        if ($rcode != '0' && $source_id != '0') {
-            $data['from_search'] = $this->m_route->set_form_search_route($vtid, $rcode, $source_id);
-
-            $data['route'] = $this->m_route->get_route($rcode, $vtid);
-            $data['route_detail'] = $this->m_route->get_route_detail($rcode, $vtid);
-            $data['SourceID'] = $source_id;
-            $data['stations'] = $this->m_station->get_stations($rcode, $vtid);
-        } elseif ($rcode != '0') {
-            $data['from_search'] = $this->m_route->set_form_search_route($vtid, $rcode);
-        } else {
-            $data['from_search'] = $this->m_route->set_form_search_route($vtid);
-        }
-
 
         $data_debug = array(
 //            'from_search' => $data['from_search'],
-//            'route' => $data['route'],
-//    'vehicle_types'=>$data['vehicle_types'],
-//            'rcode' => "vtid = $vtid | RCode = $rcode | SourceID = $source_id",
+//            'routes' => $data['routes'],
+//            'routes_detail' => $data['routes_detail'],
 //            'stations' => $data['stations'],
-//    ''=>$data[''],                 
+//            'rcode' => "vtid = $vtid | RCode = $rcode | SourceID = $source_id", 
+//            'eid' => $this->session->userdata('EID'),
         );
         $this->m_template->set_Debug($data_debug);
 

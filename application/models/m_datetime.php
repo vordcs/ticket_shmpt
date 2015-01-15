@@ -11,6 +11,10 @@ Class m_datetime extends CI_Model {
         return (new \DateTime())->format('Y-m-d H:i:s');
     }
 
+    function getTimeNow() {
+        return (new \DateTime())->format('H:i:s');
+    }
+
     function getDateToday() {
         return date('Y-m-d');
     }

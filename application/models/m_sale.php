@@ -5,6 +5,10 @@ if (!defined('BASEPATH'))
 
 class m_sale extends CI_Model {
 
+    public function set_form_search_route($rcode = NULL, $vtid = NULL) {
+        
+    }
+
     public function set_form_sale($route, $s_station, $d_station, $schedule = NULL, $fare = NULL) {
         $rid = $route['RID'];
         $rcode = $route['RCode'];

@@ -1,32 +1,7 @@
 <script>
     jQuery(document).ready(function () {
-         $("#mainmenu ul li").removeAttr('class');
+        $("#mainmenu ul li").removeAttr('class');
         $("#btnSale").addClass("active");
-        $("select[name='VTID']").change(function () {
-            var url_post = "<?= base_url(); ?>index.php/sale/get_route_by_vehicle_type";
-            var vtid = $("select[name='VTID'] option:selected").val();
-            $.ajax({
-                url: url_post,
-                data: {'VTID': vtid},
-                dataType: 'json',
-                type: "post",
-                success: function (data) {
-                    $(".result").html(data);
-                }
-            });
-        });
-        $("select[name='RCode']").change(function () {
-            var rcode = $("select[name='RCode'] option:selected").val();
-            var route_name = $("select[name='RCode'] option:selected").text();
-//            alert(rcode + '  ' + route_name);
-            $('#form_search_route').submit();
-        });
-        $("select[name='SourceID']").change(function () {
-            var s_id = $("select[name='SourceID'] option:selected").val();
-            var s_name = $("select[name='SourceID'] option:selected").text();
-//            alert(s_id + '  ' + s_name);
-            $('#form_search_route').submit();
-        });
     });
 </script>
 <div id="" class="container-fluid" style="padding-top: 50px;">
@@ -43,199 +18,137 @@
     </div>
 </div>
 <div id="" class="container"> 
-    <div class="row">
+    <div class="row">      
         <div class="col-lg-8 col-lg-offset-2 well">
             <div class="col-lg-12 text-center">
                 <h3 class="fs-title">เลือกเส้นทาง</h3>
                 <p class="fs-subtitle"></p>                    
             </div> 
-            <?php echo $from_search['form']; ?>  
-            <div class="col-lg-6 col-md-6">
-                <div class="form-group">
-                    <label class="control-label">เส้นทาง</label>
-                    <?php echo $from_search['RCode']; ?> 
-                </div>
-            </div>  
-            <div class="col-lg-6 col-md-6">
-                <div class="form-group">
-                    <label class="control-label">จุดขึ้นรถ</label>
-                    <?php echo $from_search['SourceID']; ?> 
-                </div>
-            </div>            
             <div class="col-lg-12">
-                <p class="text">ปลายทาง</p>
-            </div>
-            <?php echo form_close(); ?>
-            <hr>
-            <?php
-            if (count($route_detail) == 0 || $route_detail == '') {
-                ?>
-                <div class="col-md-12">
-                    <div class="" style="padding-bottom: 100px;padding-top: 100px;">
-                        <p class="lead text-center">กรุณาเลือกเส้นทาง</p>
-                    </div>
-                </div>  
-                <?php
-            } else {
-                $seq_start_id = '';
-                foreach ($stations as $s) {
-                    if ($SourceID == $s['SID']) {
-                        $seq_start_id = $s['Seq'];
-                    }
-                }
-                foreach ($route_detail as $rd) {
-                    $rcode = $rd['RCode'];
-                    $vtid = $rd['VTID'];
-                    $vt_name = $rd['VTDescription'];
-                    $rid = $rd['RID'];
-                    $source = $rd['RSource'];
-                    $destination = $rd['RDestination'];
-                    $schedule_type = $rd["ScheduleType"];
-                    $start_point = $rd['StartPoint'];
-                    $route_time = $rd['Time'];
-                    $route_name = " ตารางเวลาเดิน $vt_name เส้นทาง " . $rcode . ' ' . ' ' . $source . ' - ' . $destination;
-                    $last_seq_station = 0;
-                    ?>                   
-                    <div class="col-lg-6">
-                        <div class="widget widget-nopad">
-                            <div class="widget-header">                     
-                                <span class=""><?= "ไป $destination" ?></span>
-                            </div>   
-                            <div class="list-group" style="border: 1px;">
-                                <?php
-//                                ออกจาก ขอนแก่น
-                                if ($start_point == 'S') {
-                                    foreach ($stations as $s) {
-                                        if ($s['Seq'] > $seq_start_id) {
-                                            $destination_id = $s['SID'];
-                                            $station_name = $s['StationName'];
-                                            $go_to_booking = array(
-                                                'class' => "list-group-item",
-                                            );
-                                            echo anchor("sale/booking/$rid/$SourceID/$destination_id/", $station_name, $go_to_booking);
-                                        }
-                                    }
-                                } else {
-                                    for ($i = count($stations) - 1; $i >= 0; $i--) {
-                                        $destination_id = $stations[$i]['SID'];
-                                        $station_name = $stations[$i]['StationName'];
-                                        if ($stations[$i]['Seq'] < $seq_start_id) {
-                                            $go_to_booking = array(
-                                                'class' => "list-group-item",
-                                            );
-                                            echo anchor("sale/booking/$rid/$SourceID/$destination_id/", $station_name, $go_to_booking);
-                                        }
-                                    }
-                                }
-                                ?>                               
-                            </div>
-
-                        </div>
-                    </div>
+                <div class="panel-group" id="accordionRoute" role="tablist" aria-multiselectable="true">
                     <?php
-                }
-            }
-            ?>
+                    foreach ($routes as $route) {
+                        $rcode = $route['RCode'];
+                        $vtid = $route['VTID'];
+                        $vt_name = $route['VTDescription'];
+                        $source = $route['RSource'];
+                        $destination = $route['RDestination'];
+                        $route_name = "$vt_name เส้นทาง " . $rcode . ' ' . ' ' . $source . ' - ' . $destination;
+                        $id = $rcode . "_" . $vtid;
 
+                        $SourceID = $route['SID'];
+                        $source_name = $route['StationName'];
+                        $station_source_seq = $route['Seq'];
+                        if ($route['SellerNote'] != NULL) {
+                            $note = $route['SellerNote'];
+                            $source_name .= " ($note) ";
+                        }
+                        ?>
+
+                        <div class="panel panel-default">
+                            <div class="panel-heading" role="tab" id="heading<?= $id ?>">
+                                <h4 class="panel-title" style="padding-left: 3%;">
+                                    <a data-toggle="collapse" data-parent="#accordionRoute" href="#collapse<?= $id ?>" aria-expanded="true" aria-controls="collapse<?= $id ?>">
+                                        <?= $route_name ?>
+                                    </a>
+                                </h4>
+                            </div>
+                            <div id="collapse<?= $id ?>" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading<?= $id ?>">
+                                <div class="panel-body">
+                                    <p class="lead">จุดขึ้นรถ : <strong><?= $source_name ?></strong></p>
+                                    <p class="text">ปลายทาง</p>
+                                    <?php
+                                    $seq_start_id = '';
+                                    foreach ($stations as $s) {
+                                        if ($SourceID == $s['SID'] && $rcode == $s['RCode'] && $vtid == $s['VTID']) {
+                                            $seq_start_id = $s['Seq'];
+                                        }
+                                    }
+                                    foreach ($routes_detail as $rd) {
+                                        if ($rcode == $rd['RCode'] && $vtid == $rd['VTID']) {
+                                            $rid = $rd['RID'];
+                                            $source = $rd['RSource'];
+                                            $destination = $rd['RDestination'];
+                                            $schedule_type = $rd["ScheduleType"];
+                                            $start_point = $rd['StartPoint'];
+                                            $route_time = $rd['Time'];
+                                            $route_name = " ตารางเวลาเดิน $vt_name เส้นทาง " . $rcode . ' ' . ' ' . $source . ' - ' . $destination;
+                                            $last_seq_station = 0;
+
+                                            //นับจำนวนสถานี
+                                            $num_station = 0;
+                                            $num_sale_station = 0;
+                                            foreach ($stations as $s) {
+                                                if ($rcode == $s['RCode'] && $vtid == $s['VTID']) {
+                                                    $num_station ++;
+                                                    if ($s['IsSaleTicket'] == '1') {
+                                                        $num_sale_station ++;
+                                                    }
+                                                }
+                                            }
+
+                                            $stations_in_route = array();
+
+                                            if ($start_point == "S") {
+                                                $n = 0;
+                                                foreach ($stations as $station) {
+                                                    if ($rcode == $station['RCode'] && $vtid == $station['VTID'] && $station['Seq'] > $station_source_seq) {
+                                                        $stations_in_route[$n] = $station;
+                                                        $n++;
+                                                    }
+                                                }
+                                            }
+                                            if ($start_point == "D") {
+                                                $n = 0;
+                                                for ($i = $num_station; $i >= 0; $i--) {
+                                                    foreach ($stations as $station) {
+                                                        if ($rcode == $station['RCode'] && $vtid == $station['VTID'] && $station['Seq'] == $i && $station['Seq'] < $station_source_seq) {
+                                                            $stations_in_route[$n] = $station;
+                                                            $n++;
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            ?>
+                                            <div class="col-lg-6">
+                                                <div class="widget widget-nopad">
+                                                    <div class="widget-header">                     
+                                                        <span class=""><?= "ไป $destination" ?></span>
+                                                    </div>   
+                                                    <div class="list-group" style="border: 1px;">
+                                                        <?php
+                                                        if (count($stations_in_route) > 0) {
+                                                            foreach ($stations_in_route as $station) {
+                                                                $destination_id = $station['SID'];
+                                                                $station_name = $station['StationName'];
+                                                            }
+                                                            $go_to_booking = array(
+                                                                'class' => "list-group-item",
+                                                            );
+                                                            echo anchor("sale/booking/$rid/$SourceID/$destination_id/", $station_name, $go_to_booking);
+                                                        }
+                                                        ?>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <?php
+                                        }
+                                    }
+                                    ?>
+                                </div>
+                            </div>
+                        </div>  
+
+                        <?php
+                    }
+                    ?>                  
+                </div>
+
+            </div>       
         </div> 
 
     </div>
 
-
-    <div id="select_route" class="row hidden">       
-        <div class="col-md-12 well ">    
-            <div class="col-md-12 text-center">
-                <h3 class="fs-title">ค้นหาเที่ยวรถ</h3>
-                <p class="fs-subtitle lead">This is step 1</p>                    
-            </div>   
-            <div class="col-md-8 col-md-offset-2">
-                <?php echo $from_search['form']; ?>  
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label class="control-label">เส้นทาง</label>
-                        <?php echo $from_search['RCode']; ?> 
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label class="control-label">จุดขึ้นรถ</label>
-                        <?php echo $from_search['SourceID']; ?> 
-                    </div>
-                </div>
-                <?php echo form_close(); ?>
-            </div>
-            <hr>
-            <?php
-            if (count($route_detail) == 0 || $route_detail == '') {
-                ?>
-                <div class="col-md-12">
-                    <div class="" style="padding-bottom: 100px;padding-top: 100px;">
-                        <p class="lead text-center">กรุณาเลือกเส้นทาง</p>
-                    </div>
-                </div>  
-                <?php
-            } else {
-                $seq_start_id = '';
-                foreach ($stations as $s) {
-                    if ($SourceID == $s['SID']) {
-                        $seq_start_id = $s['Seq'];
-                    }
-                }
-                foreach ($route_detail as $rd) {
-                    $rcode = $rd['RCode'];
-                    $vtid = $rd['VTID'];
-                    $vt_name = $rd['VTDescription'];
-                    $rid = $rd['RID'];
-                    $source = $rd['RSource'];
-                    $destination = $rd['RDestination'];
-                    $schedule_type = $rd["ScheduleType"];
-                    $start_point = $rd['StartPoint'];
-                    $route_time = $rd['Time'];
-                    $route_name = " ตารางเวลาเดิน $vt_name เส้นทาง " . $rcode . ' ' . ' ' . $source . ' - ' . $destination;
-                    $last_seq_station = 0;
-                    ?>                   
-                    <div class="col-md-6">
-                        <div class="widget widget-nopad">
-                            <div class="widget-header">                     
-                                <span class=""><?= " เที่ยวไป $destination" ?></span>
-                            </div>   
-                            <div class="list-group" style="border: 1px;">
-                                <?php
-//                                ออกจาก ขอนแก่น
-                                if ($start_point == 'S') {
-                                    foreach ($stations as $s) {
-                                        if ($s['Seq'] > $seq_start_id) {
-                                            $destination_id = $s['SID'];
-                                            $station_name = $s['StationName'];
-                                            $go_to_step2 = array(
-                                                'class' => "list-group-item",
-                                            );
-                                            echo anchor("sale/booking/$rid/$SourceID/$destination_id", $station_name, $go_to_step2);
-                                        }
-                                    }
-                                } else {
-                                    for ($i = count($stations) - 1; $i >= 0; $i--) {
-                                        $destination_id = $stations[$i]['SID'];
-                                        $station_name = $stations[$i]['StationName'];
-                                        if ($stations[$i]['Seq'] < $seq_start_id) {
-                                            $go_to_step2 = array(
-                                                'class' => "list-group-item",
-                                            );
-                                            echo anchor("sale/booking/$rid/$SourceID/$destination_id", $station_name . " -> $destination_id ", $go_to_step2);
-                                        }
-                                    }
-                                }
-                                ?>                               
-                            </div>
-
-                        </div>
-                    </div>
-                    <?php
-                }
-            }
-            ?>
-        </div>      
-    </div>  
 </div>
 
 

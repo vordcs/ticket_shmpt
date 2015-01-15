@@ -5,76 +5,51 @@ if (!defined('BASEPATH'))
 
 class m_checkin extends CI_Model {
 
-    public function set_form_add($rcode = NULL, $vtid = NULL) {
+    public function get_vihicles_check_in($tsid = NULL, $date = NULL) {
 
-        //ข้อมูลประเภทรถ
-        $i_VTID[0] = 'ทั้งหมด';
-        foreach ($this->get_vehicle_types() as $value) {
-            $i_VTID[$value['VTID']] = $value['VTDescription'];
+        if ($date == NULL) {
+            $date = $this->m_datetime->getDateToday();
         }
 
-        //ข้อมูลเส้นทาง
-        $i_RCode[0] = 'เลือกเส้นทาง';
-        foreach ($this->get_route() as $value) {
-            $i_RCode[$value['RCode']] = $value['VTDescription'] . '  ' . $value['RCode'] . ' ' . $value['RSource'] . ' - ' . $value['RDestination'];
+        if ($tsid != NULL) {
+            $this->db->where('TSID', $tsid);
+        }
+        $this->db->where('DateCheckIn', $date);
+        $query = $this->db->get('vehicles_check_in');
+
+        return $query->result_array();
+    }
+
+    public function insert_checkin($data) {
+        $rs = '';
+        $tsid = $data['TSID'];
+        $tsid_check_in = $this->get_vihicles_check_in($tsid);
+        if (count($tsid_check_in) <= 0) {
+            $this->db->insert('vehicles_check_in', $data);
+            $rs = "INSERT -> $tsid";
+        } else {
+            $data = 
+            $this->update_checkin($tsid, $data);
+            $rs = "UPDATE -> $tsid";
         }
 
-        //เบอร์รถ
-        $i_VCode = array(
-            'name' => 'VCode',
-            'value' => set_value('VCode'),
-            'placeholder' => 'เบอร์รถ',
-            'class' => 'form-control'
-        );
-
-        //จุดขายตั๋ว
-//        $i_SID = array(
-//            'name' => 'SID',
-//            'value' => set_value('SID'),
-//            'placeholder' => 'จุดขายตั๋ว',
-//            'class' => 'form-control',
-//            'readonly' => '',
-//        );
-        $i_SID[0] = 'เลือกเส้นทาง';
-        if ($rcode != NULL) {
-            foreach ($this->get_station_sale_ticket($rcode, $vtid) as $sale_point) {
-                $i_SID[$sale_point['SID']] = $sale_point['StationName'];
-            }
-        }
-
-        $dropdown = 'class="selecter_3" data-selecter-options = \'{"cover":"true"}\' ';
-        $form_add = array(
-            'form' => form_open("checkin/add/$vtid", array('id' => 'form_check_in', 'class' => 'form-horizontal')),
-            'VTID' => form_dropdown('VTID', $i_VTID, $vtid, $dropdown),
-            'RCode' => form_dropdown('RCode', $i_RCode, (set_value('RCode') == NULL) ? 0 : set_value('RCode'), $dropdown),
-            'VCode' => form_input($i_VCode),
-//            'SID' => form_input($i_SID),
-            'SID' => form_dropdown('SID', $i_SID, set_value('SID'), $dropdown),
-        );
-
-        return $form_add;
+        return $rs;
     }
 
-    public function validation_form_add() {
-        $this->form_validation->set_rules('RCode', 'เส้นทาง', 'trim|required|xss_clean|callback_check_dropdown');
-        return TRUE;
+    public function update_checkin($tsid, $data) {
+        $this->db->where('TSID', $tsid);
+        $this->db->update('vehicles_check_in', $data);
     }
 
-    public function validation_form_edit() {
-        
-    }
-
-    public function validation_form_search() {
-        
-    }
-
-    public function get_post_form_add() {
-        $vtid = $this->input->post('VTID');
-        $rcode = $this->input->post('RCode');
+    public function get_post_form_add($rid, $tsid, $vid, $sid) {
 
         $data_form_add = array(
-            'RCode' => $rcode,
-            'VTID' => $vtid,
+            'SID' => $sid,
+            'TSID' => $tsid,
+            'RID' => $rid,
+            'VID' => $vid,
+            'TimeCheckIn' => $this->m_datetime->getTimeNow(),
+            'DateCheckIn' => $this->m_datetime->getDateToday(),
             'CreateDate' => $this->m_datetime->getDatetimeNow(),
             'CreateBy' => $this->m_user->get_user_id(),
         );
@@ -82,9 +57,50 @@ class m_checkin extends CI_Model {
         return $data_form_add;
     }
 
+    public function get_post_form_edit($tsid) {
+
+        $data_form_edit = array(
+            'TSID' => $tsid,
+            'TimeCheckIn' => $this->m_datetime->getTimeNow(),
+            'DateCheckIn' => $this->m_datetime->getDateToday(),
+            'UpdateDate' => $this->m_datetime->getDatetimeNow(),
+            'UpdateBy' => $this->m_user->get_user_id(),
+        );
+
+        return $data_form_edit;
+    }
+
     /*
      * for view on check in  only
      */
+
+    //    คืนค่าเวลาข้อมูลตารางเวลาเดิน ออกจากจุกเริ่มต้นของเเต่ละ RID
+    public function get_schedule($date = NULL, $rcode = NULL, $vtid = NULL, $rid = NULL, $tsid = NULL) {
+        $this->db->select('*,t_schedules_day.RID as RID,t_schedules_day.TSID as TSID,vehicles.VID as VID');
+        $this->db->join('t_routes', ' t_schedules_day.RID = t_routes.RID ', 'left');
+        $this->db->join('vehicles_has_schedules', ' vehicles_has_schedules.TSID = t_schedules_day.TSID', 'left');
+        $this->db->join('vehicles', ' vehicles.VID = vehicles_has_schedules.VID', 'left');
+        $this->db->join('vehicles_check_in', ' vehicles_check_in.VID = vehicles.VID and vehicles_check_in.DateCheckIn = t_schedules_day.Date', 'right');
+
+        if ($date != NULL) {
+            $this->db->where('Date', $date);
+        }
+        if ($rcode != NULL) {
+            $this->db->where('t_routes.RCode', $rcode);
+        }
+        if ($vtid != NULL) {
+            $this->db->where('t_routes.VTID', $vtid);
+        }
+        if ($rid != NULL) {
+            $this->db->where('t_schedules_day.RID', $rid);
+        }
+        if ($tsid != NULL) {
+            $this->db->where('t_schedules_day.TSID', $tsid);
+        }
+        $this->db->order_by('SeqNo', 'asc');
+        $query_schedule = $this->db->get("t_schedules_day");
+        return $query_schedule->result_array();
+    }
 
     public function get_route($rcode = NULL, $vtid = NULL, $rid = NULL) {
 

@@ -19,7 +19,6 @@ class Home extends CI_Controller {
     }
 
     public function index() {
-        $this->set_user();
         $data = array(
             'from_search' => $this->m_route->set_form_search_route(),
             'vehicle_types' => $this->m_route->get_vehicle_types(),
@@ -27,7 +26,7 @@ class Home extends CI_Controller {
             'routes_detail' => $this->m_route->get_route_detail(),
         );
         $data['stations'] = $this->m_station->get_stations();
-         $data['schedules'] = $this->m_schedule->get_schedule($this->m_datetime->getDateToday());
+        $data['schedules'] = $this->m_schedule->get_schedule($this->m_datetime->getDateToday());
         $data['schedule_master'] = $this->m_route->get_schedule_manual();
         $data_debug = array(
 //            'from_search' => $data['from_search'],
@@ -39,27 +38,6 @@ class Home extends CI_Controller {
         $this->m_template->set_Title('ระบบขายตั๋วหน้าเค้ฆาเตอร์');
         $this->m_template->set_Content('home/main', $data);
         $this->m_template->showTemplate();
-    }
-
-    public function sale_tickit() {
-
-
-        $this->m_template->set_Title('ระบบขายตั๋วหน้าเค้าเตอร์');
-        $this->m_template->set_Content('home/main', $data);
-        $this->m_template->showTemplate();
-    }
-
-    public function test() {
-        $this->load->view("home/frm_search_route");
-    }
-
-    public function set_user() {
-        $user_data = array(
-            'EID' => 'E123456789',
-            'UserName' => 'admin',
-            'sale_type' => '1',
-        );
-        $this->session->set_userdata($user_data);
     }
 
 }

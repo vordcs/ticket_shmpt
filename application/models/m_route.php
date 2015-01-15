@@ -27,6 +27,35 @@ class m_route extends CI_Model {
         return $query->result_array();
     }
 
+    public function get_route_by_seller() {
+
+        $this->db->join('t_routes', 'sellers.RCode = t_routes.RCode AND sellers.VTID = t_routes.VTID');
+        $this->db->join('vehicles_type', 'vehicles_type.VTID = t_routes.VTID');
+        $this->db->join('t_stations', 't_stations.RCode = sellers.RCode AND sellers.VTID = t_stations.VTID');
+      
+        $this->db->where('sellers.EID', $this->m_user->get_user_id());
+
+        $this->db->group_by(array('t_routes.RCode', 't_routes.VTID'));
+
+        $query = $this->db->get('sellers');
+
+        return $query->result_array();
+    }
+
+    public function get_route_detail_by_seller() {
+//        $this->db->select('*');
+        $this->db->join('t_routes', 'sellers.RCode = t_routes.RCode AND sellers.VTID = t_routes.VTID');
+        $this->db->join('vehicles_type', 'vehicles_type.VTID = t_routes.VTID');
+        
+        
+        $this->db->where('sellers.EID', $this->m_user->get_user_id());
+
+        $this->db->order_by('StartPoint', 'DESC');
+        $query = $this->db->get('sellers');
+
+        return $query->result_array();
+    }
+
     public function search_route($rcode = NULL, $source = NULL, $destination = NULL, $rid = NULL) {
 
         if ($rcode != NULL)
