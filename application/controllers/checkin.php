@@ -73,45 +73,50 @@ class checkin extends CI_Controller {
 
     public function add($rid, $tsid, $vid, $sid) {
         if ($rid == NULL || $tsid == NULL || $vid == NULL || $sid == NULL) {
-            redirect('');
+            $alert['alert_message'] = "กรุณาเลือกรอบเวลา";
+            $alert['alert_mode'] = "warning";
+            $this->session->set_flashdata('alert', $alert);
+
+            redirect('checkin/');
         }
 
-        $data = array(
-            'page_title' => 'ลงเวลา : ',
-            'page_title_small' => '',
-            'previous_page' => '',
-            'next_page' => '',
-        );
-        $date = $this->m_datetime->getDateToday();
-        $vehicle_types = $this->m_route->get_vehicle_types();
-        $routes = $this->m_route->get_route_by_seller();
-        $routes_detail = $this->m_route->get_route_detail_by_seller();
-        $schedules = $this->m_checkin->get_schedule($date);
-        $stations = $this->m_station->get_stations();
-        $stations_sale_ticket = $this->m_station->get_station_sale_ticket();
-
-
-        if (count($schedules) <= 0) {
-            redirect("checkin/");
-        }
-
-        $data['vehicle_types'] = $vehicle_types;
-        $data['routes'] = $routes;
-        $data['routes_detail'] = $routes_detail;
-        $data['schedules'] = $schedules;
-        $data['stations'] = $stations;
-        $data['stations_sale_ticket'] = $stations_sale_ticket;
         $data_insert = $this->m_checkin->get_post_form_add($rid, $tsid, $vid, $sid);
-        $data_debug = array(
-            'form_data' => $data_insert,
-            'rs' => $this->m_checkin->insert_checkin($data_insert),
-        );
+        $rs = $this->m_checkin->insert_checkin($data_insert);
 
-        $this->m_template->set_Debug($data_debug);
+        if ($rs != '' || $rs != NULL) {
+            $alert['alert_message'] = "ลงเวลาสำเร็จ";
+            $alert['alert_mode'] = "success";
+            $this->session->set_flashdata('alert', $alert);
+        } else {
+            $alert['alert_message'] = "ลงเวลาไม่สำเร็จ";
+            $alert['alert_mode'] = "danger";
+            $this->session->set_flashdata('alert', $alert);
+        }
+        redirect('checkin/');
+    }
 
-        $this->m_template->set_Title('ลงเวลา');
-        $this->m_template->set_Content('checkin/checkin', $data);
-        $this->m_template->showTemplate();
+    public function edit($tsid, $sid) {
+        if ($tsid == NULL || $sid == NULL) {
+            $alert['alert_message'] = "กรุณาเลือกรอบเวลา";
+            $alert['alert_mode'] = "warning";
+            $this->session->set_flashdata('alert', $alert);
+
+            redirect('checkin/');
+        }
+
+        $data_update = $this->m_checkin->get_post_form_edit($tsid, $sid);
+        $rs = $this->m_checkin->update_checkin($tsid, $sid, $data_update);
+
+        if ($rs != '' || $rs != NULL) {
+            $alert['alert_message'] = "แก้ไข เวลา สำเร็จ";
+            $alert['alert_mode'] = "success";
+            $this->session->set_flashdata('alert', $alert);
+        } else {
+            $alert['alert_message'] = "แก้ไข เวลา สำเร็จ";
+            $alert['alert_mode'] = "danger";
+            $this->session->set_flashdata('alert', $alert);
+        }
+        redirect('checkin/');
     }
 
 }

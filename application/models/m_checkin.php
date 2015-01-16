@@ -23,22 +23,28 @@ class m_checkin extends CI_Model {
     public function insert_checkin($data) {
         $rs = '';
         $tsid = $data['TSID'];
+        $sid = $data['SID'];
         $tsid_check_in = $this->get_vihicles_check_in($tsid);
         if (count($tsid_check_in) <= 0) {
             $this->db->insert('vehicles_check_in', $data);
             $rs = "INSERT -> $tsid";
         } else {
-            $data = 
-            $this->update_checkin($tsid, $data);
+            $data = $this->update_checkin($tsid, $sid, $data);
             $rs = "UPDATE -> $tsid";
         }
 
         return $rs;
     }
 
-    public function update_checkin($tsid, $data) {
+    public function update_checkin($tsid, $sid, $data) {
+        $this->db->where('SID', $sid);
         $this->db->where('TSID', $tsid);
         $this->db->update('vehicles_check_in', $data);
+        if ($this->db->affected_rows() == 1){
+            return $tsid;
+        }  else {
+            return NULL;
+        }
     }
 
     public function get_post_form_add($rid, $tsid, $vid, $sid) {
@@ -57,10 +63,11 @@ class m_checkin extends CI_Model {
         return $data_form_add;
     }
 
-    public function get_post_form_edit($tsid) {
+    public function get_post_form_edit($tsid, $sid) {
 
         $data_form_edit = array(
             'TSID' => $tsid,
+            'SID' => $sid,
             'TimeCheckIn' => $this->m_datetime->getTimeNow(),
             'DateCheckIn' => $this->m_datetime->getDateToday(),
             'UpdateDate' => $this->m_datetime->getDatetimeNow(),
@@ -80,7 +87,7 @@ class m_checkin extends CI_Model {
         $this->db->join('t_routes', ' t_schedules_day.RID = t_routes.RID ', 'left');
         $this->db->join('vehicles_has_schedules', ' vehicles_has_schedules.TSID = t_schedules_day.TSID', 'left');
         $this->db->join('vehicles', ' vehicles.VID = vehicles_has_schedules.VID', 'left');
-        $this->db->join('vehicles_check_in', ' vehicles_check_in.VID = vehicles.VID and vehicles_check_in.DateCheckIn = t_schedules_day.Date', 'right');
+        $this->db->join('vehicles_check_in', ' vehicles_check_in.TSID = t_schedules_day.TSID and vehicles_check_in.DateCheckIn = t_schedules_day.Date', 'left');
 
         if ($date != NULL) {
             $this->db->where('Date', $date);

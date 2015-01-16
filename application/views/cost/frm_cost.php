@@ -8,8 +8,6 @@
         } else {
             $('#other').hide();
         }
-
-
         $("select[name='CostDetailID']").on('change', function () {
             if (this.value === '999') {
                 $('#other').show();
@@ -41,24 +39,37 @@
                     <label for="" class="col-sm-3 control-label">วันที่</label>
                     <div class="col-sm-4">
                         <?php echo $form['CostDate']; ?>
+                        <?php echo $form['DateTH']; ?>
                     </div>
                     <div class="col-sm-4">
                         <?php echo form_error('CostDate', '<font color="error">', '</font>'); ?>
                     </div>
-                </div>
+                </div>                
                 <div class="form-group <?= (form_error('RCode')) ? 'has-error' : '' ?>">
                     <label for="" class="col-sm-3 control-label">เส้นทาง</label>
                     <div class="col-sm-6">
                         <?php echo $form['RCode']; ?>
+                        <?php echo $form['RouteName']; ?>
                     </div>
                     <div class="col-sm-3">
                         <?php echo form_error('RCode', '<font color="error">', '</font>'); ?>
+                    </div>
+                </div>
+                <div class="form-group <?= (form_error('TimeDepart')) ? 'has-error' : '' ?>">
+                    <label for="" class="col-sm-3 control-label">รอบเวลา</label>
+                    <div class="col-sm-4">
+                        <?php echo $form['TimeDepart']; ?>
+                        <?php echo $form['TSID']; ?>
+                    </div>
+                    <div class="col-sm-4">
+                        <?php echo form_error('CostDate', '<font color="error">', '</font>'); ?>
                     </div>
                 </div>
                 <div class="form-group <?= (form_error('VCode')) ? 'has-error' : '' ?>">  
                     <label for="" class="col-sm-3  control-label">เบอร์รถ</label>
                     <div class="col-sm-3">
                         <?php echo $form['VCode']; ?>
+                        <?php echo $form['VID']; ?>
                     </div> 
                     <div class="col-sm-4">
                         <?php echo form_error('VCode', '<font color="error">', '</font>'); ?>
@@ -72,6 +83,7 @@
                     <div class="col-sm-4">
                         <?php echo form_error('CostDetailID', '<font color="error">', '</font>'); ?>
                     </div>
+
                 </div>   
                 <div id="other" class="form-group <?= (form_error('OtherDetail')) ? 'has-error' : '' ?>">
                     <label for="" class="col-sm-3 control-label"></label>

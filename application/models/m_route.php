@@ -28,11 +28,11 @@ class m_route extends CI_Model {
     }
 
     public function get_route_by_seller() {
-
+        $this->db->select('*');
         $this->db->join('t_routes', 'sellers.RCode = t_routes.RCode AND sellers.VTID = t_routes.VTID');
         $this->db->join('vehicles_type', 'vehicles_type.VTID = t_routes.VTID');
-        $this->db->join('t_stations', 't_stations.RCode = sellers.RCode AND sellers.VTID = t_stations.VTID');
-      
+        $this->db->join('t_stations', 'sellers.SID =  t_stations.SID');                
+
         $this->db->where('sellers.EID', $this->m_user->get_user_id());
 
         $this->db->group_by(array('t_routes.RCode', 't_routes.VTID'));
@@ -46,8 +46,8 @@ class m_route extends CI_Model {
 //        $this->db->select('*');
         $this->db->join('t_routes', 'sellers.RCode = t_routes.RCode AND sellers.VTID = t_routes.VTID');
         $this->db->join('vehicles_type', 'vehicles_type.VTID = t_routes.VTID');
-        
-        
+
+
         $this->db->where('sellers.EID', $this->m_user->get_user_id());
 
         $this->db->order_by('StartPoint', 'DESC');

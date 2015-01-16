@@ -30,21 +30,29 @@ class cost extends CI_Controller {
 
         $cost_type = $this->m_cost->get_cost_type();
         $costs = $this->m_cost->get_cost();
+
         $costs_detail = $this->m_cost->get_cost_detail();
 
-        $routes = $this->m_route->get_route();
+        $vehicle_types = $this->m_route->get_vehicle_types();
+
+        $routes = $this->m_route->get_route_by_seller();
+        $routes_detail = $this->m_route->get_route_detail_by_seller();
+
+        $stations = $this->m_station->get_stations();
 
         $date = $this->m_datetime->getDateToday();
         $schedules = $this->m_schedule->get_schedule($date);
-        $stations = $this->m_station->get_stations(264);
+
+
         $data = array(
             'page_title' => 'ค่าใช้จ่าย : ',
-            'page_title_small' => 'ขอนแก่น',
+            'page_title_small' => '',
             'cost_types' => $cost_type,
             'costs' => $costs,
             'costs_detail' => $costs_detail,
+            'vehicle_types' => $vehicle_types,
             'routes' => $routes,
-            'route_details' => $this->m_route->get_route_detail(),
+            'routes_detail' => $routes_detail,
             'schedules' => $schedules,
             'stations' => $stations
         );
@@ -55,7 +63,7 @@ class cost extends CI_Controller {
 //            'costs_detail' => $data['costs_detail'],
 //            'routes' => $data['routes'],
 //            'schedules' => $data['schedules'],
-            'stations' => $data['stations'],
+//            'stations' => $data['stations'],
                 //    ''=>$data[''],           
         );
         $this->m_template->set_Debug($data_debug);
@@ -65,17 +73,79 @@ class cost extends CI_Controller {
         $this->m_template->showTemplate();
     }
 
-    public function add($ctid) {
+    public function view($tsid = NULL, $vid = NULL) {
+        $date = $this->m_datetime->getDateToday();
+        $schedule = $this->m_schedule->get_schedule($date, NULL, NULL, NULL, $tsid)[0];
+
+        $rid = $schedule['RID'];
+
+        $routes = $this->m_cost->get_route(NULL, NULL, $rid)[0];
+
+        $cost_type = $this->m_cost->get_cost_type();
+        $costs = $this->m_cost->get_cost(NULL,NULL,$date,$tsid);
+
+        $costs_detail = $this->m_cost->get_cost_detail();
+
+        $data = array(
+            'page_title' => 'ค่าใช้จ่าย : ',
+            'page_title_small' => '',
+            'previous_page' => '',
+            'next_page' => '',
+            'routes' => $routes,
+            'cost_types' => $cost_type,
+            'costs' => $costs,
+            'costs_detail' => $costs_detail,
+        );
+
+        $data_debug = array(
+//            'routes' => $data['routes'],
+//            'cost_types' => $data['cost_types'],
+            'costs' => $data['costs'],
+//            'costs_detail' => $data['costs_detail'],
+        );
+
+        $this->m_template->set_Debug($data_debug);
+
+        $this->m_template->set_Title('จัดการค่าใช้จ่าย');
+        $this->m_template->set_Content('cost/view_cost', $data);
+        $this->m_template->showTemplate();
+    }
+
+    public function add($ctid, $tsid, $time_depart) {
+
+        if ($ctid == null || $tsid == NULL || $time_depart == NULL) {
+            $alert['alert_message'] = "กรุณาเลือกรอบเวลา";
+            $alert['alert_mode'] = "warning";
+            $this->session->set_flashdata('alert', $alert);
+
+            redirect('cost/');
+        }
+        $date = $this->m_datetime->getDateToday();
+        $schedules = $this->m_schedule->get_schedule($date);
+        if (count($schedules) <= 0) {
+            $alert['alert_message'] = "ไม่พบข้มูลรอบเวลา";
+            $alert['alert_mode'] = "warning";
+            $this->session->set_flashdata('alert', $alert);
+
+            redirect('cost/');
+        }
+
+
         $form_data = '';
         $rs = '';
         if ($this->m_cost->validation_form_add() && $this->form_validation->run() == TRUE) {
             $form_data = $this->m_cost->get_post_form_add($ctid);
             $rs = $this->m_cost->insert_cost($form_data);
-            redirect('cost/');
+            
+            $alert['alert_message'] = "เพิ่มข้อมูลค่าใช้จ่ายสำเร็จ";
+            $alert['alert_mode'] = "success";
+            $this->session->set_flashdata('alert', $alert);
+            
+            redirect("cost/view/$tsid");
         }
         $page_title = 'เพิ่ม ' . $this->m_cost->get_cost_type($ctid)[0]['CostTypeName'] . ' ';
         $data = array(
-            'form' => $this->m_cost->set_form_add($ctid),
+            'form' => $this->m_cost->set_form_add($ctid, $tsid, $time_depart),
             'page_title' => $page_title,
             'page_title_small' => '',
 //            'cost_types' => $cost_type,
@@ -86,10 +156,11 @@ class cost extends CI_Controller {
         $data_debug = array(
 //            'form_data' => $form_data,
 //            'data_insert_rs'=>$rs,
+//            "schedule" => $this->m_cost->get_schedule($date),
         );
 
-//        $this->m_template->set_Debug($data_debug);
-        $this->m_template->set_Title('จัดการค่าใช้จ่าย');
+        $this->m_template->set_Debug($data_debug);
+        $this->m_template->set_Title('เพิ่มค่าใช้จ่าย');
         $this->m_template->set_Content('cost/frm_cost', $data);
         $this->m_template->showTemplate();
     }

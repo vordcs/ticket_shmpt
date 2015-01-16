@@ -5,6 +5,7 @@
     });
 </script>
 <style>
+
     .info-box {
         background:#ffffff;
         border:1px solid #c9c9c9;
