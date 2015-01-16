@@ -18,7 +18,7 @@ class m_station extends CI_Model {
         if ($seq != NULL) {
             $this->db->where('Seq', $seq);
         }
-        $this->db->order_by('Seq');
+        $this->db->order_by('Seq','asc');
         $query = $this->db->get('t_stations');
 
         $rs = $query->result_array();

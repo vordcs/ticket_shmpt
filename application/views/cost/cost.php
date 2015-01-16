@@ -203,6 +203,27 @@
                                                                     if ($vcode == '') {
                                                                         $vcode = '-';
                                                                     }
+                                                                    /*
+                                                                     * รายรับ,รายจ่าย
+                                                                     */
+                                                                    $income = 0;
+                                                                    $outcome = 0;
+                                                                    foreach ($cost_types as $cost_type) {
+                                                                        $cost_type_id = $cost_type['CostTypeID'];
+                                                                        foreach ($costs as $cost) {
+                                                                            $CostValue = $cost['CostValue'];
+                                                                            if ($tsid == $cost['TSID'] && $cost_type_id == $cost['CostTypeID']) {
+                                                                                if ($cost_type_id == '1') {
+                                                                                    //รายรับ
+                                                                                    $income+=(int) $CostValue;
+                                                                                } else {
+                                                                                    //รายจ่าย
+                                                                                    $outcome+=(int) $CostValue;
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    }
+
 
                                                                     $view = array(
                                                                         'type' => "button",
@@ -215,27 +236,27 @@
                                                                     <tr>
                                                                         <td class="text-center"><?= anchor("cost/view/$tsid/", $time_depart, $view) . '  '; ?></td>
                                                                         <td class="text-center"><?= $vcode ?></td>
-                                                                        <td class="text-center"></td>
-                                                                        <td></td>
-                                                                        <td></td>
+                                                                        <td class="text-center"><?= number_format($income) ?></td>
+                                                                        <td class="text-center"><?= number_format($outcome) ?> </td>
+                                                                        <td class="text-right"><strong><?= number_format($income - $outcome) ?></strong></td>
                                                                         <td class="text-center">
                                                                             <?php
-                                                                            $income = array(
+                                                                            $add_income = array(
                                                                                 'type' => "button",
                                                                                 'class' => "btn btn-info btn-sm",
                                                                                 'data-toggle' => "tooltip",
                                                                                 'data-placement' => "top",
                                                                                 'title' => "เพิ่มรายรับ รถเบอร์ $vcode รอบเวลา $time_depart",
                                                                             );
-                                                                            $outcome = array(
+                                                                            $add_outcome = array(
                                                                                 'type' => "button",
                                                                                 'class' => "btn btn-warning btn-sm",
                                                                                 'data-toggle' => "tooltip",
                                                                                 'data-placement' => "top",
                                                                                 'title' => "เพิ่มรายจ่าย รถเบอร์ $vcode รอบเวลา $time_depart",
                                                                             );
-                                                                            echo anchor("cost/add/1/$tsid/$time_depart", '<span class="fa fa-plus"></span>', $income) . '  ';
-                                                                            echo anchor("cost/add/2/$tsid/$time_depart", '<span class="fa fa-minus"></span>', $outcome);
+                                                                            echo anchor("cost/add/1/$tsid/$time_depart", '<span class="fa fa-plus"></span>', $add_income) . '  ';
+                                                                            echo anchor("cost/add/2/$tsid/$time_depart", '<span class="fa fa-minus"></span>', $add_outcome);
                                                                             ?>
                                                                         </td>
                                                                     </tr>

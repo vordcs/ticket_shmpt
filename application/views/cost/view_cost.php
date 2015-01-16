@@ -48,34 +48,47 @@
         </div>
     </div>
 </div>
+<?php
+$route_name = ' เส้นทาง ' . $route['VTDescription'] . '  ' . $route ['RCode'] . '  ' . $route['RSource'] . ' - ' . $route['RDestination'];
+$rid = $route['RID'];
+$income = 0;
+$outcome = 0;
+foreach ($cost_types as $cost_type) {
+    $cost_type_id = $cost_type['CostTypeID'];
+    foreach ($costs as $cost) {
+        $CostValue = $cost['CostValue'];
+        if ($cost_type_id == $cost['CostTypeID']) {
+            if ($cost_type_id == '1') {
+                //รายรับ
+                $income+=(int) $CostValue;
+            } else {
+                //รายจ่าย
+                $outcome+=(int) $CostValue;
+            }
+        }
+    }
+}
+?>
 <div class="container">
     <div class="row">
         <div class="col-md-12">
             <div class="widget">
-                <div class="widget-header"></div>
+                <div class="widget-header"><?= $route_name ?></div>
                 <div class="widget-content">
                     <div class="stats-box">
                         <div class="col-md-4">
-                            <div class="stats-box-title">Vizitor</div>
-                            <div class="stats-box-all-info"><i class="icon-user" style="color:#3366cc;"></i> 555K</div>
-                            <div class="wrap-chart">
-
-                            </div>
+                            <div class="stats-box-title">รายรับ</div>
+                            <div class="stats-box-all-info"><i class="fa fa-arrow-circle-o-down" style="color:#3366cc;"></i><?= number_format($income) ?></div>                            
                         </div>
 
                         <div class="col-md-4">
-                            <div class="stats-box-title">Likes</div>
-                            <div class="stats-box-all-info"><i class="icon-thumbs-up" style="color:#F30"></i> 66.66</div>
-                            <div class="wrap-chart">                                           
-
-                            </div>
+                            <div class="stats-box-title">รายจ่าย</div>
+                            <div class="stats-box-all-info"><i class="fa fa-arrow-circle-o-up" style="color:#F30"></i><?= number_format($outcome) ?></div>                         
                         </div>
 
                         <div class="col-md-4">
-                            <div class="stats-box-title">Orders</div>
-                            <div class="stats-box-all-info"><i class="icon-shopping-cart" style="color:#3C3"></i> 15.55</div>
-                            <div class="wrap-chart">
-                            </div>
+                            <div class="stats-box-title">คงเหลือ</div>
+                            <div class="stats-box-all-info"><i class="fa fa-shopping-cart" style="color:#3C3"></i><?= number_format($income - $outcome) ?></div>                            
                         </div>                                
                     </div> 
                 </div>
@@ -109,11 +122,29 @@
                                     $CostValue = $cost['CostValue'];
                                     $total +=(int) $CostValue;
                                     if ($cost_type_id == $cost['CostTypeID']) {
+                                        $edit = array(
+                                            'type' => 'button',
+                                            'class' => 'btn btn-warning btn-sm',
+                                            'data-toggle' => "tooltip",
+                                            'data-placement' => "left",
+                                            'title' => "แก้ไขข้อมูล $cost_type_name : $CostDetail  ",
+                                        );
+                                        $delete = array(
+                                            'data-toggle' => "tooltip",
+                                            'data-placement' => "right",
+                                            'title' => "Tooltip on right",
+                                        );
+
+                                        $action_edit = anchor("cost/edit/$CostID/$rid", '<i class="fa fa-edit"></i>', $edit);
                                         ?>
                                         <tr>
                                             <td class="text-left"><?= $CostDetail ?></td>
                                             <td class="text-right"><?= number_format($CostValue) ?></td>
-                                            <td></td>
+                                            <td class="text-center">
+                                                <?= $action_edit ?>
+                                                &nbsp;
+                                                <a class="btn btn-danger btn-sm"><i class="fa fa-trash-o"></i></a>
+                                            </td>
                                         </tr>
                                         <?php
                                     }

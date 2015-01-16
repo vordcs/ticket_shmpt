@@ -48,7 +48,8 @@
                 <div class="form-group <?= (form_error('RCode')) ? 'has-error' : '' ?>">
                     <label for="" class="col-sm-3 control-label">เส้นทาง</label>
                     <div class="col-sm-6">
-                        <?php echo $form['RCode']; ?>
+                        <?php echo $form['SID'];?>
+                        <?php echo $form['RCode']; ?>                        
                         <?php echo $form['RouteName']; ?>
                     </div>
                     <div class="col-sm-3">

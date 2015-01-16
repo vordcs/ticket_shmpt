@@ -31,8 +31,6 @@ class cost extends CI_Controller {
         $cost_type = $this->m_cost->get_cost_type();
         $costs = $this->m_cost->get_cost();
 
-        $costs_detail = $this->m_cost->get_cost_detail();
-
         $vehicle_types = $this->m_route->get_vehicle_types();
 
         $routes = $this->m_route->get_route_by_seller();
@@ -43,13 +41,13 @@ class cost extends CI_Controller {
         $date = $this->m_datetime->getDateToday();
         $schedules = $this->m_schedule->get_schedule($date);
 
+        $date_th = $this->m_datetime->DateThaiToDay();
 
         $data = array(
             'page_title' => 'ค่าใช้จ่าย : ',
-            'page_title_small' => '',
+            'page_title_small' => "วันที่ $date_th",
             'cost_types' => $cost_type,
             'costs' => $costs,
-            'costs_detail' => $costs_detail,
             'vehicle_types' => $vehicle_types,
             'routes' => $routes,
             'routes_detail' => $routes_detail,
@@ -64,7 +62,8 @@ class cost extends CI_Controller {
 //            'routes' => $data['routes'],
 //            'schedules' => $data['schedules'],
 //            'stations' => $data['stations'],
-                //    ''=>$data[''],           
+                //    ''=>$data[''],      
+//            'saller_station' => $this->m_user->get_saller_station(),
         );
         $this->m_template->set_Debug($data_debug);
 
@@ -74,33 +73,41 @@ class cost extends CI_Controller {
     }
 
     public function view($tsid = NULL, $vid = NULL) {
+        if ($tsid == NULL && $vid == NULL) {
+            $alert['alert_message'] = "กรุณาเลือกรอบเวลา";
+            $alert['alert_mode'] = "warning";
+            $this->session->set_flashdata('alert', $alert);
+
+            redirect('cost/');
+        }
         $date = $this->m_datetime->getDateToday();
         $schedule = $this->m_schedule->get_schedule($date, NULL, NULL, NULL, $tsid)[0];
 
         $rid = $schedule['RID'];
 
-        $routes = $this->m_cost->get_route(NULL, NULL, $rid)[0];
+        $route = $this->m_cost->get_route(NULL, NULL, $rid)[0];
 
         $cost_type = $this->m_cost->get_cost_type();
-        $costs = $this->m_cost->get_cost(NULL,NULL,$date,$tsid);
+        $costs = $this->m_cost->get_cost(NULL, NULL, $date, $tsid);
 
         $costs_detail = $this->m_cost->get_cost_detail();
+        $date_th = $this->m_datetime->DateThaiToDay();
 
         $data = array(
             'page_title' => 'ค่าใช้จ่าย : ',
-            'page_title_small' => '',
+            'page_title_small' => "วันที่ $date_th",
             'previous_page' => '',
             'next_page' => '',
-            'routes' => $routes,
+            'route' => $route,
             'cost_types' => $cost_type,
             'costs' => $costs,
             'costs_detail' => $costs_detail,
         );
 
         $data_debug = array(
-//            'routes' => $data['routes'],
+//            'route' => $data['route'],
 //            'cost_types' => $data['cost_types'],
-            'costs' => $data['costs'],
+//            'costs' => $data['costs'],
 //            'costs_detail' => $data['costs_detail'],
         );
 
@@ -136,11 +143,11 @@ class cost extends CI_Controller {
         if ($this->m_cost->validation_form_add() && $this->form_validation->run() == TRUE) {
             $form_data = $this->m_cost->get_post_form_add($ctid);
             $rs = $this->m_cost->insert_cost($form_data);
-            
+
             $alert['alert_message'] = "เพิ่มข้อมูลค่าใช้จ่ายสำเร็จ";
             $alert['alert_mode'] = "success";
             $this->session->set_flashdata('alert', $alert);
-            
+
             redirect("cost/view/$tsid");
         }
         $page_title = 'เพิ่ม ' . $this->m_cost->get_cost_type($ctid)[0]['CostTypeName'] . ' ';
@@ -148,19 +155,58 @@ class cost extends CI_Controller {
             'form' => $this->m_cost->set_form_add($ctid, $tsid, $time_depart),
             'page_title' => $page_title,
             'page_title_small' => '',
-//            'cost_types' => $cost_type,
-//            'costs' => $costs,
-//            'costs_detail' => $costs_detail,
+            'previous_page' => '',
+            'next_page' => '',
         );
 
         $data_debug = array(
 //            'form_data' => $form_data,
 //            'data_insert_rs'=>$rs,
 //            "schedule" => $this->m_cost->get_schedule($date),
+//            'saller_station' => $this->m_user->get_saller_station(),
         );
 
         $this->m_template->set_Debug($data_debug);
         $this->m_template->set_Title('เพิ่มค่าใช้จ่าย');
+        $this->m_template->set_Content('cost/frm_cost', $data);
+        $this->m_template->showTemplate();
+    }
+
+    public function edit($cost_id, $rid) {
+        $date_th = $this->m_datetime->DateThaiToDay();
+
+        $cost = $this->m_cost->get_cost($cost_id)[0];
+        $route = $this->m_cost->get_route(NULL, NULL, $rid)[0];
+
+
+        $form_data = '';
+        $rs = '';
+        if ($this->m_cost->validation_form_edit() && $this->form_validation->run() == TRUE) {
+            $form_data = $this->m_cost->get_post_form_edit();
+//            $rs = $this->m_cost->insert_cost($form_data);
+//            $alert['alert_message'] = "เพิ่มข้อมูลค่าใช้จ่ายสำเร็จ";
+//            $alert['alert_mode'] = "success";
+//            $this->session->set_flashdata('alert', $alert);
+//            redirect("cost/view/$tsid");
+        }
+        $data = array(
+            'page_title' => 'ค่าใช้จ่าย : ',
+            'page_title_small' => "วันที่ $date_th",
+            'previous_page' => '',
+            'next_page' => '',
+            'form' => $this->m_cost->set_form_edit($route, $cost),
+        );
+
+        $data_debug = array(
+            'form_data' => $form_data,
+//            'data_insert_rs'=>$rs,
+//            'route' => $route,
+//            'cost' => $cost,
+//            "schedule" => $this->m_cost->get_schedule($date),
+        );
+
+        $this->m_template->set_Debug($data_debug);
+        $this->m_template->set_Title('แก้ไขค่าใช้จ่าย');
         $this->m_template->set_Content('cost/frm_cost', $data);
         $this->m_template->showTemplate();
     }
