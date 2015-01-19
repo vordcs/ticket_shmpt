@@ -90,6 +90,8 @@ class report extends CI_Controller {
             redirect('home/');
         }
 
+        $vehicle_types = $this->m_route->get_vehicle_types();
+
         $routes = $this->m_route->get_route_by_seller($rcode, $vtid);
         $routes_detail = $this->m_route->get_route_detail_by_seller($rcode, $vtid);
 
@@ -103,30 +105,39 @@ class report extends CI_Controller {
             redirect('home/');
         }
 
+        $cost_type = $this->m_cost->get_cost_type();
+        $costs = $this->m_cost->get_cost();
+
+        $rcode = $routes[0]['RCode'];
+        $vt_name = $routes[0]['VTDescription'];
+        $source = $routes[0]['RSource'];
+        $detination = $routes[0]['RDestination'];
+        $route_name = "$vt_name เส้นทาง $rcode $source - $detination";
 
 
         $data = array(
-            'page_title' => 'ส่งรายงาน : ',
+            'page_title' => "ส่งรายงาน : $route_name",
             'page_title_small' => "วันที่ $date_th",
             'previous_page' => "",
             'next_page' => "",
-//            'vehicle_types' => $vehicle_types,
+            'vehicle_types' => $vehicle_types,
             'routes' => $routes,
             'routes_detail' => $routes_detail,
             'stations' => $stations,
             'schedules' => $schedules,
-//            'cost_types' => $cost_type,
-//            'costs' => $costs
+            'cost_types' => $cost_type,
+            'costs' => $costs
         );
 
         $data_debug = array(
-//            ''=>$data[''],
-//    'route'=>$data['route'],
-            'routes_detail' => $data['routes_detail'],
+//            'vehicle_types'=>$data['vehicle_types'],
+//            'routes' => $data['routes'],
+//            'routes_detail' => $data['routes_detail'],
 //            'stations' => $data['stations'],
-//            'schedules' => $data['schedules'],
+//            'schedules' => $data['schedules'],  
 //            'cost_types'=>$data['cost_types'],
 //            'costs' => $data['costs'],
+            'post_data' => $this->input->post(),
         );
         $this->m_template->set_Debug($data_debug);
         $this->m_template->set_Title('ส่งรายงาน');

@@ -35,7 +35,7 @@
         height:60px;
     }
 </style>
-<div class="container">
+<div class="container-fluid">
     <div class="row">        
         <div class="page-header">        
             <h3>
@@ -137,7 +137,7 @@
                                     'data-placement' => "top",
                                     'title' => "ส่งรายงาน $route_name",
                                 );
-                               echo anchor("report/send/$rcode/$vtid/$seller_station_id",'<i class="fa fa-send-o"></i>&nbsp;&nbsp;ส่งรายงาน',$send_report);
+                                echo anchor("report/send/$rcode/$vtid/$seller_station_id", '<i class="fa fa-send-o"></i>&nbsp;&nbsp;ส่งรายงาน', $send_report);
                                 ?>                                      
                             </div>
 
@@ -220,8 +220,9 @@
                                                     foreach ($schedules_in_route as $schedule) {
                                                         $tsid = $schedule['TSID'];
                                                         $start_time = strtotime($schedule['TimeDepart']);
-                                                        $time_depart = ' - '; //date('H:i', $start_time);
+                                                        $time_depart = ' - ';
                                                         $travel_time = 0;
+                                                        $report_id = $schedule['ReportID'];
                                                         $i = 0;
                                                         foreach ($stations_in_route as $s) {
                                                             if ($s['IsSaleTicket'] == '1') {
@@ -272,13 +273,18 @@
                                                             'Outcome' => $outcome,
                                                         );
                                                         array_push($data_graph, $temp_data_graph);
+                                                        $status_report = '<i class="fa fa-square-o fa-lg" style="color:  #DA4453" ></i>&nbsp;ยังไม่ส่ง';
+                                                        if ($report_id != NULL) {
+                                                            $status_report = '<i class="fa fa-check-square-o fa-lg" style="color: #37BC9B" ></i>&nbsp;ส่งเเล้ว';
+                                                        }
                                                         ?>
+
                                                         <tr>    
                                                             <td class="text-center"><?= $time_depart ?></td>
                                                             <td class="text-center"><?= number_format($income) ?></td>
                                                             <td class="text-center"><?= number_format($outcome) ?> </td>
                                                             <td class="text-right"><strong><?= number_format($income - $outcome) ?></strong></td>
-                                                            <td class="text-center"></td>
+                                                            <td class="text-center"><?= $status_report ?></td>
                                                         </tr> 
                                                         <?php
                                                     }
