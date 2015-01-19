@@ -43,17 +43,53 @@ Class m_datetime extends CI_Model {
         return $date;
     }
 
-    public function getDateThaiString($strDate) {
+    public function getDateThaiString($strDate = NULL) {
 //        string input 2557-11-15
         if ($strDate == NULL) {
-            return '-';
+            $day = date('d');
+            $month = date('m');
+            $year = date('Y') + 543;
+
+            $strDay = $day;
+            $strMonthThai = $this->month_th[(int) $month];
+            $strYear = $year;
         } else {
             $str = explode('-', $strDate);
             $strYear = trim($str[0]);
             $strMonthThai = $this->month_th[(int) $str[1]];
             $strDay = $str[2];
-            return "$strDay $strMonthThai $strYear";
         }
+        return "$strDay $strMonthThai $strYear";
+    }
+
+    function setTHDateToDB($input_date) {
+        $date = NULL;
+        if ($input_date != NULL || $input_date != '') {
+            $d = new DateTime($input_date);
+            if ($d->format('Y') > date('Y')) {
+                $date .= ($d->format('Y') - 543) . '-';
+                $date .= ($d->format('m')) . '-';
+                $date .= $d->format('d');
+            } else {
+                $date = $d->format('Y-m-d');
+            }
+        }
+        return $date;
+    }
+
+    function setDBDateToTH($input_date) {
+        $date = NULL;
+        if ($input_date != NULL || $input_date != '') {
+            $d = new DateTime($input_date);
+            if ($d->format('Y') > date('Y')) {
+                $date .= ($d->format('Y') + 543) . '-';
+                $date .= ($d->format('m')) . '-';
+                $date .= $d->format('d');
+            } else {
+                $date = $d->format('Y-m-d');
+            }
+        }
+        return $date;
     }
 
     function setDateFomat($input_date) {
@@ -66,6 +102,7 @@ Class m_datetime extends CI_Model {
         } else {
             $date = $d->format('Y-m-d');
         }
+
         return $date;
     }
 
@@ -73,6 +110,12 @@ Class m_datetime extends CI_Model {
         $y = new DateTime($input_year);
         $year = $y->format('yyyy');
         return $year;
+    }
+
+    public function setTimeFormat($input_time) {
+        $t = strtotime($input_time);
+        $time = $t->format('H:i:s');
+        return date('H:i', $time);
     }
 
     public function monthTHtoDB($str_date_th) {
@@ -83,40 +126,15 @@ Class m_datetime extends CI_Model {
         }
     }
 
-    public function getMonthThai($i) {
-        return $this->month_th[$i];
+    public function getMonthThai($i = NULL) {
+        if ($i == NULL) {
+            return $this->month_th;
+        } else {
+            return $this->month_th[$i];
+        }
     }
 
     public function DateThai($strDate) {
-        if ($strDate == NULL) {
-            return '-';
-        } else {
-            $str = explode('-', $strDate);
-            $strYear = trim($str[0]) + 543;
-            $strMonthThai = $this->month_th[(int) $str[1]];
-            $strDay = $str[2];
-            return "$strDay $strMonthThai $strYear";
-        }
-    }
-
-    public function strDateThaiToDB($strDate) {
-        $date = NULL;
-//       $strDate input  22 ธันวาคม 2557
-        if ($strDate == NULL) {
-            return '-';
-        } else {
-            $str = explode(' ', $strDate);
-            $strYear = trim($str[2]) - 543;
-            $strMonth = $this->monthTHtoDB(trim($str[1]));
-            $strDay = $str[0];
-            $d = new DateTime($strYear . '-' . $strMonth . '-' . $strDay);
-            $date = $d->format('Y-m-d');
-            return $date;
-        }
-    }
-
-    public function setDateThai($str) {
-        $strDate = $str;
         if ($strDate == NULL) {
             return '-';
         } else {
