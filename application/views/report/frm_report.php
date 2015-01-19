@@ -7,7 +7,7 @@
     function calNet() {
         var total = document.getElementById('Total').value;
         var vage = document.getElementById('Vage').value;
-        net = document.getElementById('Net');        
+        net = document.getElementById('Net');
 
         if (vage === '' || vage === 0) {
             document.getElementById('Vage').value = '0';
@@ -88,6 +88,8 @@
                     }
                     $form_id = "form_report_$rcode$vtid$seller_station_id";
                     echo form_open("report/send/$rcode/$vtid/$seller_station_id", array('class' => '', 'id' => "$form_id", 'name' => "$form_id"));
+
+                    echo validation_errors();
                     ?>
 
                     <div class="col-md-12 text-center">
@@ -167,6 +169,8 @@
                                 </thead>
                                 <tbody>
                                     <?php
+                                    $total_outcome = 0;
+                                    $total_income = 0;
                                     foreach ($schedules_in_route as $schedule) {
                                         $tsid = $schedule['TSID'];
                                         $start_time = $schedule['TimeDepart'];
@@ -189,54 +193,57 @@
                                                 }
                                             }
                                         }
+                                        $report_id = $schedule['ReportID'];
+                                        /*
+                                         * สถานะการส่งรายงาน
+                                         */
 
-
-                                        $vid = $schedule['VID'];
-                                        $vcode = $schedule['VCode'];
-
-                                        if ($vcode == '') {
-                                            $vcode = '-';
-                                        }
                                         /*
                                          * รายรับ,รายจ่าย
                                          */
+
                                         $income = 0;
+
                                         $outcome = 0;
                                         foreach ($cost_types as $cost_type) {
                                             $cost_type_id = $cost_type['CostTypeID'];
                                             foreach ($costs as $cost) {
                                                 $CostValue = $cost['CostValue'];
-                                                if ($tsid == $cost['TSID'] && $cost_type_id == $cost['CostTypeID']) {
+                                                if ($tsid == $cost['TSID'] && $cost_type_id == $cost['CostTypeID'] && $report_id == NULL) {
                                                     if ($cost_type_id == '1') {
                                                         //รายรับ
                                                         $income+=(int) $CostValue;
+                                                        $total_income+=$CostValue;
                                                         $total +=(int) $CostValue;
                                                     } else {
                                                         //รายจ่าย
                                                         $outcome+=(int) $CostValue;
+                                                        $total_outcome+=$CostValue;
                                                         $total -=(int) $CostValue;
                                                     }
                                                 }
                                             }
                                         }
-                                        ?>
-                                        <tr>
-                                            <td class="text-center">
-                                                <?= $time_depart; ?>
-                                                <input type="hidden" name="TSID[]" value="<?= $tsid ?>">
-                                            </td>                                           
-                                            <td class="text-center"><?= number_format($income) ?></td>
-                                            <td class="text-center"><?= number_format($outcome) ?> </td>
-                                            <td class="text-right"><strong><?= number_format($income - $outcome) ?></strong></td>                                       
-                                        </tr>
-                                        <?php
+                                        if ($report_id == NULL && ($income > 0 || $outcome > 0 )) {
+                                            ?>
+                                            <tr>
+                                                <td class="text-center">
+                                                    <?= $time_depart; ?>
+                                                    <input type="hidden" name="TSID[]" value="<?= $tsid ?>">
+                                                </td>                                           
+                                                <td class="text-center"><?= number_format($income) ?></td>
+                                                <td class="text-center"><?= number_format($outcome) ?> </td>
+                                                <td class="text-right"><strong><?= number_format($income - $outcome) ?></strong></td>                                       
+                                            </tr>
+                                            <?php
+                                        }
                                     }
                                     ?>
                                     <tr>
                                         <td class="text-center"><strong>รวม</strong></td>                                           
-                                        <td class="text-center"><strong><?= number_format($income) ?></strong></td>
-                                        <td class="text-center"><strong><?= number_format($outcome) ?></strong> </td>
-                                        <td class="text-right"><strong><?= number_format($income - $outcome) ?></strong></td>                                       
+                                        <td class="text-center"><strong><?= number_format($total_income) ?></strong></td>
+                                        <td class="text-center"><strong><?= number_format($total_outcome) ?></strong> </td>
+                                        <td class="text-right"><strong><?= number_format($total_income - $total_outcome) ?></strong></td>                                       
                                     </tr>
                                 </tbody>
                             </table>
@@ -253,13 +260,13 @@
                         <div class="form-group">
                             <label for="" class="col-sm-3 control-label">รวม</label>
                             <div class="col-sm-5">
-                                <input type="text" readonly=""  class="form-control input-lg" id="Total" name="Total"  placeholder="" value="<?= number_format($total) ?>">
+                                <input type="text" readonly=""  class="form-control input-lg" id="Total" name="Total"  placeholder="ยอดรวม" value="<?= number_format($total) ?>">
                             </div>
                         </div>
                         <div class="form-group">
                             <label  class="col-sm-3 control-label">ค่าตอบแทน</label>
                             <div class="col-sm-3">
-                                <input type="text"  class="form-control input-lg" id="Vage" name="Vage" placeholder="" value="<?= (set_value('Vage') == NULL) ? 0 : set_value('Vage') ?>" onkeypress="return isNumberKey(event)" onchange="calNet()">                                
+                                <input type="text"  class="form-control input-lg" id="Vage" name="Vage" placeholder="ค่าตอบเเทน" value="<?= (set_value('Vage') == NULL) ? 0 : set_value('Vage') ?>" onkeypress="return isNumberKey(event)" onchange="calNet()">                                
                             </div>
                             <div class="col-sm-3">
                                 <button type="button" class="btn btn-default" onclick="calNet()">ดูยอดคงเหลือ</button>
@@ -268,7 +275,13 @@
                         <div class="form-group">
                             <label for="" class="col-sm-3 control-label">คงเหลือ</label>
                             <div class="col-sm-8">
-                                <input type="text" readonly=""  class="form-control input-lg" id="Net" name="Net" placeholder="" value="<?= (set_value('Net') == NULL) ? $total : set_value('Net') ?>">
+                                <input type="text" readonly=""  class="form-control input-lg" id="Net" name="Net" placeholder="ยอดคงเหลือ" value="<?= (set_value('Net') == NULL) ? $total : set_value('Net') ?>">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="" class="col-sm-3 control-label">หมายเหตุ</label>
+                            <div class="col-sm-8">
+                                <textarea class="form-control" rows="3" id="ReportNote" name="ReportNote" placeholder="หมายเหตุ" value="<?= (set_value('ReportNote') == NULL) ? set_value('ReportNote') : set_value('ReportNote') ?>"></textarea>
                             </div>
                         </div>
                         <div class="form-group">
@@ -278,15 +291,14 @@
                                     'type' => "button",
                                     'class' => "btn btn-lg btn-danger",
                                 );
-                          
+
                                 $save = array(
                                     'class' => "btn btn-lg btn-success",
                                     'title' => "$page_title",
                                     'data-id' => "5",
-                                    'data-title' => "ส่งรายงาน",
+                                    'data-title' => "ส่งรายงาน จุดจอด : $seller_station_name",
                                     'data-sub_title' => "$route_name",
                                     'data-info' => "",
-                                    'data-content' => "จุดจอด $seller_station_name",
                                     'data-toggle' => "modal",
                                     'data-target' => "#confirm",
                                     'data-href' => "",
@@ -296,7 +308,7 @@
                                 echo anchor('#', '<span class="fa fa-save">&nbsp;&nbsp;ส่ง</span>', $save);
                                 ?>  
                             </div>
-                           
+
                         </div>
                     </div>
                 </div>

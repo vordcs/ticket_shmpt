@@ -13,6 +13,7 @@ class report extends CI_Controller {
         $this->load->model('m_schedule');
         $this->load->model('m_ticket');
         $this->load->model('m_cost');
+        $this->load->model('m_report');
         $this->load->library('form_validation');
 
         //Initial language
@@ -114,6 +115,20 @@ class report extends CI_Controller {
         $detination = $routes[0]['RDestination'];
         $route_name = "$vt_name เส้นทาง $rcode $source - $detination";
 
+        $form_data = '';
+        $rs = '';
+        if ($this->m_report->validation_form_add() && $this->form_validation->run() == TRUE) {
+            $form_data = $this->m_report->get_post_form_send();
+//            $rs = $this->m_report->insert_report($form_data);
+//            $alert['alert_message'] = "เพิ่มข้อมูลค่าใช้จ่ายสำเร็จ";
+//            $alert['alert_mode'] = "success";
+//            $this->session->set_flashdata('alert', $alert);
+//
+//            redirect("cost/view/$tsid");
+        } else {
+            $form_data = 'false';
+        }
+
 
         $data = array(
             'page_title' => "ส่งรายงาน : $route_name",
@@ -137,7 +152,9 @@ class report extends CI_Controller {
 //            'schedules' => $data['schedules'],  
 //            'cost_types'=>$data['cost_types'],
 //            'costs' => $data['costs'],
-            'post_data' => $this->input->post(),
+            'form_data' => $form_data,
+//            'rs' => $rs,
+//            'get_report' => $this->m_report->get_report(),
         );
         $this->m_template->set_Debug($data_debug);
         $this->m_template->set_Title('ส่งรายงาน');
