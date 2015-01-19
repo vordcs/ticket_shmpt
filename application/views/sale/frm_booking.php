@@ -265,31 +265,110 @@
 </style>
 
 <nav id="myNavmenu" class="navmenu navmenu-default navmenu-fixed-left offcanvas" role="navigation">
-    <a class="navmenu-brand" href="#">สถานี : </a> 
+    <a class="navmenu-brand" href="<?= base_url('home/') ?>">ระบบขายตั๋วโดยสาร</a> 
     <ul class="nav navmenu-nav">
+        <li class=""><a href="<?= base_url('home/') ?>"><i class="fa fa-home"></i>&nbsp;<span>หน้าหลัก</span> </a> </li>
+        <li id="btnSale"><a href="<?= base_url('sale/') ?>"><i class="fa fa-bullhorn fa-fw"></i>&nbsp;<span>ขายตั๋วโดยสาร</span> </a> </li>
+        <li id="btnSchedule"><a href="<?= base_url('schedule/') ?>"><i class="fa fa-list fa-fw"></i>&nbsp;<span>ตารางเดินรถ</span> </a> </li>                                  
+        <li id="btnCheckIn"><a href="<?= base_url('checkin/') ?>"><i class="fa fa-clock-o fa-fw"></i>&nbsp;<span>ลงเวลา</span></a></li>
+        <li id="btnCost"><a href="<?= base_url('cost/') ?>"><i class="fa fa-pencil-square-o fa-fw" ></i>&nbsp;<span>ค่าใช้จ่าย</span></a></li>
+        <li id="btnReport"><a href="<?= base_url('report/') ?>"><i class="fa fa-calendar-o fa-fw"></i>&nbsp;<span>รายงาน</span> </a> </li> 
         <?php
-        foreach ($routes_all as $r) {
-            $RCode = $r['RCode'];
-            $vt_name = $r['VTDescription'];
-            $RSource = $r['RSource'];
-            $RDestination = $r['RDestination'];
-            $route_name = $vt_name . '  ' . $RCode . ' ' . ' ' . $RSource . ' - ' . $RDestination;           
-            
+        foreach ($routes_seller as $route) {
+            $rcode = $route['RCode'];
+            $vtid = $route['VTID'];
+            $vt_name = $route['VTDescription'];
+            $source = $route['RSource'];
+            $destination = $route['RDestination'];
+            $route_name = "$vt_name เส้นทาง " . $rcode . ' ' . ' ' . $source . ' - ' . $destination;
+            $id = $rcode . "_" . $vtid;
+
+            $seller_station_id = $route['SID'];
+            $seller_station_name = $route['StationName'];
+            $seller_station_seq = $route['Seq'];
+            if ($route['SellerNote'] != NULL) {
+                $note = $route['SellerNote'];
+                $source_name .= " ($note) ";
+            }
             ?>
+            <li class=""><a><i class="fa fa-bus"></i><strong>เส้นทางเดินรถ</strong></a></li>
             <li class="dropdown">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown"><?= $route_name ?> <b class="caret"></b></a>
                 <ul class="dropdown-menu navmenu-nav">
-                    <li class="dropdown-header">ไป  <?= $RSource ?></li>
-                    
-                    <li class="dropdown-header">ไป <?= $RDestination ?></li>
-                    
+                    <li class="dropdown-header"><?= "จุดขึ้นรถ : $seller_station_name" ?></li>                   
+                    <li class="divider"></li>
+                    <?php
+                    foreach ($routes_detail as $rd) {
+                        if ($rcode == $rd['RCode'] && $vtid == $rd['VTID']) {
+                            $rid = $rd['RID'];
+                            $source = $rd['RSource'];
+                            $destination = $rd['RDestination'];
+                            $schedule_type = $rd["ScheduleType"];
+                            $start_point = $rd['StartPoint'];
+                            $route_time = $rd['Time'];
+                            $route_name = " ตารางเวลาเดิน $vt_name เส้นทาง " . $rcode . ' ' . ' ' . $source . ' - ' . $destination;
+
+
+                            //นับจำนวนสถานี
+                            $num_station = 0;
+                            $num_sale_station = 0;
+                            foreach ($stations as $s) {
+                                if ($rcode == $s['RCode'] && $vtid == $s['VTID']) {
+                                    $num_station ++;
+                                    if ($s['IsSaleTicket'] == '1') {
+                                        $num_sale_station ++;
+                                    }
+                                }
+                            }
+                            echo ' <li class="dropdown-header">ไป  ' . $destination . '</li>';
+
+                            $stations_in_route = array();
+
+                            if ($start_point == "S") {
+                                $n = 0;
+                                foreach ($stations as $station) {
+                                    if ($rcode == $station['RCode'] && $vtid == $station['VTID'] && $seller_station_seq < $station['Seq']) {
+                                        $stations_in_route[$n] = $station;
+                                        $n++;
+                                    }
+                                }
+                            }
+                            if ($start_point == "D") {
+                                $n = 0;
+                                for ($i = $num_station; $i >= 0; $i--) {
+                                    foreach ($stations as $station) {
+                                        if ($rcode == $station['RCode'] && $vtid == $station['VTID'] && $station['Seq'] == $i && $seller_station_seq > $station['Seq']) {
+                                            $stations_in_route[$n] = $station;
+                                            $n++;
+                                        }
+                                    }
+                                }
+                            }
+
+                            if (count($stations_in_route) > 0) {
+                                foreach ($stations_in_route as $station) {
+                                    $destination_id = $station['SID'];
+                                    $station_name = $station['StationName'];
+
+                                    $go_to_booking = array(
+                                        'class' => "",
+                                    );
+                                    $action_booking = anchor("sale/booking/$rid/$seller_station_id/$destination_id/", $station_name, $go_to_booking);
+                                    ?>
+                                    <li><?= $action_booking ?></li>
+                                    <?php
+                                }
+                            }
+                        }
+                    }
+                    ?>
+
+
                 </ul>
             </li>
             <?php
         }
-        ?>
-        <li class="divider"></li>
-        <li><a href="#">Link</a></li>     
+        ?>      
     </ul>
 </nav>
 <div class="navbar navbar-default navbar-fixed-top">

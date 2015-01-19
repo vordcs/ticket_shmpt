@@ -29,7 +29,7 @@
             <div class="widget-content">
                 <?php if ($page_title_small != '' || $page_title_small != NULL) {
                     ?>
-                    <p class="lead"><?= $page_title_small ?></p>
+                    <p class="lead text-center"><?= $page_title_small ?></p>
                 <?php }
                 ?>
 
@@ -48,7 +48,7 @@
                 <div class="form-group <?= (form_error('RCode')) ? 'has-error' : '' ?>">
                     <label for="" class="col-sm-3 control-label">เส้นทาง</label>
                     <div class="col-sm-6">
-                        <?php echo $form['SID'];?>
+                        <?php echo $form['SID']; ?>
                         <?php echo $form['RCode']; ?>                        
                         <?php echo $form['RouteName']; ?>
                     </div>
@@ -120,13 +120,19 @@
                         'class' => "btn btn-lg btn-danger",
                     );
                     $save = array(
-                        'type' => "submit",
                         'class' => "btn btn-lg btn-success",
-                        'value' => '',
-                        'content' => '<span class="fa fa-save">&nbsp;&nbsp;บันทึก</span>'
+                        'title' => "$page_title",
+                        'data-id' => "5",
+                        'data-title' => "$page_title",
+                        'data-sub_title' => "รอบเวลา",
+                        'data-info' => "$TimeDepart",
+                        'data-toggle' => "modal",
+                        'data-target' => "#confirm",
+                        'data-href' => "",
+                        'data-form_id' => "form_cost",
                     );
-                    echo anchor('cost/', '<i class="fa fa-times" ></i>&nbsp;ยกเลิก', $cancle) . '  ';
-                    echo form_button($save);
+                    echo anchor(($previous_page == NULL) ? 'cost/' : $previous_page, '<i class="fa fa-times" ></i>&nbsp;ยกเลิก', $cancle) . '  ';
+                    echo anchor('#', '<span class="fa fa-save">&nbsp;&nbsp;บันทึก</span>', $save);
                     ?>                  
                 </div> 
                 <?php echo form_close() ?>  

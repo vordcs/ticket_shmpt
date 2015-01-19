@@ -44,7 +44,7 @@
                     }
                 }
                 if ($num_route > 0) {
-                    echo "<legend>$vt_name</legend>";
+//                    echo "<legend>$vt_name</legend>";
                     if ($num_route == 1) {
                         $class = 'in';
                     }
@@ -104,7 +104,8 @@
                                 </div>
                                 <div id="collapse<?= $id ?>" class="panel-collapse collapse <?= ($x == 1 ) ? 'in' : '' ?> " role="tabpanel" aria-labelledby="heading<?= $id ?>">
                                     <div class="panel-body">
-                                        <div class="col-md-12">
+                                        <div class="col-md-12 text-center">
+                                            <h3><?= $route_name ?></h3>
                                             <p class="lead">จุดจอด : <strong><?= $station_check_in_name ?></strong></p>
                                         </div>
 

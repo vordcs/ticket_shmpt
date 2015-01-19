@@ -12,6 +12,7 @@ class report extends CI_Controller {
         $this->load->model('m_station');
         $this->load->model('m_schedule');
         $this->load->model('m_ticket');
+        $this->load->model('m_cost');
         $this->load->library('form_validation');
 
         //Initial language
@@ -19,28 +20,117 @@ class report extends CI_Controller {
     }
 
     public function index() {
+
+        $date = $this->m_datetime->getDateToday();
+        $date_th = $this->m_datetime->DateThaiToDay();
+        $schedules = $this->m_schedule->get_schedule($date);
+
+        if (count($schedules) <= 0) {
+            $alert['alert_message'] = "ไม่พบข้มูลรอบเวลา วันที่ $date_th";
+            $alert['alert_mode'] = "warning";
+            $this->session->set_flashdata('alert', $alert);
+
+            redirect('home/');
+        }
+
+
+
+        $cost_type = $this->m_cost->get_cost_type();
+        $costs = $this->m_cost->get_cost();
+
+        $vehicle_types = $this->m_route->get_vehicle_types();
+
+        $routes = $this->m_route->get_route_by_seller();
+        $routes_detail = $this->m_route->get_route_detail_by_seller();
+
+        $stations = $this->m_station->get_stations();
+
+
         $data = array(
-//            'from_search' => $this->m_schedule->set_form_search_route(),
-            'vehicle_types' => $this->m_route->get_vehicle_types(),
-            'routes' => $this->m_route->get_route(),
-            'routes_detail' => $this->m_route->get_route_detail(),
             'page_title' => 'รายงาน',
-            'page_title_small' => ': สถานนีที่ขายตั๋ว ',
+            'page_title_small' => " : วันที่ $date_th",
             'previous_page' => "",
             'next_page' => "",
+            'vehicle_types' => $vehicle_types,
+            'routes' => $routes,
+            'routes_detail' => $routes_detail,
+            'stations' => $stations,
+            'schedules' => $schedules,
+            'cost_types' => $cost_type,
+            'costs' => $costs
         );
-        $data['stations'] = $this->m_station->get_station_sale_ticket();
-        $data['schedules'] = $this->m_schedule->get_schedule($this->m_datetime->getDateToday());
-        $data['schedule_master'] = $this->m_route->get_schedule_manual();
+
         $data_debug = array(
-//            'from_search' => $data['from_search'],
 //    'route'=>$data['route'],
 //            'stations' => $data['stations'],
-//    ''=>$data[''],
+//            'costs' => $data['costs'],
         );
         $this->m_template->set_Debug($data_debug);
         $this->m_template->set_Title('รายงาน');
         $this->m_template->set_Content('report/report', $data);
+        $this->m_template->showTemplate();
+    }
+
+    public function send($rcode, $vtid, $sid) {
+
+        if ($rcode == NULL || $vtid == NULL || $sid == NULL) {
+            redirect('report');
+        }
+
+        $date = $this->m_datetime->getDateToday();
+        $date_th = $this->m_datetime->DateThaiToDay();
+
+        $schedules = $this->m_schedule->get_schedule($date, $rcode, $vtid);
+
+        if (count($schedules) <= 0) {
+            $alert['alert_message'] = "ไม่พบข้มูลรอบเวลา วันที่ $date_th";
+            $alert['alert_mode'] = "warning";
+            $this->session->set_flashdata('alert', $alert);
+
+            redirect('home/');
+        }
+
+        $routes = $this->m_route->get_route_by_seller($rcode, $vtid);
+        $routes_detail = $this->m_route->get_route_detail_by_seller($rcode, $vtid);
+
+        $stations = $this->m_station->get_stations($rcode, $vtid);
+
+        if (count($routes) <= 0 || count($routes_detail) <= 0 || count($stations) <= 0) {
+            $alert['alert_message'] = "ไม่พบข้อมูล กรุณาติดต่อผู้ดูเเลระบบ";
+            $alert['alert_mode'] = "danger";
+            $this->session->set_flashdata('alert', $alert);
+
+            redirect('home/');
+        }
+
+
+
+        $data = array(
+            'page_title' => 'ส่งรายงาน : ',
+            'page_title_small' => "วันที่ $date_th",
+            'previous_page' => "",
+            'next_page' => "",
+//            'vehicle_types' => $vehicle_types,
+            'routes' => $routes,
+            'routes_detail' => $routes_detail,
+            'stations' => $stations,
+            'schedules' => $schedules,
+//            'cost_types' => $cost_type,
+//            'costs' => $costs
+        );
+
+        $data_debug = array(
+//            ''=>$data[''],
+//    'route'=>$data['route'],
+            'routes_detail' => $data['routes_detail'],
+//            'stations' => $data['stations'],
+//            'schedules' => $data['schedules'],
+//            'cost_types'=>$data['cost_types'],
+//            'costs' => $data['costs'],
+        );
+        $this->m_template->set_Debug($data_debug);
+        $this->m_template->set_Title('ส่งรายงาน');
+        $this->m_template->set_Content('report/frm_report', $data);
         $this->m_template->showTemplate();
     }
 

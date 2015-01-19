@@ -27,6 +27,17 @@ class cost extends CI_Controller {
     }
 
     public function index() {
+        $date = $this->m_datetime->getDateToday();
+        $date_th = $this->m_datetime->DateThaiToDay();
+        $schedules = $this->m_schedule->get_schedule($date);
+        
+         if (count($schedules) <= 0) {
+            $alert['alert_message'] = "ไม่พบข้มูลรอบเวลา วันที่ $date_th";
+            $alert['alert_mode'] = "warning";
+            $this->session->set_flashdata('alert', $alert);
+            
+            redirect('home/');
+        }
 
         $cost_type = $this->m_cost->get_cost_type();
         $costs = $this->m_cost->get_cost();
@@ -37,11 +48,7 @@ class cost extends CI_Controller {
         $routes_detail = $this->m_route->get_route_detail_by_seller();
 
         $stations = $this->m_station->get_stations();
-
-        $date = $this->m_datetime->getDateToday();
-        $schedules = $this->m_schedule->get_schedule($date);
-
-        $date_th = $this->m_datetime->DateThaiToDay();
+   
 
         $data = array(
             'page_title' => 'ค่าใช้จ่าย : ',
@@ -72,8 +79,8 @@ class cost extends CI_Controller {
         $this->m_template->showTemplate();
     }
 
-    public function view($tsid = NULL, $vid = NULL) {
-        if ($tsid == NULL && $vid == NULL) {
+    public function view($tsid = NULL) {
+        if ($tsid == NULL) {
             $alert['alert_message'] = "กรุณาเลือกรอบเวลา";
             $alert['alert_mode'] = "warning";
             $this->session->set_flashdata('alert', $alert);
@@ -84,6 +91,7 @@ class cost extends CI_Controller {
         $schedule = $this->m_schedule->get_schedule($date, NULL, NULL, NULL, $tsid)[0];
 
         $rid = $schedule['RID'];
+        $vcode = $schedule['VCode'];
 
         $route = $this->m_cost->get_route(NULL, NULL, $rid)[0];
 
@@ -92,6 +100,13 @@ class cost extends CI_Controller {
 
         $costs_detail = $this->m_cost->get_cost_detail();
         $date_th = $this->m_datetime->DateThaiToDay();
+
+
+
+        $SID = $this->m_user->get_saller_station(NULL, NULL, $rid)[0]['SID'];
+
+        $time_departs = $this->m_schedule->get_time_depart($date, $rid, $tsid, $SID)[0];
+        $time_depart = $time_departs['TimeDepart'];
 
         $data = array(
             'page_title' => 'ค่าใช้จ่าย : ',
@@ -102,6 +117,9 @@ class cost extends CI_Controller {
             'cost_types' => $cost_type,
             'costs' => $costs,
             'costs_detail' => $costs_detail,
+            'TSID' => $tsid,
+            'TimeDepart' => $time_depart,
+            'VCode' =>$vcode,
         );
 
         $data_debug = array(
@@ -109,6 +127,8 @@ class cost extends CI_Controller {
 //            'cost_types' => $data['cost_types'],
 //            'costs' => $data['costs'],
 //            'costs_detail' => $data['costs_detail'],
+//            'TSID'=>$tsid,
+//            'schedule' => $schedule,
         );
 
         $this->m_template->set_Debug($data_debug);
@@ -118,9 +138,9 @@ class cost extends CI_Controller {
         $this->m_template->showTemplate();
     }
 
-    public function add($ctid, $tsid, $time_depart) {
+    public function add($ctid, $tsid) {
 
-        if ($ctid == null || $tsid == NULL || $time_depart == NULL) {
+        if ($ctid == null || $tsid == NULL) {
             $alert['alert_message'] = "กรุณาเลือกรอบเวลา";
             $alert['alert_mode'] = "warning";
             $this->session->set_flashdata('alert', $alert);
@@ -128,7 +148,7 @@ class cost extends CI_Controller {
             redirect('cost/');
         }
         $date = $this->m_datetime->getDateToday();
-        $schedules = $this->m_schedule->get_schedule($date);
+        $schedules = $this->m_schedule->get_schedule($date, NULL, NULL, NULL, $tsid);
         if (count($schedules) <= 0) {
             $alert['alert_message'] = "ไม่พบข้มูลรอบเวลา";
             $alert['alert_mode'] = "warning";
@@ -137,6 +157,12 @@ class cost extends CI_Controller {
             redirect('cost/');
         }
 
+        $RID = $schedules[0]['RID'];
+
+        $SID = $this->m_user->get_saller_station(NULL, NULL, $RID)[0]['SID'];
+
+        $time_departs = $this->m_schedule->get_time_depart($date, $RID, $tsid, $SID)[0];
+        $time_depart = $time_departs['TimeDepart'];
 
         $form_data = '';
         $rs = '';
@@ -157,6 +183,8 @@ class cost extends CI_Controller {
             'page_title_small' => '',
             'previous_page' => '',
             'next_page' => '',
+            'TimeDepart' => $time_depart,
+            'route_name' => '',
         );
 
         $data_debug = array(
@@ -164,6 +192,7 @@ class cost extends CI_Controller {
 //            'data_insert_rs'=>$rs,
 //            "schedule" => $this->m_cost->get_schedule($date),
 //            'saller_station' => $this->m_user->get_saller_station(),
+//            '$time_departs' => $time_departs,
         );
 
         $this->m_template->set_Debug($data_debug);
@@ -172,34 +201,50 @@ class cost extends CI_Controller {
         $this->m_template->showTemplate();
     }
 
-    public function edit($cost_id, $rid) {
-        $date_th = $this->m_datetime->DateThaiToDay();
+    public function edit($cost_type_id, $cost_id, $rid, $tsid) {
 
         $cost = $this->m_cost->get_cost($cost_id)[0];
-        $route = $this->m_cost->get_route(NULL, NULL, $rid)[0];
+        $CostTypeName = $cost['CostTypeName'];
+        $date = date('Y-m-d', strtotime($cost['CostDate']));
 
+
+        $route = $this->m_cost->get_route(NULL, NULL, $rid)[0];
+        $RCode = $route['RCode'];
+        $VTID = $route['VTID'];
+        $source = $route['RSource'];
+        $desination = $route['RDestination'];
+        $vt_name = $route['VTDescription'];
+        $route_name = "$vt_name เส้นทาง " . $RCode . ' ' . ' ' . $source . ' - ' . $desination;
+
+
+        $SID = $this->m_user->get_saller_station(NULL, NULL, $rid)[0]['SID'];
+
+        $time_departs = $this->m_schedule->get_time_depart($date, $rid, $tsid, $SID)[0];
+        $time_depart = $time_departs['TimeDepart'];
 
         $form_data = '';
         $rs = '';
         if ($this->m_cost->validation_form_edit() && $this->form_validation->run() == TRUE) {
-            $form_data = $this->m_cost->get_post_form_edit();
-//            $rs = $this->m_cost->insert_cost($form_data);
-//            $alert['alert_message'] = "เพิ่มข้อมูลค่าใช้จ่ายสำเร็จ";
-//            $alert['alert_mode'] = "success";
-//            $this->session->set_flashdata('alert', $alert);
-//            redirect("cost/view/$tsid");
+            $form_data = $this->m_cost->get_post_form_edit($cost_type_id);
+            $rs = $this->m_cost->update_cost($cost_id, $form_data);
+            $alert['alert_message'] = "แก้ไข ข้อมูลค่าใช้จ่าย";
+            $alert['alert_mode'] = "success";
+            $this->session->set_flashdata('alert', $alert);
+            redirect("cost/view/$tsid");
         }
         $data = array(
-            'page_title' => 'ค่าใช้จ่าย : ',
-            'page_title_small' => "วันที่ $date_th",
-            'previous_page' => '',
+            'page_title' => "แก้ไขข้อมูล :  $CostTypeName  ",
+            'page_title_small' => "",
+            'previous_page' => "cost/view/$tsid",
             'next_page' => '',
             'form' => $this->m_cost->set_form_edit($route, $cost),
+            'TimeDepart' => $time_depart,
+            'route_name' => $route_name,
         );
 
         $data_debug = array(
-            'form_data' => $form_data,
-//            'data_insert_rs'=>$rs,
+//            'form_data' => $form_data,
+//            'data_upadte' => $rs,
 //            'route' => $route,
 //            'cost' => $cost,
 //            "schedule" => $this->m_cost->get_schedule($date),
@@ -209,6 +254,30 @@ class cost extends CI_Controller {
         $this->m_template->set_Title('แก้ไขค่าใช้จ่าย');
         $this->m_template->set_Content('cost/frm_cost', $data);
         $this->m_template->showTemplate();
+    }
+
+    public function delete($cost_id, $tsid) {
+
+
+        if ($cost_id == NULL || $tsid == NULL) {
+            $alert['alert_message'] = "กรุณาเลือกข้อมูลค่าใช้จ่าย";
+            $alert['alert_mode'] = "danger";
+            $this->session->set_flashdata('alert', $alert);
+            redirect('cost/');
+        }
+
+        $rs = $this->m_cost->delete_cost($cost_id);
+        if ($rs) {
+            $alert['alert_message'] = "ลบข้อมูลค่าใช้จ่ายสำเร็จ";
+            $alert['alert_mode'] = "info";
+            $this->session->set_flashdata('alert', $alert);
+        } else {
+            $alert['alert_message'] = "ไม่พบข้อมูลค้าใช้จ่าย";
+            $alert['alert_mode'] = "danger";
+            $this->session->set_flashdata('alert', $alert);
+        }
+
+        redirect("cost/view/$tsid");
     }
 
     //ตรวจสอบเบอร์รถ

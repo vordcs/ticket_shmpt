@@ -21,6 +21,19 @@ class sale extends CI_Controller {
     }
 
     public function index() {
+
+        $date = $this->m_datetime->getDateToday();
+        $date_th = $this->m_datetime->DateThaiToDay();
+        $schedules = $this->m_schedule->get_schedule($date);
+
+        if (count($schedules) <= 0) {
+            $alert['alert_message'] = "ไม่พบข้มูลรอบเวลา วันที่ $date_th";
+            $alert['alert_mode'] = "warning";
+            $this->session->set_flashdata('alert', $alert);
+
+            redirect('home/');
+        }
+
         $data = array(
             'SourceID' => '',
             'routes' => $this->m_route->get_route_by_seller(),
@@ -33,7 +46,6 @@ class sale extends CI_Controller {
 //            'routes' => $data['routes'],
 //            'routes_detail' => $data['routes_detail'],
 //            'stations' => $data['stations'],
-//            'rcode' => "vtid = $vtid | RCode = $rcode | SourceID = $source_id", 
 //            'eid' => $this->session->userdata('EID'),
         );
         $this->m_template->set_Debug($data_debug);
@@ -92,8 +104,8 @@ class sale extends CI_Controller {
             'form' => $this->m_sale->set_form_sale($route, $s_station, $d_station, $schedule, $fare),
             'date' => $this->m_datetime->setDateThai($date),
             'route' => $route,
-            'routes_all' => $this->m_route->get_route(),
-            'route_details' => $this->m_route->get_route_detail(),
+            'routes_seller' => $this->m_route->get_route_by_seller(),
+            'routes_detail' => $this->m_route->get_route_detail_by_seller(),
             'stations' => $stations,
             's_station' => $s_station,
             'd_station' => $d_station,

@@ -6,11 +6,13 @@ if (!defined('BASEPATH'))
 class m_cost extends CI_Model {
 
     public function get_cost($cid = null, $ctid = NULL, $date = NULL, $tsid = NULL, $vid = NULL) {
+        $this->db->select('*,cost.CreateBy AS CreateBy,cost.CreateDate as CreateDate');
         $this->db->join('cost_type', 'cost_type.CostTypeID = cost.CostTypeID');
         $this->db->join('cost_detail', 'cost_detail.CostDetailID = cost.CostDetailID', 'left');
         $this->db->join('vehicles_has_cost', 'vehicles_has_cost.CostID = cost.CostID', 'left');
         $this->db->join('vehicles', 'vehicles.VID = vehicles_has_cost.VID', 'left');
         $this->db->join('t_schedules_day_has_cost', 't_schedules_day_has_cost.CostID = cost.CostID');
+        $this->db->join('t_stations', 't_stations.SID = cost.SID', 'left');
         if ($cid != NULL) {
             $this->db->where('cost.CostID', $cid);
         }
@@ -28,6 +30,7 @@ class m_cost extends CI_Model {
         }
 
         $this->db->where('cost.CostDate', $date);
+//        $this->db->where('cost.CreateBy', $this->m_user->get_user_id());
         $query = $this->db->get('cost');
         return $query->result_array();
     }
@@ -141,6 +144,33 @@ class m_cost extends CI_Model {
         return $rs;
     }
 
+    public function update_cost($cid, $data) {
+        $this->db->where('CostID', $cid);
+        $this->db->update('cost', $data['data_cost']);
+        if ($this->db->affected_rows() == 1) {
+            $cost = $this->get_cost($cid)[0];
+            return $cost;
+        } else {
+            return NULL;
+        }
+    }
+
+    public function delete_cost($cost_id) {
+        //delete vehicle has cost
+        $this->db->where('CostID', $cost_id);
+        $this->db->delete('vehicles_has_cost');
+
+        //delete schedules_day has cost
+        $this->db->where('CostID', $cost_id);
+        $this->db->delete('t_schedules_day_has_cost');
+
+        //delete cost
+        $this->db->where('CostID', $cost_id);
+        $this->db->delete('cost');
+
+        return TRUE;
+    }
+
     public function set_form_add($ctid, $tsid = NULL, $time_depart = NULL) {
         $date_th = $this->m_datetime->DateThaiToDay();
 
@@ -182,7 +212,8 @@ class m_cost extends CI_Model {
         );
         $i_SID = array(
             'type' => 'hidden',
-            'name' => 'VTID',
+            'name' => 'SID',
+            'id' => 'SID',
             'value' => $SID,
             'class' => 'form-control',
         );
@@ -258,7 +289,7 @@ class m_cost extends CI_Model {
             'class' => 'form-control');
         $dropdown = 'class="selecter_3" data-selecter-options = \'{"cover":"true"}\' ';
         $form_add = array(
-            'form' => form_open("cost/add/$ctid/$tsid/$time_depart", array('class' => 'form-horizontal', 'id' => 'form_cost')),
+            'form' => form_open("cost/add/$ctid/$tsid/", array('class' => 'form-horizontal', 'id' => 'form_cost', 'name' => 'form_cost')),
             'TSID' => form_input($i_TSID),
             'TimeDepart' => form_input($i_TimeDepart),
             'RouteName' => form_input($i_RouteName),
@@ -409,7 +440,7 @@ class m_cost extends CI_Model {
         );
         $i_SID = array(
             'type' => 'hidden',
-            'name' => 'VTID',
+            'name' => 'SID',
             'value' => $SID,
             'class' => 'form-control',
         );
@@ -457,7 +488,7 @@ class m_cost extends CI_Model {
             'class' => 'form-control');
         $dropdown = 'class="selecter_3" data-selecter-options = \'{"cover":"true"}\' ';
         $form_add = array(
-            'form' => form_open("cost/edit/$CostID/$RID/", array('class' => 'form-horizontal', 'id' => 'form_cost')),
+            'form' => form_open("cost/edit/$CostTypeID/$CostID/$RID/$TSID", array('class' => 'form-horizontal', 'id' => 'form_cost', 'name' => 'form_cost')),
             'TSID' => form_input($i_TSID),
             'TimeDepart' => form_input($i_TimeDepart),
             'RouteName' => form_input($i_RouteName),
@@ -588,10 +619,10 @@ class m_cost extends CI_Model {
         return $form_data;
     }
 
-    public function get_post_form_edit() {
+    public function get_post_form_edit($cost_type_id) {
         //ข้อมูลค่าใช้จ่าย        
         $data_cost = array(
-            'CostTypeID' => $this->input->post('CostTypeID'),
+            'CostTypeID' => $cost_type_id,
             'CostDetailID' => $this->input->post('CostDetailID'),
             'CostDate' => $this->m_datetime->setDateFomat($this->input->post('CostDate')),
             'CostValue' => $this->input->post('CostValue'),
@@ -607,8 +638,6 @@ class m_cost extends CI_Model {
 
         $form_data = array(
             'data_cost' => $data_cost,
-            'TSID' => $this->input->post('TSID'),
-            'VID' => $this->input->post('VID'),
         );
 
         return $form_data;

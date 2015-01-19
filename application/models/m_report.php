@@ -6,4 +6,6 @@ if (!defined('BASEPATH'))
 
 class m_report extends CI_Model {
     
+    
+    
 }

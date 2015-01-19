@@ -75,6 +75,11 @@ foreach ($cost_types as $cost_type) {
             <div class="widget">
                 <div class="widget-header"><?= $route_name ?></div>
                 <div class="widget-content">
+                    <p class="lead text-center">
+                        <span>รอบเวลา : <strong><?= $TimeDepart ?></strong></span>
+                        &nbsp;&nbsp;
+                        <span>รถเบอร์ : <strong><?= $VCode ?></strong></span>
+                    </p>
                     <div class="stats-box">
                         <div class="col-md-4">
                             <div class="stats-box-title">รายรับ</div>
@@ -119,9 +124,12 @@ foreach ($cost_types as $cost_type) {
                                 foreach ($costs as $cost) {
                                     $CostID = $cost['CostID'];
                                     $CostDetail = $cost['CostDetail'];
+                                    if ($cost['OtherCostDetail'] != NULL) {
+                                        $CostDetail = $cost['OtherCostDetail'];
+                                    }
                                     $CostValue = $cost['CostValue'];
-                                    $total +=(int) $CostValue;
                                     if ($cost_type_id == $cost['CostTypeID']) {
+                                        $total +=(int) $CostValue;
                                         $edit = array(
                                             'type' => 'button',
                                             'class' => 'btn btn-warning btn-sm',
@@ -130,12 +138,22 @@ foreach ($cost_types as $cost_type) {
                                             'title' => "แก้ไขข้อมูล $cost_type_name : $CostDetail  ",
                                         );
                                         $delete = array(
+                                            'type' => 'button',
+                                            'class' => 'btn btn-danger btn-sm',
                                             'data-toggle' => "tooltip",
                                             'data-placement' => "right",
-                                            'title' => "Tooltip on right",
+                                            'title' => "ลบข้อมูล $cost_type_name : $CostDetail",
+                                            'data-id' => "2",
+                                            'data-title' => "ลบข้อมูล $cost_type_name",
+                                            'data-sub_title' => "$CostDetail",
+                                            'data-info' => "$CostValue",
+                                            'data-toggle' => "modal",
+                                            'data-target' => "#confirm",
+                                            'data-href' => "cost/delete/$CostID/$TSID",
                                         );
 
-                                        $action_edit = anchor("cost/edit/$CostID/$rid", '<i class="fa fa-edit"></i>', $edit);
+                                        $action_edit = anchor("cost/edit/$cost_type_id/$CostID/$rid/$TSID", '<i class="fa fa-edit"></i>', $edit);
+                                        $action_delete = anchor("#", '<i class="fa fa-trash-o"></i>', $delete)
                                         ?>
                                         <tr>
                                             <td class="text-left"><?= $CostDetail ?></td>
@@ -143,7 +161,7 @@ foreach ($cost_types as $cost_type) {
                                             <td class="text-center">
                                                 <?= $action_edit ?>
                                                 &nbsp;
-                                                <a class="btn btn-danger btn-sm"><i class="fa fa-trash-o"></i></a>
+                                                <?= $action_delete ?>
                                             </td>
                                         </tr>
                                         <?php

@@ -27,11 +27,23 @@ class m_route extends CI_Model {
         return $query->result_array();
     }
 
-    public function get_route_by_seller() {
+    public function get_route_by_seller($rcode = NULL, $vtid = NULL, $rid = NULL) {
         $this->db->select('*');
         $this->db->join('t_routes', 'sellers.RCode = t_routes.RCode AND sellers.VTID = t_routes.VTID');
         $this->db->join('vehicles_type', 'vehicles_type.VTID = t_routes.VTID');
-        $this->db->join('t_stations', 'sellers.SID =  t_stations.SID');                
+        $this->db->join('t_stations', 'sellers.SID =  t_stations.SID');
+
+        if ($rid != NULL) {
+            $this->db->where('RID', $rid);
+        } else {
+            $this->db->where('StartPoint', 'S');
+        }
+        if ($rcode != NULL) {
+            $this->db->where('sellers.RCode', $rcode);
+        }
+        if ($vtid != NULL) {
+            $this->db->where('sellers.VTID', $vtid);
+        }
 
         $this->db->where('sellers.EID', $this->m_user->get_user_id());
 
@@ -42,11 +54,18 @@ class m_route extends CI_Model {
         return $query->result_array();
     }
 
-    public function get_route_detail_by_seller() {
-//        $this->db->select('*');
+    public function get_route_detail_by_seller($rcode = NULL, $vtid = NULL) {
+        $this->db->select('*');
         $this->db->join('t_routes', 'sellers.RCode = t_routes.RCode AND sellers.VTID = t_routes.VTID');
         $this->db->join('vehicles_type', 'vehicles_type.VTID = t_routes.VTID');
+        $this->db->join('t_stations', 'sellers.SID =  t_stations.SID');
 
+        if ($rcode != NULL) {
+            $this->db->where('sellers.RCode', $rcode);
+        }
+        if ($vtid != NULL) {
+            $this->db->where('sellers.VTID', $vtid);
+        }
 
         $this->db->where('sellers.EID', $this->m_user->get_user_id());
 
@@ -58,12 +77,15 @@ class m_route extends CI_Model {
 
     public function search_route($rcode = NULL, $source = NULL, $destination = NULL, $rid = NULL) {
 
-        if ($rcode != NULL)
+        if ($rcode != NULL){
             $this->db->where('RCode', $rcode);
-        if ($source != NULL)
+        }
+        if ($source != NULL){
             $this->db->where('RSource', $source);
-        if ($destination != NULL)
+        }
+        if ($destination != NULL){
             $this->db->where('RDestination', $destination);
+        }
         $this->db->where('StartPoint', 'S');
 //        $this->db->group_by(array('RCode', 't_routes.VTID'));
         $query = $this->db->get('t_routes');
@@ -124,7 +146,7 @@ class m_route extends CI_Model {
             $this->db->where('SID ', $sid);
         }
         $this->db->where('IsSaleTicket ', 1);
-        $this->db->order_by('Seq');
+        $this->db->order_by('Seq','asc');
         $query = $this->db->get('t_stations');
 
         $rs = $query->result_array();
@@ -142,7 +164,7 @@ class m_route extends CI_Model {
         if ($sid != NULL) {
             $this->db->where('SID ', $sid);
         }
-        $this->db->order_by('Seq');
+        $this->db->order_by('Seq','desc');
         $query = $this->db->get('t_stations');
 
         $rs = $query->result_array();

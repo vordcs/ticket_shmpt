@@ -25,17 +25,28 @@ class checkin extends CI_Controller {
 
     public function index() {
 
+        $date = $this->m_datetime->getDateToday();
+        $date_th = $this->m_datetime->DateThaiToDay();
+        $schedules = $this->m_checkin->get_schedule($date);
+
+        if (count($schedules) <= 0) {
+            $alert['alert_message'] = "ไม่พบข้มูลรอบเวลา วันที่ $date_th";
+            $alert['alert_mode'] = "warning";
+            $this->session->set_flashdata('alert', $alert);
+
+            redirect('home/');
+        }
+
         $data = array(
             'page_title' => 'ลงเวลา : ',
             'page_title_small' => '',
             'previous_page' => '',
             'next_page' => '',
         );
-        $date = $this->m_datetime->getDateToday();
+     
         $vehicle_types = $this->m_route->get_vehicle_types();
         $routes = $this->m_route->get_route_by_seller();
-        $routes_detail = $this->m_route->get_route_detail_by_seller();
-        $schedules = $this->m_checkin->get_schedule($date);
+        $routes_detail = $this->m_route->get_route_detail_by_seller();        
         $stations = $this->m_station->get_stations();
         $stations_sale_ticket = $this->m_station->get_station_sale_ticket();
 

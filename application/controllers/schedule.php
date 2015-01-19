@@ -19,6 +19,20 @@ class schedule extends CI_Controller {
     }
 
     public function index() {
+
+        $date = $this->m_datetime->getDateToday();
+        $date_th = $this->m_datetime->DateThaiToDay();
+        $schedules = $this->m_schedule->get_schedule($date);
+
+        if (count($schedules) <= 0) {
+            $alert['alert_message'] = "ไม่พบข้มูลรอบเวลา วันที่ $date_th";
+            $alert['alert_mode'] = "warning";
+            $this->session->set_flashdata('alert', $alert);
+
+            redirect('home/');
+        }
+
+
         $data = array(
             'page_title' => 'ตารางเวลาเดินรถ : ',
             'page_title_small' => 'จุดจอดของคนขาย',
@@ -29,7 +43,7 @@ class schedule extends CI_Controller {
             'vehicle_types' => $this->m_route->get_vehicle_types(),
         );
         $data['stations'] = $this->m_station->get_stations();
-        $data['schedules'] = $this->m_schedule->get_schedule($this->m_datetime->getDateToday());
+        $data['schedules'] = $schedules;
         $data_debug = array(
 //            'from_search' => $data['from_search'],
 //            'routes' => $data['routes'],

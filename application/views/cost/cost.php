@@ -20,7 +20,6 @@
 </div>
 <div class="container-fluid">
     <div class="row-fluid">
-
         <?php
         foreach ($vehicle_types as $type) {
             $vtid = $type['VTID'];
@@ -32,7 +31,7 @@
                 }
             }
             if ($num_route > 0) {
-                echo "<legend>$vt_name</legend>";
+//                echo "<legend>$vt_name</legend>";
                 if ($num_route == 1) {
                     $class = 'in';
                 }
@@ -91,8 +90,8 @@
                             </div>
                             <div id="collapse<?= $id ?>" class="panel-collapse collapse <?= ($x == 1 ) ? 'in' : '' ?> " role="tabpanel" aria-labelledby="heading<?= $id ?>">
                                 <div class="panel-body">
-                                    <div class="col-md-12">
-                                        <p class="lead text-center"><?= $route_name ?></p>
+                                    <div class="col-md-12 text-center">
+                                        <h3><?= $route_name ?></h3>
                                         <p class="lead">จุดจอด : <strong><?= $seller_station_name ?></strong></p>
                                     </div>
                                     <?php
@@ -255,8 +254,8 @@
                                                                                 'data-placement' => "top",
                                                                                 'title' => "เพิ่มรายจ่าย รถเบอร์ $vcode รอบเวลา $time_depart",
                                                                             );
-                                                                            echo anchor("cost/add/1/$tsid/$time_depart", '<span class="fa fa-plus"></span>', $add_income) . '  ';
-                                                                            echo anchor("cost/add/2/$tsid/$time_depart", '<span class="fa fa-minus"></span>', $add_outcome);
+                                                                            echo anchor("cost/add/1/$tsid/", '<span class="fa fa-plus"></span>', $add_income) . '  ';
+                                                                            echo anchor("cost/add/2/$tsid/", '<span class="fa fa-minus"></span>', $add_outcome);
                                                                             ?>
                                                                         </td>
                                                                     </tr>
@@ -286,6 +285,9 @@
 
     </div>
 </div>
+
+
+
 <div class="container hidden">  
     <div class="row">
         <div class="col-lg-12 col-md-12">
