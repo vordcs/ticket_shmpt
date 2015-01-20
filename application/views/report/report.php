@@ -101,10 +101,7 @@
                         }
                     }
                     ?>                         
-                    <div class="widget">
-                        <div class="widget-header">
-                            <?= $route_name ?>
-                        </div>
+                    <div class="widget">                       
                         <div class="widget-content">
                             <div class="col-md-12 text-center">
                                 <h3><?= $route_name ?></h3>
@@ -194,7 +191,11 @@
                                     }
 
                                     $class = ' ';
-                                    if ($seller_station_seq == 1 || $seller_station_seq == $num_station) {
+                                    if ($seller_station_seq == 1 && $start_point == 'S') {
+                                        $class = '';
+                                    } elseif ($seller_station_seq == $num_station && $start_point == 'D') {
+                                        $class = ' ';
+                                    } elseif ($seller_station_seq == 1 || $seller_station_seq == $num_station) {
                                         $class = 'hidden';
                                     }
                                     ?>
@@ -249,6 +250,14 @@
                                                          */
                                                         $income = 0;
                                                         $outcome = 0;
+                                                        /*
+                                                         * รายการรายรับที่เกิดจากการซื้อตั๋ว
+                                                         */
+                                                        foreach ($tickets as $ticket) {
+                                                            if ($tsid == $ticket['TSID'] ) {
+                                                                $income+=$ticket['PriceSeat'];
+                                                            }
+                                                        }
                                                         foreach ($cost_types as $cost_type) {
                                                             $cost_type_id = $cost_type['CostTypeID'];
                                                             foreach ($costs as $cost) {

@@ -44,7 +44,7 @@ Class m_datetime extends CI_Model {
     }
 
     public function getDateThaiString($strDate = NULL) {
-//        string input 2557-11-15
+//        string input 2015-11-15
         if ($strDate == NULL) {
             $day = date('d');
             $month = date('m');

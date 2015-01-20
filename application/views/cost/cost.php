@@ -207,6 +207,15 @@
                                                                      */
                                                                     $income = 0;
                                                                     $outcome = 0;
+                                                                    /*
+                                                                     * รายการรายรับที่เกิดจากการซื้อตั๋ว
+                                                                     */
+                                                                    foreach ($tickets as $ticket) {
+                                                                        if ($tsid == $ticket['TSID']) {
+                                                                            $income+=$ticket['PriceSeat'];
+                                                                        }
+                                                                    }
+
                                                                     foreach ($cost_types as $cost_type) {
                                                                         $cost_type_id = $cost_type['CostTypeID'];
                                                                         foreach ($costs as $cost) {
@@ -231,6 +240,10 @@
                                                                         'data-placement' => "top",
                                                                         'title' => "ดูค่าใช้จ่าย รอบเวลา $time_depart รถเบอร์ $vcode ",
                                                                     );
+                                                                    $IsReport = '';
+                                                                    if ($schedule['ReportID'] != NULL) {
+                                                                        $IsReport = 'disabled';
+                                                                    }
                                                                     ?>
                                                                     <tr>
                                                                         <td class="text-center"><?= anchor("cost/view/$tsid/", $time_depart, $view) . '  '; ?></td>
@@ -242,14 +255,14 @@
                                                                             <?php
                                                                             $add_income = array(
                                                                                 'type' => "button",
-                                                                                'class' => "btn btn-info btn-sm",
+                                                                                'class' => "btn btn-info btn-sm $IsReport",
                                                                                 'data-toggle' => "tooltip",
                                                                                 'data-placement' => "top",
                                                                                 'title' => "เพิ่มรายรับ รถเบอร์ $vcode รอบเวลา $time_depart",
                                                                             );
                                                                             $add_outcome = array(
                                                                                 'type' => "button",
-                                                                                'class' => "btn btn-warning btn-sm",
+                                                                                'class' => "btn btn-warning btn-sm $IsReport",
                                                                                 'data-toggle' => "tooltip",
                                                                                 'data-placement' => "top",
                                                                                 'title' => "เพิ่มรายจ่าย รถเบอร์ $vcode รอบเวลา $time_depart",
@@ -285,9 +298,6 @@
 
     </div>
 </div>
-
-
-
 <div class="container hidden">  
     <div class="row">
         <div class="col-lg-12 col-md-12">

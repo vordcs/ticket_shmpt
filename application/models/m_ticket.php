@@ -6,6 +6,7 @@ if (!defined('BASEPATH'))
 class m_ticket extends CI_Model {
 
     public function get_ticket($date, $tsid = null, $status_seat = NULL, $eid = NULL) {
+//        $this->check_ticket();
         $this->db->where('DateSale', $date);
         if ($tsid != NULL) {
             $this->db->where('TSID', $tsid);
@@ -14,9 +15,23 @@ class m_ticket extends CI_Model {
             $this->db->where('StatusSeat', $status_seat);
         }
         if ($eid != NULL) {
+//            $eid = $this->m_user->get_user_id();
             $this->db->where('Seller', $eid);
-        }      
-        
+        }
+        $query = $this->db->get('ticket_sale');
+
+        return $query->result_array();
+    }
+
+    public function get_ticket_by_station($sid, $tsid = NULL) {
+        $this->check_ticket();
+
+        $this->db->where('SourceID', $sid);
+        if ($tsid != NULL) {
+            $this->db->where('TSID', $tsid);
+        }
+
+
         $query = $this->db->get('ticket_sale');
 
         return $query->result_array();
@@ -29,6 +44,26 @@ class m_ticket extends CI_Model {
 
         $this->db->where('TSID', $tsid);
         $this->db->where('Seller', $eid);
+
+        $query = $this->db->get('ticket_sale');
+
+        return $query->result_array();
+    }
+
+    public function sum_ticket_price($date, $sid = NULL, $tsid = NULL) {
+
+        $this->db->select('*');
+        if ($tsid != NULL) {
+            $this->db->where('TSID', $tsid);
+        }
+        if ($sid != NULL) {
+            $this->db->where('SourceID', $sid);
+        }
+        if ($date == NULL) {
+            $date = $this->m_datetime->getDateToday();
+        }
+        $this->db->where('DateSale', $date);
+        $this->db->where('Seller', $this->m_user->get_user_id());
 
         $query = $this->db->get('ticket_sale');
 

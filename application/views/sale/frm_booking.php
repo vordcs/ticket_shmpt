@@ -517,6 +517,7 @@
                     <div class="col-md-8">
                         <label for="">วันที่เดินทาง</label>
                         <?php echo $form['Date'] ?>
+                        <?php echo $form['DateTH'] ?>
                     </div> 
                     <div class="col-md-4">
                         <label for="">เบอร์รถ</label>  
@@ -660,7 +661,15 @@
             <div id="debug" class="col-lg-12 text-center" style="margin: 2% auto;padding-top: 5%; padding-bottom: 5%;background-color: #FFFF99;">
                 <div id="user_action">
                 </div>                      
-            </div>                   
+            </div>        
+            <?php
+            $num_tickets_by_seller = 0;
+            foreach ($tickets_by_seller as $ticket) {
+                if ($ticket['StatusSeat'] != 2) {
+                    $num_tickets_by_seller++;
+                }
+            }
+            ?>
             <div id="guest_info" class="<?= ((count($tickets_by_seller) > 0) ? 'animated zoomIn' : 'hidden') ?>" style="margin-top: 2%;">  
                 <div id="guest_list" class="col-lg-12" style="max-height: 200px;overflow-y: scroll;">
                     <table id="ticket_guest" class="table">

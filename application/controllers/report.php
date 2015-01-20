@@ -44,8 +44,11 @@ class report extends CI_Controller {
         $routes = $this->m_route->get_route_by_seller();
         $routes_detail = $this->m_route->get_route_detail_by_seller();
 
+        $seller_station_id = $routes[0]['SID'];
+
         $stations = $this->m_station->get_stations();
 
+        $tickets = $this->m_ticket->sum_ticket_price($date, $seller_station_id);
 
         $data = array(
             'page_title' => 'รายงาน',
@@ -58,13 +61,15 @@ class report extends CI_Controller {
             'stations' => $stations,
             'schedules' => $schedules,
             'cost_types' => $cost_type,
-            'costs' => $costs
+            'costs' => $costs,
+            'tickets' => $tickets
         );
 
         $data_debug = array(
-//    'route'=>$data['route'],
+//            'routes' => $data['routes'],
 //            'stations' => $data['stations'],
 //            'costs' => $data['costs'],
+//            'tickets' => $data['tickets'],
         );
         $this->m_template->set_Debug($data_debug);
         $this->m_template->set_Title('รายงาน');
@@ -117,18 +122,24 @@ class report extends CI_Controller {
 
         $form_data = '';
         $rs = '';
+
         if ($this->m_report->validation_form_add() && $this->form_validation->run() == TRUE) {
             $form_data = $this->m_report->get_post_form_send();
-//            $rs = $this->m_report->insert_report($form_data);
-//            $alert['alert_message'] = "เพิ่มข้อมูลค่าใช้จ่ายสำเร็จ";
-//            $alert['alert_mode'] = "success";
-//            $this->session->set_flashdata('alert', $alert);
-//
-//            redirect("cost/view/$tsid");
+            $rs = $this->m_report->insert_report($form_data);
+            if ($form_data != FALSE) {
+                $alert['alert_message'] = "ส่งรายงาน $route_name วันที่ $date_th";
+                $alert['alert_mode'] = "success";
+                $this->session->set_flashdata('alert', $alert);
+            } else {
+                $alert['alert_message'] = "ไม่พบข้อมูลรายงาน : $route_name วันที่ $date_th ณ เวลา " . date('H:s');
+                $alert['alert_mode'] = "warning";
+                $this->session->set_flashdata('alert', $alert);
+            }
+            redirect("report");
         } else {
             $form_data = 'false';
         }
-
+        $tickets = $this->m_ticket->sum_ticket_price($date);
 
         $data = array(
             'page_title' => "ส่งรายงาน : $route_name",
@@ -141,7 +152,8 @@ class report extends CI_Controller {
             'stations' => $stations,
             'schedules' => $schedules,
             'cost_types' => $cost_type,
-            'costs' => $costs
+            'costs' => $costs,
+            'tickets' => $tickets
         );
 
         $data_debug = array(
@@ -152,8 +164,9 @@ class report extends CI_Controller {
 //            'schedules' => $data['schedules'],  
 //            'cost_types'=>$data['cost_types'],
 //            'costs' => $data['costs'],
-            'form_data' => $form_data,
-            'rs' => $rs,
+//            'tickets' => $data['tickets'],
+//            'form_data' => $form_data,
+//            'rs' => $rs,
 //            'get_report' => $this->m_report->get_report(),
         );
         $this->m_template->set_Debug($data_debug);

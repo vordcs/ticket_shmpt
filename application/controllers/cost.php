@@ -30,12 +30,12 @@ class cost extends CI_Controller {
         $date = $this->m_datetime->getDateToday();
         $date_th = $this->m_datetime->DateThaiToDay();
         $schedules = $this->m_schedule->get_schedule($date);
-        
-         if (count($schedules) <= 0) {
+
+        if (count($schedules) <= 0) {
             $alert['alert_message'] = "ไม่พบข้มูลรอบเวลา วันที่ $date_th";
             $alert['alert_mode'] = "warning";
             $this->session->set_flashdata('alert', $alert);
-            
+
             redirect('home/');
         }
 
@@ -46,9 +46,11 @@ class cost extends CI_Controller {
 
         $routes = $this->m_route->get_route_by_seller();
         $routes_detail = $this->m_route->get_route_detail_by_seller();
+        $seller_station_id = $routes[0]['SID'];
 
         $stations = $this->m_station->get_stations();
-   
+
+        $tickets = $this->m_ticket->sum_ticket_price($date, $seller_station_id);
 
         $data = array(
             'page_title' => 'ค่าใช้จ่าย : ',
@@ -59,7 +61,8 @@ class cost extends CI_Controller {
             'routes' => $routes,
             'routes_detail' => $routes_detail,
             'schedules' => $schedules,
-            'stations' => $stations
+            'stations' => $stations,
+            'tickets' => $tickets,
         );
         $data_debug = array(
 //            'from_search' => $data['from_search'],           
@@ -71,6 +74,7 @@ class cost extends CI_Controller {
 //            'stations' => $data['stations'],
                 //    ''=>$data[''],      
 //            'saller_station' => $this->m_user->get_saller_station(),
+//            'tickets' => $data['tickets'],
         );
         $this->m_template->set_Debug($data_debug);
 
@@ -93,8 +97,8 @@ class cost extends CI_Controller {
         $rid = $schedule['RID'];
         $vcode = $schedule['VCode'];
 
-        $route = $this->m_cost->get_route(NULL, NULL, $rid)[0];
-
+        $route = $this->m_route->get_route_by_seller(NULL, NULL, $rid)[0];
+        $seller_station_id = $route['SID'];
         $cost_type = $this->m_cost->get_cost_type();
         $costs = $this->m_cost->get_cost(NULL, NULL, $date, $tsid);
 
@@ -108,6 +112,8 @@ class cost extends CI_Controller {
         $time_departs = $this->m_schedule->get_time_depart($date, $rid, $tsid, $SID)[0];
         $time_depart = $time_departs['TimeDepart'];
 
+        $tickets = $this->m_ticket->sum_ticket_price($date, $seller_station_id, $tsid);
+
         $data = array(
             'page_title' => 'ค่าใช้จ่าย : ',
             'page_title_small' => "วันที่ $date_th",
@@ -117,9 +123,11 @@ class cost extends CI_Controller {
             'cost_types' => $cost_type,
             'costs' => $costs,
             'costs_detail' => $costs_detail,
+            'schedule' => $schedule,
             'TSID' => $tsid,
             'TimeDepart' => $time_depart,
-            'VCode' =>$vcode,
+            'VCode' => $vcode,
+            'tickets' => $tickets,
         );
 
         $data_debug = array(
@@ -129,6 +137,7 @@ class cost extends CI_Controller {
 //            'costs_detail' => $data['costs_detail'],
 //            'TSID'=>$tsid,
 //            'schedule' => $schedule,
+//            'tickets' => $data['tickets'],
         );
 
         $this->m_template->set_Debug($data_debug);

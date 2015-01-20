@@ -22,7 +22,7 @@ class m_report extends CI_Model {
         if ($ReportID != NULL) {
             $this->db->where('ReportID', $ReportID);
         }
-        
+
         $this->db->where('ReportDate', $date);
 
         $query = $this->db->get('report_day');
@@ -68,7 +68,7 @@ class m_report extends CI_Model {
         $TSID = $this->input->post('TSID');
 
         $ReportID = $this->gennerate_report_id($RCode, $VTID, $SID);
-        if ($ReportID != FALSE && count($TSID) > 0) {
+        if (!empty($TSID) && $ReportID != FALSE) {
             $report = array(
                 'ReportID' => $ReportID,
                 'ReportDate' => $this->m_datetime->getDateToday(),
@@ -101,8 +101,11 @@ class m_report extends CI_Model {
             );
 
             return $form_data;
+        } else {
+            return FALSE;
         }
-        return '$ReportID';
+
+        return FALSE;
     }
 
     public function validation_form_add() {

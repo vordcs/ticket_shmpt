@@ -31,7 +31,7 @@ class m_sale extends CI_Model {
         
     }
 
-    public function set_form_sale($route, $s_station, $d_station, $schedule = NULL, $fare = NULL) {
+    public function set_form_booking($route, $s_station, $d_station, $schedule = NULL, $fare = NULL) {
         $rid = $route['RID'];
         $rcode = $route['RCode'];
         $vtid = $route['VTID'];
@@ -87,7 +87,8 @@ class m_sale extends CI_Model {
                 if ($destination_travel_time != '0') {
                     $time_arrive = date('H:i', strtotime("+$destination_travel_time minutes", strtotime($start_time)));
                 }
-                $date = $this->m_datetime->setDateThai($schedule['Date']);
+                $date = $schedule['Date']; //getDateThaiString();
+                $date_th = $this->m_datetime->getDateThaiString($schedule['Date']);
             }
         }
         if (count($fare) > 0 && $fare != NULL) {
@@ -177,12 +178,20 @@ class m_sale extends CI_Model {
             'value' => $time_arrive,
         );
         $i_Date = array(
-            'type' => "text",
+            'type' => "hidden",
             'name' => "Date",
             'id' => "Date",
             'class' => "form-control text-center",
             'readonly' => "",
             'value' => $date,
+        );
+        $i_DateTH = array(
+            'type' => "text",
+            'name' => "DateTH",
+            'id' => "DateTH",
+            'class' => "form-control text-center",
+            'readonly' => "",
+            'value' => $date_th,
         );
         $i_Price = array(
             'type' => "text",
@@ -222,6 +231,7 @@ class m_sale extends CI_Model {
             'TimeDepart' => form_input($i_TimeDepart),
             'TimeArrive' => form_input($i_TimeArrive),
             'Date' => form_input($i_Date),
+            'DateTH' => form_input($i_DateTH),
             'Price' => form_input($i_Price),
             'PriceDicount' => form_input($i_PriceDicount),
             'VCode' => form_input($i_VCode),
@@ -230,7 +240,7 @@ class m_sale extends CI_Model {
         return $form_sale_ticket;
     }
 
-    public function get_post_form_sale() {
+    public function get_post_form_booking() {
 
         $route_name = $this->input->post('route_name');
         $RID = $this->input->post('RID');
@@ -244,7 +254,7 @@ class m_sale extends CI_Model {
         $TimeDepart = $this->input->post('TimeDepart');
         $TimeArrive = $this->input->post('TimeArrive');
 
-        $Date = $this->m_datetime->strDateThaiToDB($this->input->post('Date'));
+        $Date = $this->m_datetime->getDateToday(); //$this->$this->input->post('Date');
         $Price = $this->input->post('Price');
         $PriceDicount = $this->input->post('PriceDicount');
 
@@ -260,7 +270,7 @@ class m_sale extends CI_Model {
             }
         }
         $note = "ตั๋วโดยสารเดินทางจาก $SourceName ไป $DestinationName เส้นทาง $route_name เวลาออก $TimeDepart เวลาถึง $TimeArrive ";
-        $ticket = array();
+        $tickets = array();
 
         for ($i = 0; $i < count($Seat); $i++) {
             $temp_ticket = array(
@@ -281,7 +291,7 @@ class m_sale extends CI_Model {
                 'Seller' => $this->session->userdata('EID'),
 //                'StatusSeat' => 1,                'TicketSaleNote' => $note,
             );
-            array_push($ticket, $temp_ticket);
+            array_push($tickets, $temp_ticket);
         }
 
 //        $form_data = array(
@@ -301,7 +311,7 @@ class m_sale extends CI_Model {
 //            'PriceSeat' => $PriceSeat,
 //            'IsDiscount' => $IsDiscount,
 //        );
-        return $ticket;
+        return $tickets;
     }
 
     public function validate_form_sale() {

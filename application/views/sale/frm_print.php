@@ -1,58 +1,20 @@
 <script>
-    setTimeout(function () {
-        location.reload();
-    }, 120000);
-
     $(window).load(function () {
         $("ol.progtrckr").each(function () {
             $(this).attr("data-progtrckr-steps",
                     $(this).children("li").length);
         });
     });
-    function beforePrint() {
-        var el = document.getElementById("main");
-        el.innerHTML += "<br>beforePrint";
-    }
-
-    function afterPrint() {
-        var el = document.getElementById("main");
-        el.innerHTML += "<br>afterPrint";
-    }
-
-    function handleMediaChange(mql) {
-        if (mql.matches) {
-            beforePrint();
-        } else {
-            afterPrint();
-        }
-    }
-
-    function setup() {
-        var mpl = window.matchMedia("print");
-        mpl.addListener(handleMediaChange);
-    }
     function print_ticket() {
-        setup();
         window.print();
-
-//        alert('print');
-//        var mediaQueryList = window.matchMedia('print');
-//        mediaQueryList.addListener(function (mql) {
-//            if (mql.matches) {
-//                console.log('onbeforeprint equivalent');
-//            } else {
-//                console.log('onafterprint equivalent');
-//            }
-//        });
-//        window.print();
-//        $('.ticket-print').each(function () {
-//            var ticket_id = $(this).attr('id');
-//            var rs = ticket_sale(ticket_id);
-//            alert(ticket_id + ' -> ' + rs);
-//        });
-//        window.location.reload(history.go(-1));
-//        return true;
-//        document.body.onmousemove = doneyet;
+    }
+    function print_sucess() {
+        var url = '<?= base_url() . "sale/booking/$rid/$source_id/$destination_id/$tsid" ?>'
+        $('.ticket-print').each(function () {
+            var ticket_id = $(this).attr('id');
+            ticket_sale(ticket_id);
+        });
+        window.location = url;
     }
 
     function ticket_sale(ticket_id) {
@@ -180,10 +142,12 @@
     @media all
     {
         .page-break	{ display:none; }
+        .page-break-no{ display:none; }  
     }
     @media print
     {
         .page-break	{ display:block;height:1px; page-break-before:always; }
+        .page-break-no{ display:block;height:1px; page-break-after:avoid; }   
     }
 
 </style>
@@ -202,8 +166,7 @@
 </div>
 
 <!--html preview-->
-<div id="" class="container-fluid hidden-print" >
-    <p id="main">Initial text</p>
+<div id="" class="container-fluid hidden-print" >  
     <?= form_open("sale/print_ticket/$tsid", array('class' => 'form', 'id' => 'form_print_ticket')) ?>
     <div class="row" style="padding-bottom: 10%">
         <?php
@@ -425,7 +388,6 @@
                             <tr class="title">   
                                 <td class="text-center">
                                     <small>
-
                                         <?= $time_depart ?>
                                     </small>                                    
                                     <br>
@@ -450,5 +412,20 @@
     </div>
 </div>
 <footer class="hidden-print" style=""> 
-    <button type="button" class="btn btn-info"  onclick="print_ticket()"><span class="fa fa-print fa-2x"></span>&nbsp;พิมพ์ตั๋วโดยสาร</button> 
+    <div class="container">
+        <div class="row">
+            <div class="col-md-10 col-md-offset-1">
+                <?php
+                $cancle = array(
+                    'type' => "button",
+                    'class' => "btn btn-warning pull-left",
+                );
+                echo anchor(($previous_page == NULL) ? 'sale/' : $previous_page, '<i class="fa fa-plus" ></i>&nbsp;เพิ่มที่นั่ง', $cancle) . '  ';
+                ?>  
+                <button type="button" class="btn btn-lg btn-info"  onclick="print_ticket()"><span class="fa fa-print fa-2x"></span>&nbsp;พิมพ์ตั๋วโดยสาร</button> 
+                <button type="button" class="btn btn-success pull-right"  onclick="print_sucess()"><span class="fa fa-check"></span>&nbsp;พิมพ์สำเร็จ</button> 
+            </div>
+        </div>
+    </div>
+
 </footer>

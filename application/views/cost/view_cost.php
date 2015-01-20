@@ -53,6 +53,14 @@ $route_name = ' เส้นทาง ' . $route['VTDescription'] . '  ' . $rout
 $rid = $route['RID'];
 $income = 0;
 $outcome = 0;
+$ticket_total_price = 0;
+$num_ticket = count($tickets);
+if ($num_ticket > 0) {
+    foreach ($tickets as $ticket) {
+        $income+=$ticket['PriceSeat'];
+        $ticket_total_price +=$ticket['PriceSeat'];
+    }
+}
 foreach ($cost_types as $cost_type) {
     $cost_type_id = $cost_type['CostTypeID'];
     foreach ($costs as $cost) {
@@ -120,6 +128,14 @@ foreach ($cost_types as $cost_type) {
                             </thead>
                             <tbody>
                                 <?php
+                                if ($cost_type_id == 1 && $num_ticket > 0) {
+                                    ?>
+                                    <tr>
+                                        <td class="text-left">ตั๋วโดยสารรอบเวลา : <?= $TimeDepart . " ($num_ticket ที่นั่ง) " ?></td>
+                                        <td class="text-center" colspan="2"><?= number_format($ticket_total_price) ?></td>                                        
+                                    </tr>
+                                <?php } ?>
+                                <?php
                                 $total = 0;
                                 foreach ($costs as $cost) {
                                     $CostID = $cost['CostID'];
@@ -128,18 +144,23 @@ foreach ($cost_types as $cost_type) {
                                         $CostDetail = $cost['OtherCostDetail'];
                                     }
                                     $CostValue = $cost['CostValue'];
+
+                                    $IsReport = '';
+                                    if ($schedule['ReportID'] != NULL) {
+                                        $IsReport = 'disabled';
+                                    }
                                     if ($cost_type_id == $cost['CostTypeID']) {
                                         $total +=(int) $CostValue;
                                         $edit = array(
                                             'type' => 'button',
-                                            'class' => 'btn btn-warning btn-sm',
+                                            'class' => "btn btn-warning btn-sm $IsReport",
                                             'data-toggle' => "tooltip",
                                             'data-placement' => "left",
                                             'title' => "แก้ไขข้อมูล $cost_type_name : $CostDetail  ",
                                         );
                                         $delete = array(
                                             'type' => 'button',
-                                            'class' => 'btn btn-danger btn-sm',
+                                            'class' => "btn btn-danger btn-sm $IsReport",
                                             'data-toggle' => "tooltip",
                                             'data-placement' => "right",
                                             'title' => "ลบข้อมูล $cost_type_name : $CostDetail",

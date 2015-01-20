@@ -203,8 +203,19 @@
                                          */
 
                                         $income = 0;
-
                                         $outcome = 0;
+
+                                        $num_ticket = count($tickets);
+                                        if ($num_ticket > 0) {
+                                            foreach ($tickets as $ticket) {
+                                                if ($tsid == $ticket['TSID']) {
+                                                    $income+=$ticket['PriceSeat'];
+                                                    $total_income+=$ticket['PriceSeat'];
+                                                    $total +=$ticket['PriceSeat'];
+                                                }
+                                            }
+                                        }
+
                                         foreach ($cost_types as $cost_type) {
                                             $cost_type_id = $cost_type['CostTypeID'];
                                             foreach ($costs as $cost) {
@@ -284,32 +295,30 @@
                                 <textarea class="form-control" rows="3" id="ReportNote" name="ReportNote" placeholder="หมายเหตุ" value="<?= (set_value('ReportNote') == NULL) ? set_value('ReportNote') : set_value('ReportNote') ?>"></textarea>
                             </div>
                         </div>
-                        <div class="form-group">
-                            <div class="col-sm-12 text-center">                             
-                                <?php
-                                $cancle = array(
-                                    'type' => "button",
-                                    'class' => "btn btn-lg btn-danger",
-                                );
 
-                                $save = array(
-                                    'class' => "btn btn-lg btn-success",
-                                    'title' => "$page_title",
-                                    'data-id' => "5",
-                                    'data-title' => "ส่งรายงาน จุดจอด : $seller_station_name",
-                                    'data-sub_title' => "$route_name",
-                                    'data-info' => "",
-                                    'data-toggle' => "modal",
-                                    'data-target' => "#confirm",
-                                    'data-href' => "",
-                                    'data-form_id' => "$form_id",
-                                );
-                                echo anchor(($previous_page == NULL) ? 'report/' : $previous_page, '<i class="fa fa-times" ></i>&nbsp;ยกเลิก', $cancle) . '  ';
-                                echo anchor('#', '<span class="fa fa-save">&nbsp;&nbsp;ส่ง</span>', $save);
-                                ?>  
-                            </div>
+                        <div class="col-sm-12 text-center">                             
+                            <?php
+                            $cancle = array(
+                                'type' => "button",
+                                'class' => "btn btn-lg btn-danger",
+                            );
 
-                        </div>
+                            $save = array(
+                                'class' => "btn btn-lg btn-success",
+                                'title' => "$page_title",
+                                'data-id' => "5",
+                                'data-title' => "ส่งรายงาน จุดจอด : $seller_station_name",
+                                'data-sub_title' => "$route_name",
+                                'data-info' => "",
+                                'data-toggle' => "modal",
+                                'data-target' => "#confirm",
+                                'data-href' => "",
+                                'data-form_id' => "$form_id",
+                            );
+                            echo anchor(($previous_page == NULL) ? 'report/' : $previous_page, '<i class="fa fa-times" ></i>&nbsp;ยกเลิก', $cancle) . '  ';
+                            echo anchor('#', '<span class="fa fa-save">&nbsp;&nbsp;ส่งรายงาน</span>', $save);
+                            ?>  
+                        </div>                       
                     </div>
                 </div>
             </div>

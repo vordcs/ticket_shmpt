@@ -83,7 +83,7 @@ class sale extends CI_Controller {
             $alert['alert_mode'] = "warning";
             $this->session->set_flashdata('alert', $alert);
 
-//            redirect('sale/');
+            redirect('sale/');
         }
         $schedule = $schedules[0];
         $schedules_detail = $this->m_schedule->get_schedule($date, $rcode, $vtid, $rid);
@@ -102,15 +102,19 @@ class sale extends CI_Controller {
             redirect('sale/');
         }
 
-        $route = $this->m_route->get_route(NULL, NULL, $rid)[0];
+        $route = $this->m_route->get_route_by_seller(NULL, NULL, $rid)[0];
+        /*
+         * ข้อมูลคนขายตั๋ว
+         */
+        $seller_station_id = $route['SID'];
         $fare = $this->m_fares->get_fares($rcode, $vtid, $source_id, $destination_id)[0];
         $tickets_by_seller = $this->m_ticket->get_ticket_by_saller($schedules_id);
-        $tickets = $this->m_ticket->get_ticket($date, $schedules_id);
-        $tickets_today = $this->m_ticket->get_ticket($date);
+        $tickets = $this->m_ticket->get_ticket_by_station($seller_station_id, $schedules_id);
+        $tickets_today = $this->m_ticket->get_ticket_by_station($seller_station_id);
 
         $data = array(
-            'form' => $this->m_sale->set_form_sale($route, $s_station, $d_station, $schedule, $fare),
-            'date' => $this->m_datetime->setDateThai($date),
+            'form' => $this->m_sale->set_form_booking($route, $s_station, $d_station, $schedule, $fare),
+            'date' => $this->m_datetime->getDateThaiString($date),
             'route' => $route,
             'routes_seller' => $this->m_route->get_route_by_seller(),
             'routes_detail' => $this->m_route->get_route_detail_by_seller(),
@@ -148,7 +152,7 @@ class sale extends CI_Controller {
         );
 
         if ($this->m_sale->validate_form_sale() && $this->form_validation->run() == TRUE) {
-            $tickets = $this->m_sale->get_post_form_sale();
+            $tickets = $this->m_sale->get_post_form_booking();
 //            $data_debug['data_form_sale'] = $tickets;
             $data_debug['update_resever_ticket'] = $this->m_ticket->update_resever_ticket($tickets);
             redirect("sale/print_ticket/$rid/$source_id/$destination_id/$schedules_id");
@@ -185,9 +189,14 @@ class sale extends CI_Controller {
 
             redirect("sale/booking/$rid/$source_id/$destination_id/$tsid");
         }
-        
+
         $route = $this->m_route->get_route(NULL, NULL, $rid);
         $data = array(
+            'previous_page' => "sale/booking/$rid/$source_id/$destination_id/$tsid",
+            'next_page' => '',
+            'rid' => $route[0]['RID'],
+            'source_id' => $source_id,
+            'destination_id' => $destination_id,
             'tsid' => $tsid,
             'tickets' => $tickets,
             'route' => $route[0],
