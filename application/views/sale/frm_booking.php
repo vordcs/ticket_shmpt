@@ -206,19 +206,19 @@
     }
     .bg-blank{
 
-        background-image: url(<?= base_url() . 'assets/img/seat_blank.jpg' ?>);
+        background-image: url(<?= base_url() . 'assets/img/seat_blank.png' ?>);
         background-repeat: no-repeat;
         background-size: 100% 100%;
         /*background: #26C281;*/
     }
     .bg-reserve{
-        background-image: url(<?= base_url() . 'assets/img/seat_reserve.jpg' ?>);
+        background-image: url(<?= base_url() . 'assets/img/seat_reserve.png' ?>);
         background-repeat: no-repeat;
         background-size: 100% 100%;
         /*background: #F3C13A;*/
     }
     .bg-busy{
-        background-image: url(<?= base_url() . 'assets/img/seat_busy.jpg' ?>);
+        background-image: url(<?= base_url() . 'assets/img/seat_busy.png' ?>);
         background-repeat: no-repeat;
         background-size: 100% 100%;
         /*background: #FFA5A5;*/
@@ -463,6 +463,7 @@
                         <?php
                         foreach ($schedules_detail as $sd) {
                             $tsid = $sd['TSID'];
+                            $rid = $sd['RID'];
                             $schedule_seq_no = $sd['SeqNo'];
                             $seat_blank = $sd['VSeat'];
                             $start_time = $sd['TimeDepart'];

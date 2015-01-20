@@ -3,13 +3,13 @@
         $("#mainmenu ul li").removeAttr('class');
         $("#btnCost").addClass("active");
         var CostDetailID = $("#CostDetailID").val();
-        if (CostDetailID === '999') {
+        if (CostDetailID === '999' || CostDetailID === '888') {
             $('#other').show();
         } else {
             $('#other').hide();
         }
         $("select[name='CostDetailID']").on('change', function () {
-            if (this.value === '999') {
+            if (this.value === '999' || this.value === '888') {
                 $('#other').show();
             } else {
                 $('#other').hide();

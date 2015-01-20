@@ -83,7 +83,7 @@
             }
         </style>
     </head>
-    <body onload="document.refresh();">        
+    <body>        
         <?php
         if (isset($debug) && $debug != NULL) {
             echo '<div class="container hidden-print" style="margin-top: 60px;">';

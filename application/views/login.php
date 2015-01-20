@@ -37,7 +37,7 @@
                     <a class="navbar-brand" href="#">บริษัท สหมิตรภาพ(2512) จำกัด</a>
                 </div>
                 <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-2">
-                    <p class="navbar-text navbar-right">Signed in as Mark Otto</p>
+                    <p class="navbar-text navbar-right"></p>
                 </div>
             </div>
         </div>

@@ -39,6 +39,7 @@
                 <div class="panel-group panel-group-lists collapse in" id="accordionRoute" role="tablist" aria-multiselectable="true">
                     <?php
                     $x = 1;
+                    $flag = TRUE;
                     foreach ($routes as $route) {
                         $rcode = $route['RCode'];
                         $vtid = $route['VTID'];
@@ -139,9 +140,9 @@
 
                                             $class = ' ';
                                             if ($seller_station_seq == 1 && $start_point == 'S') {
-                                                $class = ' col-md-offset-3 ';
+                                                $class = ' col-md-offset-1 ';
                                             } elseif ($seller_station_seq == $num_station && $start_point == 'D') {
-                                                $class = ' col-md-offset-3 ';
+                                                $class = ' col-md-offset-1 ';
                                             } elseif ($seller_station_seq == 1 || $seller_station_seq == $num_station) {
                                                 $class = 'hidden';
                                             }
@@ -231,8 +232,6 @@
                                                                             }
                                                                         }
                                                                     }
-
-
                                                                     $view = array(
                                                                         'type' => "button",
                                                                         'class' => "btn btn-link btn-block",
@@ -279,6 +278,33 @@
                                                         </table>
                                                     </div> 
                                                 </div>
+                                            </div>  
+                                            <?php
+                                            $class_beteen = '';
+                                            if ($seller_station_seq == 1 && $start_point == 'S') {
+                                                
+                                            } elseif ($seller_station_seq == $num_station && $start_point == 'D') {
+                                                
+                                            } else {
+                                                $class_beteen = 'hidden';
+                                            }
+                                            ?>
+                                            <div class="col-md-4 <?= $class_beteen ?>">
+                                                <div class="well">
+                                                    <legend>รายทาง</legend>
+                                                    <table class="table">
+                                                        <thead>
+                                                            <tr>
+                                                                <th style="width: 30%">ออกจาก</th>
+                                                                <th style="width: 30%">จำนวนเงิน</th>
+                                                                <th style="width: 40%"></th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+
+                                                        </tbody>
+                                                    </table>
+                                                </div>
                                             </div>
                                             <?php
                                         }
@@ -294,8 +320,7 @@
                 <?php
             }
         }
-        ?>        
-
+        ?> 
     </div>
 </div>
 <div class="container hidden">  

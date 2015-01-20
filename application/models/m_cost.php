@@ -30,7 +30,7 @@ class m_cost extends CI_Model {
         }
 
         $this->db->where('cost.CostDate', $date);
-//        $this->db->where('cost.CreateBy', $this->m_user->get_user_id());
+        $this->db->where('cost.CreateBy', $this->m_user->get_user_id());
         $query = $this->db->get('cost');
         return $query->result_array();
     }
@@ -220,7 +220,9 @@ class m_cost extends CI_Model {
 
         $i_CostDetailID[0] = 'เลือกรายการ';
         foreach ($this->get_cost_detail($ctid) as $value) {
-            $i_CostDetailID[$value['CostDetailID']] = $value['CostDetail'];
+            if ($value['CostDetailID'] != '1') {
+                $i_CostDetailID[$value['CostDetailID']] = $value['CostDetail'];
+            }
         }
 
         $i_OtherDetail = array(
@@ -558,7 +560,7 @@ class m_cost extends CI_Model {
     public function validation_form_add() {
 
         $CostDetailID = $this->input->post('CostDetailID');
-        if ($CostDetailID == '999') {
+        if ($CostDetailID == '999' || $CostDetailID == '888') {
             $this->form_validation->set_rules('OtherDetail', 'รายการอื่นๆ', 'trim|required|xss_clean');
         } else {
             $this->form_validation->set_rules('OtherDetail', 'รายการอื่นๆ', 'trim|xss_clean');
