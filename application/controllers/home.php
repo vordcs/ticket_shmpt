@@ -12,6 +12,7 @@ class Home extends CI_Controller {
         $this->load->model('m_station');
         $this->load->model('m_schedule');
         $this->load->model('m_ticket');
+        $this->load->model('m_home');
         $this->load->library('form_validation');
 
         //Initial language
@@ -19,6 +20,42 @@ class Home extends CI_Controller {
     }
 
     public function index() {
+        if ($this->m_home->set_validation() && $this->form_validation->run()) {
+            $input = $this->input->post();
+            $EID = $this->m_home->get_user_id();
+            $new_pass = $input['new_pass'];
+            $have = $this->m_home->check_pass($EID, $input['old_pass']);
+            if ($have) {
+                if ($this->m_home->update_user($EID, $new_pass)) {
+                    //Alert success and redirect to candidate
+                    $alert['alert_message'] = "เปลี่ยนรหัสผ่านสำเร็จ";
+                    $alert['alert_mode'] = "success";
+                    $this->session->set_flashdata('alert', $alert);
+                    redirect('home');
+                } else {
+                    //Alert success and redirect to candidate
+                    $alert['alert_message'] = "เปลี่ยนรหัสผ่านไม่สำเร็จ";
+                    $alert['alert_mode'] = "danger";
+                    $this->session->set_flashdata('alert', $alert);
+                    redirect('home');
+                }
+            } else {
+                //Alert success and redirect to candidate
+                $alert['alert_message'] = "คุณกรอกรหัสผ่านเก่าไม่ถูกต้อง";
+                $alert['alert_mode'] = "danger";
+                $this->session->set_flashdata('alert', $alert);
+                redirect('home');
+            }
+        } else {
+            if ($this->input->server('REQUEST_METHOD') === 'POST') {
+                //Alert success and redirect to candidate
+                $alert['alert_message'] = "กรุณากรอกข้อมูลให้ครบ";
+                $alert['alert_mode'] = "danger";
+                $this->session->set_flashdata('alert', $alert);
+                redirect('home');
+            }
+        }
+
         $data = array(
             'from_search' => $this->m_route->set_form_search_route(),
             'vehicle_types' => $this->m_route->get_vehicle_types(),
@@ -28,11 +65,15 @@ class Home extends CI_Controller {
         $data['stations'] = $this->m_station->get_stations();
         $data['schedules'] = $this->m_schedule->get_schedule($this->m_datetime->getDateToday());
         $data['schedule_master'] = $this->m_route->get_schedule_manual();
+        $data['detail'] = $this->m_home->get_seller_detail($this->m_home->get_user_id())[0];
+
         $data_debug = array(
 //            'from_search' => $data['from_search'],
 //    'route'=>$data['route'],
 //    ''=>$data[''],
 //    ''=>$data[''],
+//            'detail' => $data['detail'],
+//            'input' => (isset($input)) ? $input : NULL,
         );
         $this->m_template->set_Debug($data_debug);
         $this->m_template->set_Title('ระบบขายตั๋วหน้าเค้ฆาเตอร์');

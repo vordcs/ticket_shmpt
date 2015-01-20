@@ -17,28 +17,30 @@
     </div>
 </div>
 <div class="container">
-    <div class="row col-md-6 col-md-offset-3">
-        <table>
-            <thead>
-                <tr>
-                    <th>เส้นทาง</th>
-                    <th>จัดการตารางเดินรถ</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php
-                foreach ($routes_seller as $row) {
-                    $route_name = $row['VTDescription'] . ' เส้นทาง ' . $row['RCode'] . ' ' . $row['RSource'] . ' - ' . $row['RDestination'];
-                    ?>
+    <?php if (count($routes_seller) > 0) { ?>
+        <div class="row col-md-6 col-md-offset-3">
+            <table class="table table-bordered">
+                <thead>
                     <tr>
-                        <td><?= $route_name ?></td>
-                        <td><?=  anchor('schedule/view/'.$row['RCode'].'/'.$row['VTID'],'จัดตาราง')?></td>
+                        <th>เส้นทาง</th>
+                        <th>จัดการตารางเดินรถ</th>
                     </tr>
-                <?php }
-                ?>
-            </tbody>
-        </table>
-    </div>
+                </thead>
+                <tbody>
+                    <?php
+                    foreach ($routes_seller as $row) {
+                        $route_name = $row['VTDescription'] . ' เส้นทาง ' . $row['RCode'] . ' ' . $row['RSource'] . ' - ' . $row['RDestination'];
+                        ?>
+                        <tr>
+                            <td><?= $route_name ?></td>
+                            <td class="text-center"><?= anchor('schedule/view/' . $row['RCode'] . '/' . $row['VTID'], 'จัดตาราง', array('class' => 'btn btn-primary')) ?></td>
+                        </tr>
+                    <?php }
+                    ?>
+                </tbody>
+            </table>
+        </div>
+    <?php } ?>
 
 
     <?php
