@@ -15,8 +15,8 @@ class m_ticket extends CI_Model {
         }
         if ($eid != NULL) {
             $this->db->where('Seller', $eid);
-        }
-
+        }      
+        
         $query = $this->db->get('ticket_sale');
 
         return $query->result_array();
@@ -170,9 +170,9 @@ class m_ticket extends CI_Model {
      * ตรวจสอบสถานะการจอง เมื่อเกิน 2 นาทีจะถูกลบ
      */
 
-    public function check_ticket() {
+    public function check_ticket($tsid = NULL) {
         $today = $this->m_datetime->getDateToday();
-        $tickets_reseve = $this->get_ticket($today, NULL, 2);
+        $tickets_reseve = $this->get_ticket($today, $tsid, 2);
         foreach ($tickets_reseve as $ticket) {
             $tsid = $ticket['TSID'];
             $seat = $ticket['Seat'];

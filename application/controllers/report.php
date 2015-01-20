@@ -153,7 +153,7 @@ class report extends CI_Controller {
 //            'cost_types'=>$data['cost_types'],
 //            'costs' => $data['costs'],
             'form_data' => $form_data,
-//            'rs' => $rs,
+            'rs' => $rs,
 //            'get_report' => $this->m_report->get_report(),
         );
         $this->m_template->set_Debug($data_debug);

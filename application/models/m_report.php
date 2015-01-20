@@ -1,4 +1,3 @@
-
 <?php
 
 if (!defined('BASEPATH'))
@@ -8,25 +7,22 @@ class m_report extends CI_Model {
 
     public function get_report($date = NULL, $RCode = NULL, $VTID = NULL, $SID = NULL, $ReportID = NULL) {
 
-        if ($RCode != NULL) {
-//            $this->db->where('RCode');
-        }
-        if ($VTID != NULL) {
-//            $this->db->where('VTID');
-        }
-        if ($SID != NULL) {
-//            $this->db->where('report_day.SID');
-        }
-        if ($ReportID != NULL) {
-            $this->db->where('ReportID');
-        }
-
-        if ($date != NULL) {
-            
-        } else {
+        if ($date == NULL) {
             $date = $this->m_datetime->getDateToday();
         }
-
+        if ($RCode != NULL) {
+            $this->db->where('RCode', $RCode);
+        }
+        if ($VTID != NULL) {
+            $this->db->where('VTID', $VTID);
+        }
+        if ($SID != NULL) {
+            $this->db->where('SID', $SID);
+        }
+        if ($ReportID != NULL) {
+            $this->db->where('ReportID', $ReportID);
+        }
+        
         $this->db->where('ReportDate', $date);
 
         $query = $this->db->get('report_day');
@@ -106,7 +102,7 @@ class m_report extends CI_Model {
 
             return $form_data;
         }
-        return $ReportID;
+        return '$ReportID';
     }
 
     public function validation_form_add() {
@@ -119,7 +115,8 @@ class m_report extends CI_Model {
     }
 
     public function gennerate_report_id($RCode, $VTID, $SID) {
-        $Report = $this->get_report(NULL, $RCode, $VTID, $SID);
+        $date = $this->m_datetime->getDateToday();
+        $Report = $this->get_report($date, $RCode, $VTID, $SID);
         $num_report = count($Report);
         $ReportID = '';
         if ($num_report >= 0) {

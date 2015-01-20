@@ -59,10 +59,14 @@ class sale extends CI_Controller {
         $date = $this->m_datetime->getDateToday();
 
         if ($rid == NULL || $source_id == NULL || $destination_id == NULL) {
+            $alert['alert_message'] = "เลือกข้อมูลรอบเวลา";
+            $alert['alert_mode'] = "warning";
+            $this->session->set_flashdata('alert', $alert);
+
             redirect('sale/');
         }
 //        Check detail and sent to load form
-        $detail = $this->m_route->get_route(NULL, NULL, $rid);
+        $detail = $this->m_route->get_route_by_seller(NULL, NULL, $rid);
         if (count($detail) > 0) {
             $rcode = $detail[0]['RCode'];
             $vtid = $detail[0]['VTID'];
@@ -73,9 +77,13 @@ class sale extends CI_Controller {
         $s_station = $this->m_station->get_stations($rcode, $vtid, $source_id)[0];
         $d_station = $this->m_station->get_stations($rcode, $vtid, $destination_id)[0];
 
-        $schedules = $this->m_schedule->get_schedule($date, $rcode, $vtid, $rid, $schedules_id);
+        $schedules = $this->m_sale->get_schedule($schedules_id);
         if (count($schedules) <= 0) {
-            redirect('sale/');
+            $alert['alert_message'] = "ไม่พบข้อมูลตารางเวลาเดิน $route_name กรุณาติดต่อผู้ดูแลระบบ";
+            $alert['alert_mode'] = "warning";
+            $this->session->set_flashdata('alert', $alert);
+
+//            redirect('sale/');
         }
         $schedule = $schedules[0];
         $schedules_detail = $this->m_schedule->get_schedule($date, $rcode, $vtid, $rid);
@@ -136,13 +144,14 @@ class sale extends CI_Controller {
 //            'tickets_by_seller' => $data['tickets_by_seller'],
 //            'tickets' => $data['tickets'],
 //            'tickets_today' => $data['tickets_today'],
+//            'paramiter' => "$date, $rcode, $vtid, $rid, $schedules_id",
         );
 
         if ($this->m_sale->validate_form_sale() && $this->form_validation->run() == TRUE) {
             $tickets = $this->m_sale->get_post_form_sale();
 //            $data_debug['data_form_sale'] = $tickets;
             $data_debug['update_resever_ticket'] = $this->m_ticket->update_resever_ticket($tickets);
-            redirect("sale/print_ticket/$schedules_id");
+            redirect("sale/print_ticket/$rid/$source_id/$destination_id/$schedules_id");
         }
 
         $this->m_template->set_Debug($data_debug);
@@ -151,19 +160,33 @@ class sale extends CI_Controller {
         $this->m_template->showSaleTemplate();
     }
 
-    public function print_ticket($tsid = NULL) {
-        if ($tsid == NULL) {
-            echo "<script>window.location.href='javascript:history.back(-1);'</script>";
+    public function print_ticket($rid = NULL, $source_id = NULL, $destination_id = NULL, $tsid = NULL) {
+        //ตรวจสอบสถานะตั๋ว 
+        $this->m_ticket->check_ticket();
+
+        if ($rid == null || $source_id == NULL || $destination_id == NULL || $tsid == NULL) {
+            $alert['alert_message'] = "เลือกข้อมูลรอบเวลา";
+            $alert['alert_mode'] = "danger";
+            $this->session->set_flashdata('alert', $alert);
+
+            redirect('sale/');
         }
+
         $date = $this->m_datetime->getDateToday();
-        $eid = $this->session->userdata('EID');
+        $eid = $this->m_user->get_user_id();
+
         $tickets = $this->m_ticket->get_ticket($date, $tsid, 2, $eid);
 
 
         if (count($tickets) <= 0) {
-            echo "<script>window.location.href='javascript:history.back(-1);'</script>";
+            $alert['alert_message'] = "หมดเวลาทำรายการ";
+            $alert['alert_mode'] = "warning";
+            $this->session->set_flashdata('alert', $alert);
+
+            redirect("sale/booking/$rid/$source_id/$destination_id/$tsid");
         }
-        $route = $this->m_route->get_route(NULL, NULL, $tickets[0]['RID']);
+        
+        $route = $this->m_route->get_route(NULL, NULL, $rid);
         $data = array(
             'tsid' => $tsid,
             'tickets' => $tickets,

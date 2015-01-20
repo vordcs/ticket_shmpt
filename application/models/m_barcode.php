@@ -26,8 +26,8 @@ Class m_barcode extends CI_Model {
                 mkdir($folder_barcode, 0777, TRUE);
             }
 
-            $this->load->helper("file");
-            delete_files($folder_barcode);
+//            $this->load->helper("file");
+//            delete_files($folder_barcode);
 
             $this->load->library('zend');
             $this->zend->load('Zend/Barcode');

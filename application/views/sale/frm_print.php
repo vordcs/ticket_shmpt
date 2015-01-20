@@ -1,13 +1,50 @@
 <script>
+    setTimeout(function () {
+        location.reload();
+    }, 120000);
+
     $(window).load(function () {
         $("ol.progtrckr").each(function () {
             $(this).attr("data-progtrckr-steps",
                     $(this).children("li").length);
         });
-        loadPrint();
     });
+    function beforePrint() {
+        var el = document.getElementById("main");
+        el.innerHTML += "<br>beforePrint";
+    }
+
+    function afterPrint() {
+        var el = document.getElementById("main");
+        el.innerHTML += "<br>afterPrint";
+    }
+
+    function handleMediaChange(mql) {
+        if (mql.matches) {
+            beforePrint();
+        } else {
+            afterPrint();
+        }
+    }
+
+    function setup() {
+        var mpl = window.matchMedia("print");
+        mpl.addListener(handleMediaChange);
+    }
     function print_ticket() {
+        setup();
         window.print();
+
+//        alert('print');
+//        var mediaQueryList = window.matchMedia('print');
+//        mediaQueryList.addListener(function (mql) {
+//            if (mql.matches) {
+//                console.log('onbeforeprint equivalent');
+//            } else {
+//                console.log('onafterprint equivalent');
+//            }
+//        });
+//        window.print();
 //        $('.ticket-print').each(function () {
 //            var ticket_id = $(this).attr('id');
 //            var rs = ticket_sale(ticket_id);
@@ -17,12 +54,7 @@
 //        return true;
 //        document.body.onmousemove = doneyet;
     }
-    function loadPrint() {
-        window.print();
-        setTimeout(function () {
-            window.close();
-        }, 100);
-    }
+
     function ticket_sale(ticket_id) {
         var data_ticket = {
             'TicketID': ticket_id
@@ -170,7 +202,8 @@
 </div>
 
 <!--html preview-->
-<div id="" class="container hidden-print" >
+<div id="" class="container-fluid hidden-print" >
+    <p id="main">Initial text</p>
     <?= form_open("sale/print_ticket/$tsid", array('class' => 'form', 'id' => 'form_print_ticket')) ?>
     <div class="row" style="padding-bottom: 10%">
         <?php
@@ -190,7 +223,7 @@
             $price = $t['PriceSeat'];
             $name_seller = $this->session->userdata('EID');
             ?>
-            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 well" style="border:1px solid black;padding-left: 20px;padding-right: 20px;margin: 5px 10px auto;">
+            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 well" style="border:1px solid black;padding-left: 20px;padding-right: 20px;margin: 5px 5px auto;">
                 <fieldset disabled >
                     <div class="ticket" id="">                    
                         <div class="ticket-title" style="text-align: center; margin-bottom: 15px;">
@@ -295,15 +328,15 @@
                             </tr>
                             <tr class="title">
                                 <td class="" style=" width: 50%;border-right: 1px solid; padding-left:5px;" colspan="">เบอร์รถ : </td>
-                                <td class="" style=" width: 50%;padding-left: 5px" colspan="">เวลาออก : </td>
+                                <td class="" style=" width: 50%;padding-left: 5px" colspan="">เวลาออก/<small>Depart</small> : </td>
                             </tr>
                             <tr>                            
                                 <td class="vcode" rowspan="1"><strong><?= $vcode ?></strong></td>                            
                                 <td class="time-depart" rowspan=""><strong><?= $time_depart ?></strong></td>
                             </tr>
                             <tr class="title">
-                                <td class="" style="border-right: 1px solid; padding-left:5px;" colspan="">เลขที่นั่ง : </td>
-                                <td class="" style="padding-left:5px;" colspan="">เวลาถึง : </td>
+                                <td class="" style="border-right: 1px solid; padding-left:5px;" colspan="">เลขที่นั่ง/<small>Seat</small> : </td>
+                                <td class="" style="padding-left:5px;" colspan="">เวลาถึง/<small>Arrive</small> : </td>
                             </tr>    
                             <tr class=""> 
                                 <td class="detail seat " colspan=""><strong><?= $seat ?></strong></td>
@@ -330,7 +363,7 @@
                                 </td>
                             </tr>                       
                             <tr class="title">                            
-                                <td class="" colspan="">ราคา : </td>
+                                <td class="" colspan="">ราคา&nbsp;<small>Price</small> : </td>
                             </tr>
                             <tr>
                                 <td class="detail text-right" style="">                                
@@ -391,6 +424,11 @@
                             </tr>  
                             <tr class="title">   
                                 <td class="text-center">
+                                    <small>
+
+                                        <?= $time_depart ?>
+                                    </small>                                    
+                                    <br>
                                     <?= $vcode ?>
                                     <br>
                                     <?= $vt_name ?>

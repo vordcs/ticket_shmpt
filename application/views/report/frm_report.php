@@ -239,11 +239,11 @@
                                         }
                                     }
                                     ?>
-                                    <tr>
+                                    <tr class="success">
                                         <td class="text-center"><strong>รวม</strong></td>                                           
                                         <td class="text-center"><strong><?= number_format($total_income) ?></strong></td>
                                         <td class="text-center"><strong><?= number_format($total_outcome) ?></strong> </td>
-                                        <td class="text-right"><strong><?= number_format($total_income - $total_outcome) ?></strong></td>                                       
+                                        <td class="text-right bg-info"><strong><?= number_format($total_income - $total_outcome) ?></strong></td>                                       
                                     </tr>
                                 </tbody>
                             </table>

@@ -5,6 +5,28 @@ if (!defined('BASEPATH'))
 
 class m_sale extends CI_Model {
 
+    //    คืนค่าเวลาข้อมูลตารางเวลาเดิน ออกจากจุกเริ่มต้นของเเต่ละ RID
+    public function get_schedule($tsid = NULL, $rid = NULL) {
+        $this->db->select('*,t_schedules_day.TSID as TSID,t_schedules_day.RID as RID');
+        $this->db->join('t_routes', ' t_schedules_day.RID = t_routes.RID ', 'left');
+        $this->db->join('vehicles_has_schedules', ' vehicles_has_schedules.TSID = t_schedules_day.TSID', 'left');
+        $this->db->join('vehicles', ' vehicles.VID = vehicles_has_schedules.VID', 'left');
+
+        if ($tsid != NULL) {
+            $this->db->where('t_schedules_day.TSID', $tsid);
+        }
+
+        if ($rid != NULL) {
+            $this->db->where('t_schedules_day.RID', $rid);
+        }
+
+        $this->db->where('t_schedules_day.ScheduleStatus', '1');
+
+        $this->db->order_by('t_schedules_day.TimeDepart', 'asc');
+        $query_schedule = $this->db->get("t_schedules_day");
+        return $query_schedule->result_array();
+    }
+
     public function set_form_search_route($rcode = NULL, $vtid = NULL) {
         
     }
