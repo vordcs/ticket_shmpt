@@ -557,7 +557,7 @@ class m_schedule_hr extends CI_Model {
     }
 
     public function set_form_change($rcode, $vtid, $vid = "") {
-        $temp_vehicle = $this->m_schedule->get_vehicle($rcode, $vtid);
+        $temp_vehicle = $this->m_schedule_hr->get_vehicle($rcode, $vtid);
         $option = array();
         foreach ($temp_vehicle as $row) {
             if ($row['VID'] != $vid)
