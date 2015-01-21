@@ -18,7 +18,372 @@
         </div>
     </div>
 </div>
-<div class="container-fluid">
+<div class="container-fluid"> 
+    <?php
+    foreach ($vehicle_types as $type) {
+        $vtid = $type['VTID'];
+        $vt_name = $type['VTDescription'];
+        $num_route = 0;
+        foreach ($routes as $route) {
+            if ($vtid == $route['VTID']) {
+                $num_route++;
+            }
+        }
+        ?> 
+        <div class="row-fluid">
+            <div role="tabpanel">
+                <?php
+                if ($num_route > 0) {
+                    echo "<legend>$vt_name</legend>";
+                    if ($num_route == 1) {
+                        $class = 'in';
+                    }
+                    ?>
+                    <!-- Nav tabs -->
+                    <ul class="nav nav-tabs nav-justified" role="tablist" id="TabRoute<?= $vtid ?>">
+                        <?php
+                        foreach ($routes as $r) {
+                            $rcode = $r['RCode'];
+                            $route_name = "$vt_name  $rcode" . ' ' . $r['RSource'] . ' - ' . $r['RDestination'];
+                            $id = $rcode . '_' . $vtid;
+                            ?>
+                            <li class="">
+                                <a href="#<?= $id ?>" role="tab" data-toggle="tab"><?= $route_name ?></a>
+                            </li>
+                            <?php
+                        }
+                        ?>    
+                    </ul>
+                    <!-- Tab panes -->
+                    <div class="tab-content">                    
+                        <?php
+                        foreach ($routes as $route) {
+                            $rcode = $route['RCode'];
+                            $vtid = $route['VTID'];
+                            $vt_name = $route['VTDescription'];
+                            $source = $route['RSource'];
+                            $destination = $route['RDestination'];
+                            $route_name = "$vt_name เส้นทาง " . $rcode . ' ' . ' ' . $source . ' - ' . $destination;
+                            $id = $rcode . "_" . $vtid;
+
+                            $seller_station_id = $route['SID'];
+                            $seller_station_name = $route['StationName'];
+                            $seller_station_seq = $route['Seq'];
+                            if ($route['SellerNote'] != NULL) {
+                                $note = $route['SellerNote'];
+                                $seller_station_name .= " ($note) ";
+                            }
+                            //นับจำนวนสถานี
+                            $num_station = 0;
+                            $num_sale_station = 0;
+                            foreach ($stations as $s) {
+                                if ($rcode == $s['RCode'] && $vtid == $s['VTID']) {
+                                    $num_station ++;
+                                    if ($s['IsSaleTicket'] == '1') {
+                                        $num_sale_station ++;
+                                    }
+                                }
+                            }
+
+                            /*
+                             * ตรวจสอบข้อมูลพนักงานขายตั๋ว 
+                             * ว่าเป็นจุดเริ่มต้นหรือว่าสุดท้าย
+                             * ถ้าเป็นจุดต้นทาง ให้แสดง เฉพาะ S
+                             * ถ้าเป็นจุดปลายทาง ให้แสดง เฉพาะ D
+                             */
+
+                            foreach ($stations as $station) {
+                                if ($seller_station_id == $station['SID']) {
+                                    $seller_station_seq = $station['Seq'];
+                                }
+                            }
+                            ?>
+                            <div role="tabpanel" class="tab-pane fade" id="<?= $id ?>">
+                                <div class="col-md-12 text-center">
+                                    <h3><?= $route_name ?></h3>
+                                    <p class="lead">จุดจอด : <strong><?= $seller_station_name ?></strong></p>
+                                </div>
+                                <?php
+                                $schedules_form = array();
+                                $stations_form = array();
+                                foreach ($routes_detail as $rd) {
+                                    if ($rcode == $rd['RCode'] && $vtid == $rd['VTID']) {
+                                        $rid = $rd['RID'];
+                                        $source = $rd['RSource'];
+                                        $destination = $rd['RDestination'];
+                                        $schedule_type = $rd["ScheduleType"];
+                                        $start_point = $rd['StartPoint'];
+                                        $route_time = $rd['Time'];
+                                        $route_name = "เส้นทาง " . $rcode . ' ' . ' ' . $source . ' - ' . $destination;
+
+                                        $stations_in_route = array();
+
+                                        if ($start_point == "S") {
+                                            $n = 0;
+                                            foreach ($stations as $station) {
+                                                if ($rcode == $station['RCode'] && $vtid == $station['VTID']) {
+                                                    $stations_in_route[$n] = $station;
+                                                    $n++;
+                                                }
+                                            }
+                                        }
+                                        if ($start_point == "D") {
+                                            $n = 0;
+                                            for ($i = $num_station; $i >= 0; $i--) {
+                                                foreach ($stations as $station) {
+                                                    if ($rcode == $station['RCode'] && $vtid == $station['VTID'] && $station['Seq'] == $i) {
+                                                        $stations_in_route[$n] = $station;
+                                                        $n++;
+                                                    }
+                                                }
+                                            }
+                                        }
+
+                                        $schedules_in_route = array();
+                                        foreach ($schedules as $sd) {
+                                            if ($rid == $sd['RID']) {
+                                                array_push($schedules_in_route, $sd);
+                                            }
+                                        }
+                                        /*
+                                         * สถานีต้นทางเเละปลายทางจะมีค่า รายทาง
+                                         */
+                                        
+
+                                        $class = ' ';
+                                        if ($seller_station_seq == 1 && $start_point == 'S') {
+                                            $schedules_form = $schedules_in_route;
+                                            $stations_form = $stations_in_route;
+
+                                            $class = ' col-md-offset-1 ';
+                                        } elseif ($seller_station_seq == $num_station && $start_point == 'D') {
+                                            $schedules_form = $schedules_in_route;
+                                            $stations_form = $stations_in_route;
+
+                                            $class = ' col-md-offset-1 ';
+                                        } elseif ($seller_station_seq == 1 || $seller_station_seq == $num_station) {                                          
+                                            $class = 'hidden';
+                                        }
+                                        ?>     
+
+                                        <div class="col-md-6 <?= $class ?>">
+                                            <div class="widget">
+                                                <div class="widget-header">
+                                                    <i>ไป</i>
+                                                    <strong>
+                                                        <?= $destination ?>   
+                                                    </strong>
+                                                </div>
+                                                <div class="widget-content">
+                                                    <table class="table table-striped table-hover">
+                                                        <thead>
+                                                            <tr>
+                                                                <th style="width: 20%">เวลาออก</th> 
+                                                                <th rowspan="2" style="width: 15%">รถเบอร์</th>                                                                                                                                  
+                                                                <th rowspan="2" style="width: 15%">รายรับ</th>
+                                                                <th rowspan="2" style="width: 15%">รายจ่าย</th>
+                                                                <th rowspan="2" style="width: 15%">คงเหลือ</th>
+                                                                <th rowspan="2" style="width: 20%"></th>
+                                                            </tr>
+                                                            <tr>
+                                                                <th style="width: 20%"><?= $seller_station_name ?></th> 
+                                                            </tr>
+
+                                                        </thead>
+                                                        <tbody>
+                                                            <?php
+                                                            foreach ($schedules_in_route as $schedule) {
+                                                                $tsid = $schedule['TSID'];
+                                                                $start_time = $schedule['TimeDepart'];
+                                                                $time_depart = '';
+                                                                $temp = 0;
+                                                                foreach ($stations_in_route as $s) {
+                                                                    if ($s['IsSaleTicket'] == '1') {
+                                                                        $station_name = $s['StationName'];
+                                                                        $travel_time = $s['TravelTime'];
+                                                                        if ($s['Seq'] == '1' || $s['Seq'] == $num_station) {
+//                                                                                  สถานีต้นทาง
+                                                                            $time = strtotime($start_time);
+                                                                        } else {
+                                                                            $temp+=$travel_time;
+                                                                            $time = strtotime("+$temp minutes", strtotime($start_time));
+                                                                        }
+                                                                        if ($seller_station_id == $s['SID']) {
+                                                                            $time_depart = date('H:i', $time);
+                                                                            break;
+                                                                        }
+                                                                    }
+                                                                }
+
+
+                                                                $vid = $schedule['VID'];
+                                                                $vcode = $schedule['VCode'];
+
+                                                                if ($vcode == '') {
+                                                                    $vcode = '-';
+                                                                }
+                                                                /*
+                                                                 * รายรับ,รายจ่าย
+                                                                 */
+                                                                $income = 0;
+                                                                $outcome = 0;
+                                                                /*
+                                                                 * รายการรายรับที่เกิดจากการซื้อตั๋ว
+                                                                 */
+                                                                foreach ($tickets as $ticket) {
+                                                                    if ($tsid == $ticket['TSID']) {
+                                                                        $income+=$ticket['PriceSeat'];
+                                                                    }
+                                                                }
+
+                                                                foreach ($cost_types as $cost_type) {
+                                                                    $cost_type_id = $cost_type['CostTypeID'];
+                                                                    foreach ($costs as $cost) {
+                                                                        $CostValue = $cost['CostValue'];
+                                                                        if ($tsid == $cost['TSID'] && $cost_type_id == $cost['CostTypeID']) {
+                                                                            if ($cost_type_id == '1') {
+                                                                                //รายรับ
+                                                                                $income+=(int) $CostValue;
+                                                                            } else {
+                                                                                //รายจ่าย
+                                                                                $outcome+=(int) $CostValue;
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                                $view = array(
+                                                                    'type' => "button",
+                                                                    'class' => "btn btn-link btn-block",
+                                                                    'data-toggle' => "tooltip",
+                                                                    'data-placement' => "top",
+                                                                    'title' => "ดูค่าใช้จ่าย รอบเวลา $time_depart รถเบอร์ $vcode ",
+                                                                );
+                                                                $IsReport = '';
+                                                                if ($schedule['ReportID'] != NULL) {
+                                                                    $IsReport = 'disabled';
+                                                                }
+                                                                ?>
+                                                                <tr>
+                                                                    <td class="text-center"><?= anchor("cost/view/$tsid/", $time_depart, $view) . '  '; ?></td>
+                                                                    <td class="text-center"><?= $vcode ?></td>
+                                                                    <td class="text-center"><?= number_format($income) ?></td>
+                                                                    <td class="text-center"><?= number_format($outcome) ?> </td>
+                                                                    <td class="text-right"><strong><?= number_format($income - $outcome) ?></strong></td>
+                                                                    <td class="text-center">
+                                                                        <?php
+                                                                        $add_income = array(
+                                                                            'type' => "button",
+                                                                            'class' => "btn btn-info btn-sm $IsReport",
+                                                                            'data-toggle' => "tooltip",
+                                                                            'data-placement' => "top",
+                                                                            'title' => "เพิ่มรายรับ รถเบอร์ $vcode รอบเวลา $time_depart",
+                                                                        );
+                                                                        $add_outcome = array(
+                                                                            'type' => "button",
+                                                                            'class' => "btn btn-warning btn-sm $IsReport",
+                                                                            'data-toggle' => "tooltip",
+                                                                            'data-placement' => "top",
+                                                                            'title' => "เพิ่มรายจ่าย รถเบอร์ $vcode รอบเวลา $time_depart",
+                                                                        );
+                                                                        echo anchor("cost/add/1/$tsid/", '<span class="fa fa-plus"></span>', $add_income) . '  ';
+                                                                        echo anchor("cost/add/2/$tsid/", '<span class="fa fa-minus"></span>', $add_outcome);
+                                                                        ?>
+                                                                    </td>
+                                                                </tr>
+                                                                <?php
+                                                            }
+                                                            ?>
+                                                        </tbody>
+                                                    </table>
+                                                </div> 
+                                            </div>
+                                        </div>   
+                                        <?php
+                                    }
+                                }
+                                ?>
+                                <?php
+                                if (count($schedules_form) > 0 && count($stations_form) > 0) {
+                                    $station_name_form = end($stations_form)['StationName'];
+                                    ?>
+                                    <div class="col-md-4 well">                                
+                                        <legend>รายทาง</legend>
+                                        <table class="table table-striped table-hover table-bordered">
+                                            <thead>
+                                                <tr>
+                                                    <th style="width: 20%">ออกจาก</th> 
+                                                    <th rowspan="2" style="width: 15%">รถเบอร์</th>                                                                                                                                  
+                                                    <th rowspan="2" style="width: 20%">จำนวนเงิน</th>
+                                                    <th rowspan="2" style="width: 20%"></th>
+                                                </tr>
+                                                <tr>
+                                                    <th><?= $station_name_form ?></th> 
+                                                </tr>
+                                            </thead>                                            
+                                            <tbody>
+                                                <?php
+                                                foreach ($schedules_in_route as $schedule) {
+                                                    $tsid = $schedule['TSID'];
+                                                    $start_time = $schedule['TimeDepart'];
+                                                    $time_depart = '';
+                                                    $temp = 0;
+                                                    foreach ($stations_in_route as $s) {
+                                                        if ($s['IsSaleTicket'] == '1') {
+                                                            $station_name = $s['StationName'];
+                                                            $travel_time = $s['TravelTime'];
+                                                            if ($s['Seq'] == '1' || $s['Seq'] == $num_station) {
+//                                                                                  สถานีต้นทาง
+                                                                $time = strtotime($start_time);
+                                                            } else {
+                                                                $temp+=$travel_time;
+                                                                $time = strtotime("+$temp minutes", strtotime($start_time));
+                                                            }
+                                                            if ($seller_station_id == $s['SID']) {
+                                                                $time_depart = date('H:i', $time);
+                                                                break;
+                                                            }
+                                                        }
+                                                    }
+
+
+                                                    $vid = $schedule['VID'];
+                                                    $vcode = $schedule['VCode'];
+
+                                                    if ($vcode == '') {
+                                                        $vcode = '-';
+                                                    }
+                                                    ?>
+                                                    <tr>
+                                                        <td class="text-center"><?= anchor("cost/view/$tsid/", $time_depart, $view) . '  '; ?></td>
+                                                        <td class="text-center"><?= $vcode ?></td>
+                                                        <td class="text-right"></td>
+                                                        <td class="text-center"></td>
+                                                    </tr>
+                                                    <?php
+                                                }
+                                                ?>
+
+                                            </tbody>
+                                        </table>
+
+
+                                    </div>
+                                <?php } ?>
+                            </div>
+                        <?php } ?>
+                    </div>
+                    <?php
+                }
+                ?>
+            </div>
+        </div>
+    <?php } ?>
+</div>
+
+
+
+
+<div class="container-fluid hidden">  
     <div class="row-fluid">
         <?php
         foreach ($vehicle_types as $type) {
@@ -136,7 +501,6 @@
                                                     array_push($schedules_in_route, $sd);
                                                 }
                                             }
-
 
                                             $class = ' ';
                                             if ($seller_station_seq == 1 && $start_point == 'S') {
@@ -278,34 +642,7 @@
                                                         </table>
                                                     </div> 
                                                 </div>
-                                            </div>  
-                                            <?php
-                                            $class_beteen = '';
-                                            if ($seller_station_seq == 1 && $start_point == 'S') {
-                                                
-                                            } elseif ($seller_station_seq == $num_station && $start_point == 'D') {
-                                                
-                                            } else {
-                                                $class_beteen = 'hidden';
-                                            }
-                                            ?>
-                                            <div class="col-md-4 <?= $class_beteen ?>">
-                                                <div class="well">
-                                                    <legend>รายทาง</legend>
-                                                    <table class="table">
-                                                        <thead>
-                                                            <tr>
-                                                                <th style="width: 30%">ออกจาก</th>
-                                                                <th style="width: 30%">จำนวนเงิน</th>
-                                                                <th style="width: 40%"></th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            </div>
+                                            </div>                                                                               
                                             <?php
                                         }
                                     }

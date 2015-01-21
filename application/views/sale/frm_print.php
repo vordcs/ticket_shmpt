@@ -240,7 +240,7 @@
                                         <span class="small"><?php echo $this->m_datetime->getDatetimeNow(); ?></span>                               
                                     </div>
                                     <div class="col-xs-6 text-right">
-                                        <span class="small">ผู้ชายตั๋ว</span>                                 
+                                        <span class="small"><?= $this->m_user->get_user_first_name() ?></span>                                 
                                     </div>
                                 </div>
                             </div>
@@ -275,7 +275,7 @@
             $price = $t['PriceSeat'];
             $barcode = $this->m_barcode->gen_barcode($ticket_id);
             $qrcode = $this->m_qrcode->gen_qrcode($ticket_id);
-            $name_seller = $this->session->userdata('EID');
+            $name_seller = $this->m_user->get_user_first_name();
             ?>
             <div class="page-break">
                 <div class="ticket-print" id="<?= $ticket_id ?>">
