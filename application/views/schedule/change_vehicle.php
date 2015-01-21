@@ -97,7 +97,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-12 text-center" style="margin-top: 5%;">                   
+                        <div class="col-md-12 text-center" style="margin-top: 20%;">                   
                             <?php
                             $cancle = array(
                                 'class' => "btn btn-lg btn-danger",
