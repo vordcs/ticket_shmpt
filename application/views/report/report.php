@@ -48,7 +48,7 @@
     </div>
 </div>
 
-<div class="container-fluid">
+<div class="container-fluid hidden">
     <?php
     foreach ($vehicle_types as $type) {
         $vtid = $type['VTID'];
@@ -195,7 +195,7 @@
 
 </div>
 
-<div class="container-fluid hidden">     
+<div class="container-fluid">     
     <?php
     foreach ($vehicle_types as $type) {
         $vtid = $type['VTID'];

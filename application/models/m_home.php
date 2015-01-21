@@ -48,4 +48,15 @@ class m_home extends CI_Model {
             return FALSE;
     }
 
+    public function get_timeline($date = NULL) {
+        $this->db->from('report_day AS rd');
+        if ($date == NULL) {
+            $date = $this->m_datetime->getDateToday();
+        }
+        $this->db->where('rd.ReportDate', $date);
+
+        $query_schedule = $this->db->get();
+        return $query_schedule->result_array();
+    }
+
 }

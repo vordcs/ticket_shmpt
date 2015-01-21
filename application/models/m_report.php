@@ -133,7 +133,7 @@ class m_report extends CI_Model {
             //สถานี
             $ReportID .= str_pad($SID, 2, '0', STR_PAD_LEFT);
             //run number
-            $ReportID .=str_pad($num_report, 3, '0', STR_PAD_LEFT);
+            $ReportID .=str_pad($num_report, 1, '0', STR_PAD_LEFT);
 
             return $ReportID;
         }

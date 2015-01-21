@@ -99,8 +99,35 @@
             <div class="col-md-12">
                 <div class="timeline">
                     <dl>
-                        <dt>Apr 2014</dt>
-                        <dd class="pos-right clearfix">
+                        <dt>รายงานที่ส่งวันนี้ <?php
+                        $date = date_create($timeline[0]['ReportDate']);
+                        echo date_format($date, 'm / d / Y');
+                        ?></dt>
+                        <?php
+                        for ($i = 0; $i < count($timeline); $i++) {
+                            if ($i % 2 == 0) {
+                                echo '<dd class="pos-right clearfix">';
+                            } else {
+                                echo '<dd class="pos-left clearfix">';
+                            }
+                            $time = date_create($timeline[$i]['CreateDate']);
+                            $time = date_format($time, 'H:i');
+
+                            echo '<div class="circ"> </div>';
+                            echo '<div class="time">' . $time . '</div>';
+                            echo '<div class="events">';
+                            echo '<div class="events-body">';
+                            echo '<h4 class="events-heading">ส่งเงินครั้งที่ ' . ($i + 1) . ' ของวัน</h4>';
+                            echo '<p>เงินขายตั๋ว' . number_format($timeline[$i]['Total']) . ' บาท,';
+                            if (number_format($timeline[$i]['Vage']) != 0)
+                                echo' ค่าตอบแทน ' . number_format($timeline[$i]['Vage']) . ' บาท,';
+                            echo ' เงินสุทธิรวม ' . number_format($timeline[$i]['Net']) . ' บาท</p>';
+                            echo '</div>';
+                            echo '</div>';
+                            echo '</dd>';
+                        }
+                        ?>
+<!--                        <dd class="pos-right clearfix">
                             <div class="circ"> </div>
                             <div class="time">Apr 14</div>
                             <div class="events">
@@ -125,7 +152,7 @@
                                     <p>Raw denim you probably haven't heard of them jean shorts Austin. Nesciunt tofu stumptown aliqua, retro synth master cleanse. Mustache cliche tempor, williamsburg carles vegan helvetica.</p>
                                 </div>
                             </div>
-                        </dd>
+                        </dd>-->
 
                 </div>
 

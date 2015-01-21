@@ -126,6 +126,11 @@ class report extends CI_Controller {
 
         if ($this->m_report->validation_form_add() && $this->form_validation->run() == TRUE) {
             $form_data = $this->m_report->get_post_form_send();
+            //Remove comma from number
+            $form_data['report']['Total'] = str_replace(",", "", $form_data['report']['Total']);
+            $form_data['report']['Vage'] = str_replace(",", "", $form_data['report']['Vage']);
+            $form_data['report']['Net'] = str_replace(",", "", $form_data['report']['Net']);
+            
             $rs = $this->m_report->insert_report($form_data);
             if ($form_data != FALSE) {
                 $alert['alert_message'] = "ส่งรายงาน $route_name วันที่ $date_th";
@@ -168,7 +173,7 @@ class report extends CI_Controller {
 //            'tickets' => $data['tickets'],
 //            'form_data' => $form_data,
 //            'rs' => $rs,
-//            'get_report' => $this->m_report->get_report(),
+//            'get_report' => $this->m_report->get_report($this->m_datetime->getDateToday(), $rcode, $vtid, $sid),
         );
         $this->m_template->set_Debug($data_debug);
         $this->m_template->set_Title('ส่งรายงาน');
