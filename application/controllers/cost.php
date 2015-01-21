@@ -168,7 +168,7 @@ class cost extends CI_Controller {
 
         $RID = $schedules[0]['RID'];
 
-        $SID = $this->m_user->get_saller_station(NULL, NULL, $RID)[0]['SID'];
+        $SID = $this->m_route->get_route_by_seller(NULL, NULL, $RID)[0]['SID'];
 
         $time_departs = $this->m_schedule->get_time_depart($date, $RID, $tsid, $SID)[0];
         $time_depart = $time_departs['TimeDepart'];
@@ -199,9 +199,10 @@ class cost extends CI_Controller {
         $data_debug = array(
 //            'form_data' => $form_data,
 //            'data_insert_rs'=>$rs,
-//            "schedule" => $this->m_cost->get_schedule($date),
+//            "schedules" => $schedules,
 //            'saller_station' => $this->m_user->get_saller_station(),
 //            '$time_departs' => $time_departs,
+//            'SID' => $SID,
         );
 
         $this->m_template->set_Debug($data_debug);

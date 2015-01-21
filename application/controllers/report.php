@@ -67,6 +67,7 @@ class report extends CI_Controller {
 
         $data_debug = array(
 //            'routes' => $data['routes'],
+//            'routes_detail'=>$data['routes_detail'],
 //            'stations' => $data['stations'],
 //            'costs' => $data['costs'],
 //            'tickets' => $data['tickets'],

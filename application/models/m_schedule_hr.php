@@ -254,7 +254,7 @@ class m_schedule_hr extends CI_Model {
             'class' => 'form-control'
         );
 
-        $time = 30 * 60; //30 minutes
+        $time = 10 * 60; //10 minutes
         $time_start = ceil((time() + $time) / 300) * 300;
         $temp = 0;
         $i_TimeDepart[0] = "เลือกเวลา";

@@ -48,6 +48,7 @@ class m_route extends CI_Model {
         $this->db->where('sellers.EID', $this->m_user->get_user_id());
 
         $this->db->group_by(array('t_routes.RCode', 't_routes.VTID'));
+        $this->db->order_by('t_routes.RCode');
 
         $query = $this->db->get('sellers');
 
@@ -69,7 +70,7 @@ class m_route extends CI_Model {
 
         $this->db->where('sellers.EID', $this->m_user->get_user_id());
 
-        $this->db->order_by('StartPoint', 'DESC');
+        $this->db->order_by('t_routes.RCode');
         $query = $this->db->get('sellers');
 
         return $query->result_array();

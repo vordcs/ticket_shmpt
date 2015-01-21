@@ -47,7 +47,155 @@
         </div>
     </div>
 </div>
-<div class="container-fluid">   
+
+<div class="container-fluid">
+    <?php
+    foreach ($vehicle_types as $type) {
+        $vtid = $type['VTID'];
+        $vt_name = $type['VTDescription'];
+        $num_route = 0;
+        foreach ($routes as $route) {
+            if ($vtid == $route['VTID']) {
+                $num_route++;
+            }
+        }
+        if ($num_route > 0) {
+            ?>
+            <div class="row-fluid ">   
+                <ul class="nav nav-tabs nav-justified" role="tablist" id="TabSche">
+                    <?php
+                    foreach ($routes as $r) {
+                        $rcode = $r['RCode'];
+                        $route_name = "$vt_name  $rcode" . ' ' . $r['RSource'] . ' - ' . $r['RDestination'];
+                        $id = $rcode . '_' . $vtid;
+                        ?>
+                        <li class="">
+                            <a href="#<?= $id ?>" role="tab" data-toggle="tab"><?= $route_name ?></a>
+                        </li>
+                        <?php
+                    }
+                    ?>
+                </ul>
+                <div class="tab-content">
+                    <?php
+                    foreach ($routes as $r) {
+
+                        $rcode = $route['RCode'];
+                        $vtid = $route['VTID'];
+                        $vt_name = $route['VTDescription'];
+                        $source = $route['RSource'];
+                        $destination = $route['RDestination'];
+                        $route_name = "$vt_name เส้นทาง " . $rcode . ' ' . ' ' . $source . ' - ' . $destination;
+                        $id = $rcode . "_" . $vtid;
+
+                        $seller_station_id = $route['SID'];
+                        $seller_station_name = $route['StationName'];
+                        $seller_station_seq = $route['Seq'];
+                        if ($route['SellerNote'] != NULL) {
+                            $note = $route['SellerNote'];
+                            $seller_station_name .= " ($note) ";
+                        }
+                        /*
+                         * สรุปข้อมูลรายรับรายจ่าย 
+                         */
+                        $income = 0;
+                        $outcome = 0;
+                        foreach ($cost_types as $cost_type) {
+                            $cost_type_id = $cost_type['CostTypeID'];
+                            foreach ($costs as $cost) {
+                                $CostValue = $cost['CostValue'];
+                                if ($cost_type_id == $cost['CostTypeID'] && $seller_station_id == $cost['SID']) {
+                                    if ($cost_type_id == '1') {
+                                        //รายรับ
+                                        $income+=(int) $CostValue;
+                                    } else {
+                                        //รายจ่าย
+                                        $outcome+=(int) $CostValue;
+                                    }
+                                }
+                            }
+                        }
+                        foreach ($routes_detail as $rd) {
+                            if ($rcode == $rd['RCode'] && $vtid == $rd['VTID']) {
+                                $rid = $rd['RID'];
+                                $source = $rd['RSource'];
+                                $destination = $rd['RDestination'];
+                                $start_point = $rd['StartPoint'];
+
+
+                                //นับจำนวนสถานี
+                                $num_station = 0;
+                                $num_sale_station = 0;
+                                foreach ($stations as $s) {
+                                    if ($rcode == $s['RCode'] && $vtid == $s['VTID']) {
+                                        $num_station ++;
+                                        if ($s['IsSaleTicket'] == '1') {
+                                            $num_sale_station ++;
+                                        }
+                                    }
+                                }
+
+                                $stations_in_route = array();
+
+                                if ($start_point == "S") {
+                                    $n = 0;
+                                    foreach ($stations as $station) {
+                                        if ($rcode == $station['RCode'] && $vtid == $station['VTID']) {
+                                            $stations_in_route[$n] = $station;
+                                            $n++;
+                                        }
+                                    }
+                                }
+                                if ($start_point == "D") {
+                                    $n = 0;
+                                    for ($i = $num_station; $i >= 0; $i--) {
+                                        foreach ($stations as $station) {
+                                            if ($rcode == $station['RCode'] && $vtid == $station['VTID'] && $station['Seq'] == $i) {
+                                                $stations_in_route[$n] = $station;
+                                                $n++;
+                                            }
+                                        }
+                                    }
+                                }
+
+                                $schedules_in_route = array();
+
+                                foreach ($schedules as $sd) {
+                                    if ($rid == $sd['RID']) {
+                                        array_push($schedules_in_route, $sd);
+                                    }
+                                }
+
+                                $class = ' ';
+                                if ($seller_station_seq == 1 && $start_point == 'S') {
+                                    $class = '';
+                                } elseif ($seller_station_seq == $num_station && $start_point == 'D') {
+                                    $class = ' ';
+                                } elseif ($seller_station_seq == 1 || $seller_station_seq == $num_station) {
+                                    $class = 'hidden';
+                                }
+                                ?>
+                                <div role="tabpanel" class="tab-pane" id="<?= $id ?>">
+                                   
+                                    
+                                    
+                                </div>
+
+                            <?php
+                            }
+                        }
+                    }
+                    ?>
+                </div>
+            </div>
+            <?php
+        }
+    }
+    ?>
+
+</div>
+
+<div class="container-fluid hidden">     
     <?php
     foreach ($vehicle_types as $type) {
         $vtid = $type['VTID'];
@@ -254,7 +402,7 @@
                                                          * รายการรายรับที่เกิดจากการซื้อตั๋ว
                                                          */
                                                         foreach ($tickets as $ticket) {
-                                                            if ($tsid == $ticket['TSID'] ) {
+                                                            if ($tsid == $ticket['TSID']) {
                                                                 $income+=$ticket['PriceSeat'];
                                                             }
                                                         }
@@ -326,7 +474,7 @@
                                                         }
                                                     }
                                                     ?>
-                                                    <?php ?>
+                    <?php ?>
                                                 </tbody>
                                             </table>
                                         </div>
