@@ -66,7 +66,7 @@ class Home extends CI_Controller {
         $data['schedules'] = $this->m_schedule->get_schedule($this->m_datetime->getDateToday());
         $data['schedule_master'] = $this->m_route->get_schedule_manual();
         $data['detail'] = $this->m_home->get_seller_detail($this->m_home->get_user_id())[0];
-//        $data['timeline'] = $this->m_home->get_timeline();
+        $data['timeline'] = $this->m_home->get_timeline();
 
         $data_debug = array(
 //            'from_search' => $data['from_search'],

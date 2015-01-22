@@ -122,37 +122,47 @@
                             if (number_format($timeline[$i]['Vage']) != 0)
                                 echo' ค่าตอบแทน ' . number_format($timeline[$i]['Vage']) . ' บาท,';
                             echo ' เงินสุทธิรวม ' . number_format($timeline[$i]['Net']) . ' บาท</p>';
+
+                            echo '<p>ของรอบต่อไปนี้ ';
+                            for ($j = 0; $j < count($timeline[$i]['detail']); $j++) {
+                                echo substr($timeline[$i]['detail'][$j]['TimeDepart'], 0, -3);
+                                if ($j < (count($timeline[$i]['detail']) - 1))
+                                    echo ' | ';
+                            }
+                            echo '</p>';
+
                             echo '</div>';
                             echo '</div>';
                             echo '</dd>';
                         }
                         ?>
-<!--                        <dd class="pos-right clearfix">
-                            <div class="circ"> </div>
-                            <div class="time">Apr 14</div>
-                            <div class="events">
-                                <div class="pull-left">
-                                    <img class="events-object img-rounded" src="img/photo-1.jpg">
-                                </div>
-                                <div class="events-body">
-                                    <h4 class="events-heading">Bootstrap</h4>
-                                    <p>Raw denim you probably haven't heard of them jean shorts Austin. Nesciunt tofu stumptown aliqua, retro synth master cleanse. Mustache cliche tempor, williamsburg carles vegan helvetica.</p>
-                                </div>
-                            </div>
-                        </dd>
-                        <dd class="pos-left clearfix">
-                            <div class="circ"></div>
-                            <div class="time">Apr 10</div>
-                            <div class="events">
-                                <div class="pull-left">
-                                    <img class="events-object img-rounded" src="img/photo-2.jpg">
-                                </div>
-                                <div class="events-body">
-                                    <h4 class="events-heading">Bootflat</h4>
-                                    <p>Raw denim you probably haven't heard of them jean shorts Austin. Nesciunt tofu stumptown aliqua, retro synth master cleanse. Mustache cliche tempor, williamsburg carles vegan helvetica.</p>
-                                </div>
-                            </div>
-                        </dd>-->
+                        <!--                        <dd class="pos-right clearfix">
+                                                        <div class="circ"> </div>
+                                                        <div class="time">Apr 14</div>
+                                                        <div class="events">
+                                                            <div class="pull-left">
+                                                                <img class="events-object img-rounded" src="img/photo-1.jpg">
+                                                            </div>
+                                                            <div class="events-body">
+                                                                <h4 class="events-heading">Bootstrap</h4>
+                                                                <p>Raw denim you probably haven't heard of them jean shorts Austin. Nesciunt tofu stumptown aliqua, retro synth master cleanse. Mustache cliche tempor, williamsburg carles vegan helvetica.</p>
+                                                                <p>ของรอบต่อไปนี้ 16.00</p>
+                                                            </div>
+                                                        </div>
+                                                    </dd>
+                                                    <dd class="pos-left clearfix">
+                                                        <div class="circ"></div>
+                                                        <div class="time">Apr 10</div>
+                                                        <div class="events">
+                                                            <div class="pull-left">
+                                                                <img class="events-object img-rounded" src="img/photo-2.jpg">
+                                                            </div>
+                                                            <div class="events-body">
+                                                                <h4 class="events-heading">Bootflat</h4>
+                                                                <p>Raw denim you probably haven't heard of them jean shorts Austin. Nesciunt tofu stumptown aliqua, retro synth master cleanse. Mustache cliche tempor, williamsburg carles vegan helvetica.</p>
+                                                            </div>
+                                                        </div>
+                                                    </dd>-->
 
                 </div>
 

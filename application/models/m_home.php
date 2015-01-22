@@ -56,7 +56,18 @@ class m_home extends CI_Model {
         $this->db->where('rd.ReportDate', $date);
 
         $query_schedule = $this->db->get();
-        return $query_schedule->result_array();
+        $ans = $query_schedule->result_array();
+
+        //Make detail
+        for ($i = 0; $i < count($ans); $i++) {
+            $this->db->from('t_schedules_day_has_report AS tsdhr');
+            $this->db->join('t_schedules_day AS tsd', ' tsd.TSID = tsdhr.TSID ', 'left');
+            $this->db->where('tsdhr.ReportID', $ans[$i]['ReportID']);
+            $query_temp = $this->db->get();
+            $ans[$i]['detail'] = $query_temp->result_array();
+        }
+        
+        return $ans;
     }
 
 }
