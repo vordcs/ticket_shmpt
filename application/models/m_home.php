@@ -48,25 +48,37 @@ class m_home extends CI_Model {
             return FALSE;
     }
 
-    public function get_timeline($date = NULL) {
+    public function get_timeline($date = NULL, $sid = NULL) {
         $this->db->from('report_day AS rd');
         if ($date == NULL) {
             $date = $this->m_datetime->getDateToday();
         }
         $this->db->where('rd.ReportDate', $date);
+        $this->db->order_by('rd.ReportTime', 'asc');
 
         $query_schedule = $this->db->get();
         $ans = $query_schedule->result_array();
+
+        if ($sid != NULL) {
+            for ($i = 0; $i < count($ans); $i++) {
+                $temp_sid = $ans[$i]['SID'];
+                if (in_array($temp_sid, $sid) == FALSE) {
+                    unset($ans[$i]);
+                    $i--;
+                }
+            }
+        }
 
         //Make detail
         for ($i = 0; $i < count($ans); $i++) {
             $this->db->from('t_schedules_day_has_report AS tsdhr');
             $this->db->join('t_schedules_day AS tsd', ' tsd.TSID = tsdhr.TSID ', 'left');
             $this->db->where('tsdhr.ReportID', $ans[$i]['ReportID']);
+            $this->db->order_by('tsd.TimeDepart', 'asc');
             $query_temp = $this->db->get();
             $ans[$i]['detail'] = $query_temp->result_array();
         }
-        
+
         return $ans;
     }
 

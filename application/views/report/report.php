@@ -48,7 +48,35 @@
     </div>
 </div>
 
-<div class="container-fluid hidden">
+<div class="container-fluid">
+    <div class="row-fluid ">   
+        <ul class="nav nav-tabs nav-justified" role="tablist" id="TabSche">
+            <li class="">
+                <a href="#264_1" role="tab" data-toggle="tab">รถตู้  264 ขอนแก่น - กาฬสินธุ์</a>
+            </li>
+            <li class="">
+                <a href="#278_1" role="tab" data-toggle="tab">รถตู้  278 ขอนแก่น - มุกดาหาร</a>
+            </li>
+        </ul>
+        <div class="tab-content">
+            <div role="tabpanel" class="tab-pane" id="264_1">
+111111111
+
+
+            </div>
+
+            <div role="tabpanel" class="tab-pane" id="278_1">
+
+222222222
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<div class="container-fluid">
     <?php
     foreach ($vehicle_types as $type) {
         $vtid = $type['VTID'];
@@ -176,12 +204,12 @@
                                 }
                                 ?>
                                 <div role="tabpanel" class="tab-pane" id="<?= $id ?>">
-                                   
-                                    
-                                    
+
+
+
                                 </div>
 
-                            <?php
+                                <?php
                             }
                         }
                     }
@@ -195,7 +223,7 @@
 
 </div>
 
-<div class="container-fluid">     
+<div class="container-fluid hidden">     
     <?php
     foreach ($vehicle_types as $type) {
         $vtid = $type['VTID'];
@@ -474,7 +502,7 @@
                                                         }
                                                     }
                                                     ?>
-                    <?php ?>
+                                                    <?php ?>
                                                 </tbody>
                                             </table>
                                         </div>

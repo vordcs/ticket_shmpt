@@ -66,8 +66,12 @@ class Home extends CI_Controller {
         $data['schedules'] = $this->m_schedule->get_schedule($this->m_datetime->getDateToday());
         $data['schedule_master'] = $this->m_route->get_schedule_manual();
         $data['detail'] = $this->m_home->get_seller_detail($this->m_home->get_user_id())[0];
-        $data['timeline'] = $this->m_home->get_timeline();
-
+        $data['seller_detail'] = $this->m_user->get_saller_station();
+        $data['all_sid'] = array();
+        foreach ($data['seller_detail'] as $row) {
+            array_push($data['all_sid'], $row['SID']);
+        }
+        $data['timeline'] = $this->m_home->get_timeline(NULL, $data['all_sid']);
         $data_debug = array(
 //            'from_search' => $data['from_search'],
 //    'route'=>$data['route'],
@@ -75,7 +79,10 @@ class Home extends CI_Controller {
 //    ''=>$data[''],
 //            'detail' => $data['detail'],
 //            'input' => (isset($input)) ? $input : NULL,
-//            'timeline' => $data['timeline']
+//            'timeline' => $data['timeline'],
+//            'seller_detail' => $data['seller_detail'],
+//            'all_sid' => $data['all_sid'],
+//            'test' => (in_array('0', $data['all_sid'])) ? '1' : '2',
         );
         $this->m_template->set_Debug($data_debug);
         $this->m_template->set_Title('ระบบขายตั๋วหน้าเค้ฆาเตอร์');

@@ -5,6 +5,45 @@ if (!defined('BASEPATH'))
 
 class m_report extends CI_Model {
 
+    public function get_cost($cid = null, $ctid = NULL, $date = NULL, $tsid = NULL, $vid = NULL) {
+        $this->db->select('*,cost.CreateBy AS CreateBy,cost.CreateDate as CreateDate');
+        $this->db->join('cost_type', 'cost_type.CostTypeID = cost.CostTypeID');
+        $this->db->join('cost_detail', 'cost_detail.CostDetailID = cost.CostDetailID', 'left');
+        $this->db->join('vehicles_has_cost', 'vehicles_has_cost.CostID = cost.CostID', 'left');
+        $this->db->join('vehicles', 'vehicles.VID = vehicles_has_cost.VID', 'left');
+        $this->db->join('t_schedules_day_has_cost', 't_schedules_day_has_cost.CostID = cost.CostID');
+        $this->db->join('t_stations', 't_stations.SID = cost.SID', 'left');
+        if ($cid != NULL) {
+            $this->db->where('cost.CostID', $cid);
+        }
+        if ($ctid != NULL) {
+            $this->db->where('cost.CostTypeID', $ctid);
+        }
+        if ($tsid != NULL) {
+            $this->db->where('t_schedules_day_has_cost.TSID', $tsid);
+        }
+        if ($vid != NULL) {
+            $this->db->where('vehicles_has_cost.VID', $vid);
+        }
+        if ($date == NULL) {
+            $date = $this->m_datetime->getDateToday();
+        }
+
+        $this->db->where('cost.CostDate', $date);
+        $this->db->where('cost.CreateBy', $this->m_user->get_user_id());
+        $query = $this->db->get('cost');
+        return $query->result_array();
+    }
+
+    public function get_cost_type($id = NULL) {
+
+        if ($id != NULL) {
+            $this->db->where('CostTypeID', $id);
+        }
+        $query = $this->db->get('cost_type');
+        return $query->result_array();
+    }
+
     public function get_report($date = NULL, $RCode = NULL, $VTID = NULL, $SID = NULL, $ReportID = NULL) {
 
         if ($date == NULL) {

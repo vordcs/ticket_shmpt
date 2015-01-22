@@ -12,7 +12,6 @@ class report extends CI_Controller {
         $this->load->model('m_station');
         $this->load->model('m_schedule');
         $this->load->model('m_ticket');
-        $this->load->model('m_cost');
         $this->load->model('m_report');
         $this->load->library('form_validation');
 
@@ -36,8 +35,8 @@ class report extends CI_Controller {
 
 
 
-        $cost_type = $this->m_cost->get_cost_type();
-        $costs = $this->m_cost->get_cost();
+        $cost_type = $this->m_report->get_cost_type();
+        $costs = $this->m_report->get_cost();
 
         $vehicle_types = $this->m_route->get_vehicle_types();
 
@@ -64,6 +63,34 @@ class report extends CI_Controller {
             'costs' => $costs,
             'tickets' => $tickets
         );
+        $data['seller_detail'] = $this->m_user->get_saller_station();
+
+        /*
+         * เดรียมข้อมูลทั้งหมดเพื่อนำไปแสดงใน view
+         */
+        $all_data = $routes;
+        for ($i = 0; $i < count($all_data); $i++) {
+            $rcode = $all_data[$i]['RCode'];
+            $vtid = $all_data[$i]['VTID'];
+            $rid = $all_data[$i]['RID'];
+            $all_data[$i]['schedules'] = $this->m_schedule->get_schedule($date, $rcode, $vtid, $rid);
+
+            //ปรับเวลา TimeDepart และ TimeArrive ของแต่ละเที่ยว
+            $temp_station = $this->m_station->get_stations_by_start_point($all_data[$i]['StartPoint'], $rcode, $vtid);
+            $seq = $all_data[$i]['Seq'];
+            $temp = 0;
+            for ($j = 1; $j < count($temp_station); $j++) {
+                if ($temp_station[$j]['IsSaleTicket'] == 1 && $temp_station[$j]['IsSaleTicket'] < $seq) {
+                    $temp+=$temp_station[$j]['TravelTime'];
+                }
+            }
+            for ($j = 0; $j < count($all_data[$i]['schedules']); $j++) {
+                $time = strtotime("+$temp minutes", strtotime($all_data[$i]['schedules'][$j]['TimeDepart']));
+                $all_data[$i]['schedules'][$j]['TimeDepart'] = date('H:i:s', $time);
+                $time = strtotime("+$temp minutes", strtotime($all_data[$i]['schedules'][$j]['TimeArrive']));
+                $all_data[$i]['schedules'][$j]['TimeArrive'] = date('H:i:s', $time);
+            }
+        }
 
         $data_debug = array(
 //            'routes' => $data['routes'],
@@ -71,6 +98,7 @@ class report extends CI_Controller {
 //            'stations' => $data['stations'],
 //            'costs' => $data['costs'],
 //            'tickets' => $data['tickets'],
+            'all_data' => $all_data
         );
         $this->m_template->set_Debug($data_debug);
         $this->m_template->set_Title('รายงาน');
@@ -112,8 +140,8 @@ class report extends CI_Controller {
             redirect('home/');
         }
 
-        $cost_type = $this->m_cost->get_cost_type();
-        $costs = $this->m_cost->get_cost();
+        $cost_type = $this->m_report->get_cost_type();
+        $costs = $this->m_report->get_cost();
 
         $rcode = $routes[0]['RCode'];
         $vt_name = $routes[0]['VTDescription'];
@@ -130,7 +158,7 @@ class report extends CI_Controller {
             $form_data['report']['Total'] = str_replace(",", "", $form_data['report']['Total']);
             $form_data['report']['Vage'] = str_replace(",", "", $form_data['report']['Vage']);
             $form_data['report']['Net'] = str_replace(",", "", $form_data['report']['Net']);
-            
+
             $rs = $this->m_report->insert_report($form_data);
             if ($form_data != FALSE) {
                 $alert['alert_message'] = "ส่งรายงาน $route_name วันที่ $date_th";

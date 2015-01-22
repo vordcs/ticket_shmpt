@@ -72,7 +72,7 @@ class cost extends CI_Controller {
         $data_debug = array(
 //            'from_search' => $data['from_search'],           
 //            'cost_types' => $data['cost_types'],
-            'costs' => $data['costs'],
+//            'costs' => $data['costs'],
 //            'costs_detail' => $data['costs_detail'],
 //            'cost_along_road' => $data['cost_along_road'],
 //            'routes' => $data['routes'],

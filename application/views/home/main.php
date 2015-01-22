@@ -94,7 +94,7 @@
         </div>
     </div>
 
-    <?php if (isset($timeline)) { ?>
+    <?php if (isset($timeline) && count($timeline) > 0) { ?>
         <div class="row">  
             <div class="col-md-12">
                 <div class="timeline">
@@ -117,11 +117,11 @@
                             echo '<div class="time">' . $time . '</div>';
                             echo '<div class="events">';
                             echo '<div class="events-body">';
-                            echo '<h4 class="events-heading">ส่งเงินครั้งที่ ' . ($i + 1) . ' ของวัน</h4>';
-                            echo '<p>เงินขายตั๋ว' . number_format($timeline[$i]['Total']) . ' บาท,';
+                            echo '<h4 class="events-heading">ส่งเงินครั้งที่ ' . ($i + 1) . ' ของวัน <span class="badge badge-success">สาย ' . $timeline[$i]['RCode'] . '</span></h4>';
+                            echo '<p>เงินขายตั๋ว <strong>' . number_format($timeline[$i]['Total']) . '</strong> บาท,';
                             if (number_format($timeline[$i]['Vage']) != 0)
-                                echo' ค่าตอบแทน ' . number_format($timeline[$i]['Vage']) . ' บาท,';
-                            echo ' เงินสุทธิรวม ' . number_format($timeline[$i]['Net']) . ' บาท</p>';
+                                echo' ค่าตอบแทน <strong>' . number_format($timeline[$i]['Vage']) . '</strong> บาท,';
+                            echo ' เงินสุทธิรวม <strong>' . number_format($timeline[$i]['Net']) . '</strong> บาท</p>';
 
                             echo '<p>ของรอบต่อไปนี้ ';
                             for ($j = 0; $j < count($timeline[$i]['detail']); $j++) {
