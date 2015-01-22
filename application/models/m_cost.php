@@ -35,6 +35,17 @@ class m_cost extends CI_Model {
         return $query->result_array();
     }
 
+    public function sum_costs($date, $SID, $CostTypeID = NULL, $CostDetailID = NULL) {
+        if ($CostTypeID != NULL) {
+            $this->db->where('cost.CostTypeID', $CostTypeID);
+        }
+        $this->db->where('cost.SID', $date);
+        $this->db->where('cost.CreateBy', $this->m_user->get_user_id());
+        $this->db->where('cost.CostDate', $date);
+        $query = $this->db->get('cost');
+        return $query->row_array();
+    }
+
     public function get_cost_type($id = NULL) {
 
         if ($id != NULL) {
@@ -44,11 +55,33 @@ class m_cost extends CI_Model {
         return $query->result_array();
     }
 
-    public function get_cost_detail($id = NULL) {
-        if ($id != NULL) {
-            $this->db->where('CostTypeID', $id);
+    public function get_cost_detail($CostTypeID = NULL, $CostDetailID = NULL) {
+        if ($CostDetailID != NULL) {
+            $this->db->where('CostDetailID', $CostDetailID);
+        }
+        if ($CostTypeID != NULL) {
+            $this->db->where('CostTypeID', $CostTypeID);
         }
         $query = $this->db->get('cost_detail');
+        return $query->result_array();
+    }
+
+    /*
+     * คืนค่าเฉพาะค่าใช้จ่ายรายทางเท่านั่น
+     */
+
+    public function get_cost_along_road($date, $SID, $tsid = NULL) {
+        $this->db->select('*,cost.CreateBy AS CreateBy,cost.CreateDate as CreateDate');
+        $this->db->join('cost_type', 'cost_type.CostTypeID = cost.CostTypeID');
+        $this->db->join('cost_detail', 'cost_detail.CostDetailID = cost.CostDetailID', 'left');
+        $this->db->join('t_schedules_day_has_cost', 't_schedules_day_has_cost.CostID = cost.CostID');
+
+        $this->db->where('cost.CostDetailID', 1);
+        $this->db->where('cost.CostTypeID', 1);
+
+        $this->db->where('cost.SID', $SID);
+        $this->db->where('cost.CreateBy', $this->m_user->get_user_id());
+        $query = $this->db->get('cost');
         return $query->result_array();
     }
 
@@ -71,8 +104,9 @@ class m_cost extends CI_Model {
     }
 
     public function get_vehicle_types($id = NULL) {
-        if ($id != NULL)
+        if ($id != NULL) {
             $this->db->where('VTID', $id);
+        }
         $temp = $this->db->get('vehicles_type');
         return $temp->result_array();
     }
@@ -156,22 +190,190 @@ class m_cost extends CI_Model {
     }
 
     public function delete_cost($cost_id) {
-        //delete vehicle has cost
+//delete vehicle has cost
         $this->db->where('CostID', $cost_id);
         $this->db->delete('vehicles_has_cost');
 
-        //delete schedules_day has cost
+//delete schedules_day has cost
         $this->db->where('CostID', $cost_id);
         $this->db->delete('t_schedules_day_has_cost');
 
-        //delete cost
+//delete cost
         $this->db->where('CostID', $cost_id);
         $this->db->delete('cost');
 
         return TRUE;
     }
 
-    public function set_form_add($ctid, $tsid = NULL, $time_depart = NULL) {
+    public function set_view_cost($date, $routes, $routes_detail) {
+        $this->load->model('m_sale');
+        $this->load->model('m_route');
+        $this->load->model('m_station');
+        $this->load->model('m_schedule');
+        $this->load->model('m_fares');
+        $this->load->model('m_ticket');
+        $this->load->model('m_cost');
+
+        $costs = array();
+//รายรับรายทาง
+
+
+        foreach ($routes as $route) {
+            $rcode = $route['RCode'];
+            $vtid = $route['VTID'];
+            $vt_name = $route['VTDescription'];
+            $source = $route['RSource'];
+            $destination = $route['RDestination'];
+            $route_name = "$vt_name " . $rcode . ' ' . ' ' . $source . ' - ' . $destination;
+
+            $seller_station_id = $route['SID'];
+            $seller_station_name = $route['StationName'];
+            $seller_station_seq = $route['Seq'];
+            if ($route['SellerNote'] != NULL) {
+                $note = $route['SellerNote'];
+                $seller_station_name .= " ($note) ";
+            }
+            /*
+             * ตรวจสอบข้อมูลพนักงานขายตั๋ว 
+             * ว่าเป็นจุดเริ่มต้นหรือว่าสุดท้าย
+             * ถ้าเป็นจุดต้นทาง ให้แสดง เฉพาะ S
+             * ถ้าเป็นจุดปลายทาง ให้แสดง เฉพาะ D
+             */
+
+            $stations = $this->m_station->get_stations($rcode, $vtid);
+            $num_station = count($stations);
+            foreach ($stations as $station) {
+                if ($seller_station_id == $station['SID']) {
+                    $seller_station_seq = $station['Seq'];
+                }
+            }
+            $route_detail = $this->m_route->get_route_detail_by_seller($rcode, $vtid);
+            $detail_in_route = array();
+            foreach ($route_detail as $rd) {
+                $rid = $rd['RID'];
+                $start_point = $rd['StartPoint'];
+                $source = $rd['RSource'];
+                $destination = $rd['RDestination'];
+                $route_detail_name = "$vt_name เส้นทาง " . $rcode . ' ' . ' ' . $source . ' - ' . $destination;
+                $stations_in_route = $this->m_station->get_stations_by_start_point($start_point, $rcode, $vtid);
+
+                $schedules = $this->m_schedule->get_schedule($date, $rcode, $vtid, $rid);
+
+                $schedules_in_route = array();
+                foreach ($schedules as $schedule) {
+                    $tsid = $schedule['TSID'];
+                    $start_time = $schedule['TimeDepart'];
+                    $report_id = $schedule['ReportID'];
+                    $time_depart = '';
+                    $temp = 0;
+                    foreach ($stations_in_route as $s) {
+                        if ($s['IsSaleTicket'] == '1') {
+                            $station_name = $s['StationName'];
+                            $travel_time = $s['TravelTime'];
+                            if ($s['Seq'] == '1' || $s['Seq'] == $num_station) {
+                                $time = strtotime($start_time);
+                            } else {
+                                $temp+=$travel_time;
+                                $time = strtotime("+$temp minutes", strtotime($start_time));
+                            }
+                            if ($seller_station_id == $s['SID']) {
+                                $time_depart = date('H:i', $time);
+                            }
+                        }
+                    }
+                    $vid = $schedule['VID'];
+                    $vcode = $schedule['VCode'];
+                    if ($vcode == '') {
+                        $vcode = '-';
+                    }
+
+                    $income = 0;
+                    $outcome = 0;
+
+                    /*
+                     * รายได้จากการขายตั๋ว
+                     */
+                    $income += $this->m_ticket->sum_ticket_price($date, $seller_station_id, $tsid)['Total'];
+
+                    /*
+                     * รายได้จากการ ค่าฝากของเเละอื่นๆ
+                     * CostTypeID = 1 
+                     */
+
+//                    foreach ($cost_types as $cost_type) {
+//                        $cost_type_id = $cost_type['CostTypeID'];
+//                        foreach ($costs as $cost) {
+//                            $CostValue = $cost['CostValue'];
+//                            if ($tsid == $cost['TSID'] && $cost_type_id == $cost['CostTypeID']) {
+//                                if ($cost_type_id == '1') {
+//                                    //รายรับ
+//                                    $income+=(int) $CostValue;
+//                                } else {
+//                                    //รายจ่าย
+//                                    $outcome+=(int) $CostValue;
+//                                }
+//                            }
+//                        }
+//                    }
+
+
+                    $temp_schedules_in_route = array(
+                        'TSID' => $tsid,
+                        'TimeDepart' => $time_depart,
+                        'VID' => $vid,
+                        'VCode' => $vcode,
+                        'Income' => $income,
+                        'Outcome' => 0,
+                        'ReportID' => $report_id,
+                    );
+                    array_push($schedules_in_route, $temp_schedules_in_route);
+                }
+
+
+                $temp_detail_in_route = array(
+                    'RID' => $rid,
+                    'RouteName' => $route_detail_name,
+                    'RSource' => $source,
+                    'RDestination' => $destination,
+                    'StartPoint' => $start_point,
+                    'schedules' => $schedules_in_route,
+                );
+                array_push($detail_in_route, $temp_detail_in_route);
+            }
+
+
+            $cost_along_road = array();
+            if ($seller_station_seq == 1) {
+                $start_point = 'S';
+                $cost_along_road = array_pop($detail_in_route);
+            } elseif ($seller_station_seq == $num_station) {
+                $start_point = 'D';
+                $cost_along_road = array_shift($detail_in_route);
+            } else {
+                $start_point = 'กลางทาง';
+            }
+
+
+            $temp_cost = array(
+                'RouteName' => $route_name,
+                'RCode' => $rcode,
+                'VTID' => $vtid,
+                'seller_station_id' => $seller_station_id,
+                'seller_station_seq' => $seller_station_seq,
+                'seller_station_name' => $seller_station_name,
+                'start_point' => $start_point,
+                'routes_detail' => $detail_in_route,
+                'costs_along_road' => $cost_along_road,
+            );
+            array_push($costs, $temp_cost);
+        }
+        $rs = array(
+            'costs' => $costs
+        );
+        return $rs;
+    }
+
+    public function set_form_add($ctid, $tsid = NULL, $time_depart = NULL, $CostDetailID = NULL) {
         $date_th = $this->m_datetime->DateThaiToDay();
 
         $date = $this->m_datetime->getDateToday();
@@ -219,7 +421,7 @@ class m_cost extends CI_Model {
         );
 
         $i_CostDetailID[0] = 'เลือกรายการ';
-        foreach ($this->get_cost_detail($ctid) as $value) {
+        foreach ($this->get_cost_detail($ctid, $CostDetailID) as $value) {
             if ($value['CostDetailID'] != '1') {
                 $i_CostDetailID[$value['CostDetailID']] = $value['CostDetail'];
             }
@@ -289,7 +491,10 @@ class m_cost extends CI_Model {
             'placeholder' => 'หมายเหตุ',
             'rows' => '3',
             'class' => 'form-control');
+
         $dropdown = 'class="selecter_3" data-selecter-options = \'{"cover":"true"}\' ';
+
+
         $form_add = array(
             'form' => form_open("cost/add/$ctid/$tsid/", array('class' => 'form-horizontal', 'id' => 'form_cost', 'name' => 'form_cost')),
             'TSID' => form_input($i_TSID),
@@ -299,7 +504,7 @@ class m_cost extends CI_Model {
             'RCode' => form_input($i_RCode),
             'DateTH' => form_input($i_DateTH),
             'CostDate' => form_input($i_CostDate),
-            'CostDetailID' => form_dropdown('CostDetailID', $i_CostDetailID, set_value('CostDetailID'), $dropdown . 'id = "CostDetailID" '),
+            'CostDetailID' => form_dropdown('CostDetailID', $i_CostDetailID, (set_value('CostDetailID') == NULL) ? $CostDetailID : set_value('CostDetailID'), $dropdown . 'id = "CostDetailID" '),
             'OtherDetail' => form_input($i_OtherDetail),
             'VID' => form_input($i_VID),
             'VCode' => form_input($i_VCode),
@@ -509,7 +714,7 @@ class m_cost extends CI_Model {
     }
 
     public function set_form_search($rcode = NULL, $vtid = NULL) {
-        //ข้อมูลเส้นทาง
+//ข้อมูลเส้นทาง
         $i_RCode[0] = 'เส้นทางทั้งหมด';
         foreach ($this->get_route() as $value) {
             $i_RCode[$value['RCode']] = $value['RCode'] . ' ' . $value['RSource'] . ' - ' . $value['RDestination'];
@@ -595,8 +800,8 @@ class m_cost extends CI_Model {
         return TRUE;
     }
 
-    public function get_post_form_add($ctid) {
-        //ข้อมูลค่าใช้จ่าย        
+    public function get_post_form_add($ctid, $cost_id = NULL) {
+//ข้อมูลค่าใช้จ่าย        
         $data_cost = array(
             'CostTypeID' => $ctid,
             'CostDetailID' => $this->input->post('CostDetailID'),
@@ -622,7 +827,7 @@ class m_cost extends CI_Model {
     }
 
     public function get_post_form_edit($cost_type_id) {
-        //ข้อมูลค่าใช้จ่าย        
+//ข้อมูลค่าใช้จ่าย        
         $data_cost = array(
             'CostTypeID' => $cost_type_id,
             'CostDetailID' => $this->input->post('CostDetailID'),
@@ -645,7 +850,7 @@ class m_cost extends CI_Model {
         return $form_data;
     }
 
-    //    คืนค่าเวลาข้อมูลตารางเวลาเดิน ออกจากจุกเริ่มต้นของเเต่ละ RID
+//    คืนค่าเวลาข้อมูลตารางเวลาเดิน ออกจากจุกเริ่มต้นของเเต่ละ RID
     public function get_schedule($date = NULL, $tsid = NULL) {
         $this->db->select('*,t_schedules_day.RID as RID,t_schedules_day.TSID as TSID,vehicles.VID as VID');
         $this->db->join('t_routes', ' t_schedules_day.RID = t_routes.RID ', 'left');
@@ -664,7 +869,7 @@ class m_cost extends CI_Model {
         return $query_schedule->result_array();
     }
 
-    //คืนค่าข้อมูลจุดจอด
+//คืนค่าข้อมูลจุดจอด
     public function get_stations($rcode = null, $vtid = null, $sid = NULL, $seq = NULL) {
         if ($rcode != NULL) {
             $this->db->where('RCode', $rcode);

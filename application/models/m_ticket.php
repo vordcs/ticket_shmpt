@@ -31,7 +31,6 @@ class m_ticket extends CI_Model {
             $this->db->where('TSID', $tsid);
         }
 
-
         $query = $this->db->get('ticket_sale');
 
         return $query->result_array();
@@ -50,9 +49,9 @@ class m_ticket extends CI_Model {
         return $query->result_array();
     }
 
-    public function sum_ticket_price($date, $sid = NULL, $tsid = NULL) {
+    public function sum_ticket_price($date = NULL, $sid = NULL, $tsid = NULL) {
 
-        $this->db->select('*');
+        $this->db->select('SUM(PriceSeat) as Total');
         if ($tsid != NULL) {
             $this->db->where('TSID', $tsid);
         }
@@ -67,8 +66,9 @@ class m_ticket extends CI_Model {
 
         $query = $this->db->get('ticket_sale');
 
-        return $query->result_array();
+        return $query->row_array();
     }
+    
 
     public function generate_ticket_id($tsid, $source_id, $destination_id, $vcode, $seat) {
         $str_vcode = explode('-', $vcode);

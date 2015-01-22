@@ -42,6 +42,7 @@ class cost extends CI_Controller {
         $cost_type = $this->m_cost->get_cost_type();
         $costs = $this->m_cost->get_cost();
 
+
         $vehicle_types = $this->m_route->get_vehicle_types();
 
         $routes = $this->m_route->get_route_by_seller();
@@ -52,29 +53,36 @@ class cost extends CI_Controller {
 
         $tickets = $this->m_ticket->sum_ticket_price($date, $seller_station_id);
 
+        $cost_along_road = $this->m_cost->get_cost_along_road($date, $seller_station_id);
+
         $data = array(
             'page_title' => 'ค่าใช้จ่าย : ',
             'page_title_small' => "วันที่ $date_th",
             'cost_types' => $cost_type,
             'costs' => $costs,
+            'cost_along_road' => $cost_along_road,
             'vehicle_types' => $vehicle_types,
             'routes' => $routes,
             'routes_detail' => $routes_detail,
             'schedules' => $schedules,
             'stations' => $stations,
             'tickets' => $tickets,
+            'data' => $this->m_cost->set_view_cost($date, $routes, $routes_detail),
         );
         $data_debug = array(
 //            'from_search' => $data['from_search'],           
 //            'cost_types' => $data['cost_types'],
-//            'costs' => $data['costs'],
+            'costs' => $data['costs'],
 //            'costs_detail' => $data['costs_detail'],
+//            'cost_along_road' => $data['cost_along_road'],
 //            'routes' => $data['routes'],
+//            'routes_detail' => $data['routes_detail'],
 //            'schedules' => $data['schedules'],
 //            'stations' => $data['stations'],
                 //    ''=>$data[''],      
 //            'saller_station' => $this->m_user->get_saller_station(),
 //            'tickets' => $data['tickets'],
+//            'data' => $data['data'],
         );
         $this->m_template->set_Debug($data_debug);
 
@@ -147,7 +155,7 @@ class cost extends CI_Controller {
         $this->m_template->showTemplate();
     }
 
-    public function add($ctid, $tsid) {
+    public function add($ctid, $tsid, $cost_detail_id = NULL) {
 
         if ($ctid == null || $tsid == NULL) {
             $alert['alert_message'] = "กรุณาเลือกรอบเวลา";
@@ -187,7 +195,7 @@ class cost extends CI_Controller {
         }
         $page_title = 'เพิ่ม ' . $this->m_cost->get_cost_type($ctid)[0]['CostTypeName'] . ' ';
         $data = array(
-            'form' => $this->m_cost->set_form_add($ctid, $tsid, $time_depart),
+            'form' => $this->m_cost->set_form_add($ctid, $tsid, $time_depart, $cost_detail_id),
             'page_title' => $page_title,
             'page_title_small' => '',
             'previous_page' => '',

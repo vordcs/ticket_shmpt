@@ -76,15 +76,36 @@ class m_route extends CI_Model {
         return $query->result_array();
     }
 
+    public function get_route_detail_by_start_point($start_point, $rcode = NULL, $vtid = NULL) {
+        $this->db->select('*');
+        $this->db->join('t_routes', 'sellers.RCode = t_routes.RCode AND sellers.VTID = t_routes.VTID');
+        $this->db->join('vehicles_type', 'vehicles_type.VTID = t_routes.VTID');
+        $this->db->join('t_stations', 'sellers.SID =  t_stations.SID');
+
+        if ($rcode != NULL) {
+            $this->db->where('sellers.RCode', $rcode);
+        }
+        if ($vtid != NULL) {
+            $this->db->where('sellers.VTID', $vtid);
+        }
+        $this->db->where('StartPoint', $start_point);
+        $this->db->where('sellers.EID', $this->m_user->get_user_id());
+
+        $this->db->order_by('t_routes.RCode');
+        $query = $this->db->get('sellers');
+
+        return $query->result_array();
+    }
+
     public function search_route($rcode = NULL, $source = NULL, $destination = NULL, $rid = NULL) {
 
-        if ($rcode != NULL){
+        if ($rcode != NULL) {
             $this->db->where('RCode', $rcode);
         }
-        if ($source != NULL){
+        if ($source != NULL) {
             $this->db->where('RSource', $source);
         }
-        if ($destination != NULL){
+        if ($destination != NULL) {
             $this->db->where('RDestination', $destination);
         }
         $this->db->where('StartPoint', 'S');
@@ -147,7 +168,7 @@ class m_route extends CI_Model {
             $this->db->where('SID ', $sid);
         }
         $this->db->where('IsSaleTicket ', 1);
-        $this->db->order_by('Seq','asc');
+        $this->db->order_by('Seq', 'asc');
         $query = $this->db->get('t_stations');
 
         $rs = $query->result_array();
@@ -165,7 +186,7 @@ class m_route extends CI_Model {
         if ($sid != NULL) {
             $this->db->where('SID ', $sid);
         }
-        $this->db->order_by('Seq','desc');
+        $this->db->order_by('Seq', 'desc');
         $query = $this->db->get('t_stations');
 
         $rs = $query->result_array();
