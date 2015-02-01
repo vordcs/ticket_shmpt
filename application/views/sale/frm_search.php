@@ -41,7 +41,7 @@
                         $seller_station_seq = $route['Seq'];
                         if ($route['SellerNote'] != NULL) {
                             $note = $route['SellerNote'];
-                            $source_name .= " ($note) ";
+                            $seller_station_name .= " ($note) ";
                         }
                         ?>
 

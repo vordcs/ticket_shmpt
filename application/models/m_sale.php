@@ -314,6 +314,76 @@ class m_sale extends CI_Model {
         return $tickets;
     }
 
+    public function set_form_print($date, $rid, $tsid) {
+        $this->load->model('m_route');
+        $this->load->model('m_station');
+        $this->load->model('m_schedule');
+        $this->load->model('m_fares');
+        $this->load->model('m_ticket');
+
+        $rs = array();
+        $eid = $this->m_user->get_user_id();
+
+        $route = $this->m_route->get_route(NULL, NULL, $rid)[0];
+
+        $tickets = $this->m_ticket->get_ticket($date, $tsid, 2, $eid);
+
+        $rcode = $route['RCode'];
+        $vtid = $route['VTID'];
+        $vt_name = $route['VTDescription'];
+        $route_name = "$vt_name $rcode " . $route['RSource'] . '-' . $route['RDestination'];
+
+        $note = '&nbsp;';
+
+        foreach ($tickets as $ticket) {
+
+            $ticket_id = $ticket['TicketID'];
+            $source_name = $ticket['SourceName'];
+            $destination_name = $ticket['DestinationName'];
+            $vcode = $ticket['VCode'];
+            $seat = $ticket['Seat'];
+            $time_depart = date('H:i', strtotime($ticket['TimeDepart']));
+            $time_arrive = date('H:i', strtotime($ticket['TimeArrive']));
+            $date = $this->m_datetime->getDateThaiString($ticket['DateSale']);
+            $price = $ticket['PriceSeat'];
+            $barcode = $this->m_barcode->gen_barcode($ticket_id);
+            $qrcode = $this->m_qrcode->gen_qrcode($ticket_id);
+            $name_seller = $this->m_user->get_user_first_name();
+
+            if ($time_arrive == '00:00') {
+                $time_arrive = '-';
+            }
+            if ($vtid == '1') {
+                $note = '** รถเต็มออกก่อนเวลา **';
+                $time_depart.='*';
+            }
+
+            $temp_ticket = array(
+                'TicketID' => $ticket_id,
+                'RCode' => $rcode,
+                'VTID' => $vtid,
+                'VTName' => $vt_name,
+                'VCode' => $vcode,
+                'Seat' => $seat,
+                'TimeDepart' => $time_depart,
+                'TimeArrive' => $time_arrive,
+                'Date' => $date,
+                'RouteName' => $route_name,
+                'SourceName' => $source_name,
+                'DestinationName' => $destination_name,
+                'Price' => $price,
+                'BarCode' => $barcode,
+                'QrCode' => $qrcode,
+                'Note' => $note,
+                'DateSale' => $this->m_datetime->getDatetimeNow(),
+                'SellerName' => $name_seller,
+            );
+            array_push($rs, $temp_ticket);
+        }
+
+        return $rs;
+    }
+
     public function validate_form_sale() {
         $Seat = $this->input->post('Seat');
         if (count($Seat) <= 0 || $Seat == NULL) {

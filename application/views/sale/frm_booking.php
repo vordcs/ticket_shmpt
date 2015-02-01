@@ -288,7 +288,7 @@
             $seller_station_seq = $route['Seq'];
             if ($route['SellerNote'] != NULL) {
                 $note = $route['SellerNote'];
-                $source_name .= " ($note) ";
+                $seller_station_name .= " ($note) ";
             }
             ?>
             <li class=""><a><i class="fa fa-bus"></i><strong>เส้นทางเดินรถ</strong></a></li>
@@ -597,7 +597,7 @@
                                                 $add_click = '';
                                                 $remove_click = '';
                                                 $user = '<i class="fa fa-user fa-2x"></i><br>';
-                                                $seat_info = 'กำลังทำรายการ';
+                                                $seat_info = 'ไม่ว่าง';
                                                 $class_seat = " bg-reserve ";
                                                 $class_info = "badge-warning";
                                             }

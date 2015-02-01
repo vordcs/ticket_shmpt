@@ -6,6 +6,7 @@ if (!defined('BASEPATH'))
 Class m_datetime extends CI_Model {
 
     private $month_th = array("", "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม");
+    private $month_th_short = array("", "ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค.");
 
     function getDatetimeNow() {
         return (new \DateTime())->format('Y-m-d H:i:s');
@@ -43,6 +44,25 @@ Class m_datetime extends CI_Model {
         return $date;
     }
 
+    public function getDateThaiStringShort($strDate = NULL) {
+        //        string input 2015-11-15
+        if ($strDate == NULL) {
+            $day = date('d');
+            $month = date('m');
+            $year = date('Y') + 543;
+
+            $strDay = $day;
+            $strMonthThai = $this->month_th_short[(int) $month];
+            $strYear = $year;
+        } else {
+            $str = explode('-', $strDate);
+            $strYear = trim($str[0]) + 543;
+            $strMonthThai = $this->month_th_short[(int) $str[1]];
+            $strDay = $str[2];
+        }
+        return "$strDay  $strMonthThai " . substr($strYear, 2);
+    }
+
     public function getDateThaiString($strDate = NULL) {
 //        string input 2015-11-15
         if ($strDate == NULL) {
@@ -55,7 +75,7 @@ Class m_datetime extends CI_Model {
             $strYear = $year;
         } else {
             $str = explode('-', $strDate);
-            $strYear = trim($str[0]);
+            $strYear = trim($str[0])+ 543;
             $strMonthThai = $this->month_th[(int) $str[1]];
             $strDay = $str[2];
         }

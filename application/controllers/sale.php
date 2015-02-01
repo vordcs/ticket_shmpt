@@ -108,7 +108,7 @@ class sale extends CI_Controller {
          */
         $seller_station_id = $route['SID'];
         $fare = $this->m_fares->get_fares($rcode, $vtid, $source_id, $destination_id)[0];
-        $tickets_by_seller = $this->m_ticket->get_ticket_by_saller($schedules_id);
+        $tickets_by_seller = $this->m_ticket->get_ticket_for_booking($schedules_id);
         $tickets = $this->m_ticket->get_ticket_by_station($seller_station_id, $schedules_id);
         $tickets_today = $this->m_ticket->get_ticket_by_station($seller_station_id);
 
@@ -200,12 +200,13 @@ class sale extends CI_Controller {
             'tsid' => $tsid,
             'tickets' => $tickets,
             'route' => $route[0],
+            'data' => $this->m_sale->set_form_print($date, $rid, $tsid),
         );
         $data_debug = array(
 //            'tickets' => $data['tickets'],
 //            'route' => $data['route'],
 //            'data_post' => $this->input->post(),
-//            '' => $data[''],
+//            'data' => $data['data'],
         );
 
         $this->m_template->set_Debug($data_debug);
@@ -213,6 +214,10 @@ class sale extends CI_Controller {
         $this->m_template->set_Content('sale/frm_print', $data);
         $this->m_template->showSaleTemplate();
     }
+
+    /*
+     * for ajax
+     */
 
     public function booking_seat() {
         $tsid = $this->input->post('TSID');
@@ -224,6 +229,7 @@ class sale extends CI_Controller {
         $destination_name = $this->input->post("DestinationName");
         $price_seat = $this->input->post("PriceSeat");
         $price_dicount = $this->input->post('PriceDicount');
+
 
         if ($price_seat == $price_dicount) {
             $IsDiscount = 1;
@@ -242,6 +248,7 @@ class sale extends CI_Controller {
             'DateSale' => $this->m_datetime->getDateToday(),
             'PriceSeat' => $price_seat,
             'IsDiscount' => $IsDiscount,
+            'Seller' => $this->m_user->get_user_id(),
         );
         $ticket_id = $this->m_ticket->resever_ticket($ticket_data);
         if ($ticket_id != NULL || $ticket_id != '') {

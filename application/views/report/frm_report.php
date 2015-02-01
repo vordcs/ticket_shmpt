@@ -5,10 +5,9 @@
         $("#btnReport").addClass("active");
     });
     function calNet() {
-        var total = document.getElementById('Total').value;
-        var vage = document.getElementById('Vage').value;
+        var total = document.getElementById('Total').value.replace(',', '.');
+        var vage = document.getElementById('Vage').value.replace(',', '.');
         net = document.getElementById('Net');
-
         if (vage === '' || vage === 0) {
             document.getElementById('Vage').value = '0';
         } else if (vage !== 0) {
@@ -27,7 +26,36 @@
     }
 
 </script>
-<div class="container">
+<style>    
+    .report-print{    
+        background: white;
+        font-family:Arial, "times New Roman", tahoma;        
+        /*width: 100%;*/
+        page-break-inside: avoid;
+    } 
+    .header-report{
+        font-size: 12pt;
+    }
+    .title{      
+        font-size: 6pt;        
+    }
+    .sub-title{
+        font-size: 5pt;
+    }
+    .note{
+        font-size: 4pt;
+    }
+    @media all
+    {
+        .report-print	{ display:none; }         
+    }
+    @media print
+    {
+        .report-print	{ display:block;height:1px; page-break-before:always; }
+         
+    }
+</style>
+<div class="container hidden-print">
     <div class="row">        
         <div class="page-header">        
             <h3>
@@ -40,289 +68,431 @@
         </div>
     </div>
 </div>
-<div class="container">
-    <div class="widget">  
-        <div class="widget-content">
-            <div class="row">   
-                <?php
-                $x = 1;
-                foreach ($routes as $route) {
-                    $rcode = $route['RCode'];
-                    $vtid = $route['VTID'];
-                    $vt_name = $route['VTDescription'];
-                    $source = $route['RSource'];
-                    $destination = $route['RDestination'];
-                    $route_name = "$vt_name เส้นทาง " . $rcode . ' ' . ' ' . $source . ' - ' . $destination;
-                    $id = $rcode . "_" . $vtid;
+<div class="container hidden-print">
+    <div class="row well" style="padding-bottom: 5%;">
+        <?php
+        $seller_station_name = '';
+        $route_name = '';
+        foreach ($data['data'] as $route) {
+            $RCode = $route['RCode'];
+            $VTID = $route['VTID'];
+            $num_along_road = count($route['cost_along_road']);
+            $seller_station_id = $route['seller_station_id'];
+            $seller_station_name = $route['seller_station_name'];
+            $route_name = $route['RouteName'];
 
-                    $seller_station_id = $route['SID'];
-                    $seller_station_name = $route['StationName'];
-                    $seller_station_seq = $route['Seq'];
-                    if ($route['SellerNote'] != NULL) {
-                        $note = $route['SellerNote'];
-                        $seller_station_name .= " ($note) ";
-                    }
-                    //นับจำนวนสถานี
-                    $num_station = 0;
-                    $num_sale_station = 0;
-                    foreach ($stations as $s) {
-                        if ($rcode == $s['RCode'] && $vtid == $s['VTID']) {
-                            $num_station ++;
-                            if ($s['IsSaleTicket'] == '1') {
-                                $num_sale_station ++;
-                            }
-                        }
-                    }
+            $total = 0;
 
-                    /*
-                     * ตรวจสอบข้อมูลพนักงานขายตั๋ว 
-                     * ว่าเป็นจุดเริ่มต้นหรือว่าสุดท้าย
-                     * ถ้าเป็นจุดต้นทาง ให้แสดง เฉพาะ S
-                     * ถ้าเป็นจุดปลายทาง ให้แสดง เฉพาะ D
-                     */
-
-                    foreach ($stations as $station) {
-                        if ($seller_station_id == $station['SID']) {
-                            $seller_station_seq = $station['Seq'];
-                        }
-                    }
-                    $form_id = "form_report_$rcode$vtid$seller_station_id";
-                    echo form_open("report/send/$rcode/$vtid/$seller_station_id", array('class' => '', 'id' => "$form_id", 'name' => "$form_id"));
-
-                    echo validation_errors();
-                    ?>
-
-                    <div class="col-md-12 text-center">
-                        <h3>
-                            <?= "จุดจอด : $seller_station_name" ?>
-                            <input type="hidden" name="RCode" value="<?= $rcode ?>">
-                            <input type="hidden" name="VTID" value="<?= $vtid ?>">
-                            <input type="hidden" name="SID" value="<?= $seller_station_id ?>">
-
-                        </h3>
-                    </div>
-                    <?php
-                    $total = 0;
-                    foreach ($routes_detail as $rd) {
-                        $rid = $rd['RID'];
-                        $source = $rd['RSource'];
-                        $destination = $rd['RDestination'];
-                        $schedule_type = $rd["ScheduleType"];
-                        $start_point = $rd['StartPoint'];
-                        $route_time = $rd['Time'];
-
-                        $stations_in_route = array();
-
-                        if ($start_point == "S") {
-                            $n = 0;
-                            foreach ($stations as $station) {
-                                if ($rcode == $station['RCode'] && $vtid == $station['VTID']) {
-                                    $stations_in_route[$n] = $station;
-                                    $n++;
-                                }
-                            }
-                        }
-                        if ($start_point == "D") {
-                            $n = 0;
-                            for ($i = $num_station; $i >= 0; $i--) {
-                                foreach ($stations as $station) {
-                                    if ($rcode == $station['RCode'] && $vtid == $station['VTID'] && $station['Seq'] == $i) {
-                                        $stations_in_route[$n] = $station;
-                                        $n++;
-                                    }
-                                }
-                            }
-                        }
-
-                        $schedules_in_route = array();
-                        foreach ($schedules as $sd) {
-                            if ($rid == $sd['RID']) {
-                                array_push($schedules_in_route, $sd);
-                            }
-                        }
-
-
-                        $class = ' ';
-                        if ($seller_station_seq == 1 && $start_point == 'S') {
-                            $class = ' col-md-offset-3 ';
-                        } elseif ($seller_station_seq == $num_station && $start_point == 'D') {
-                            $class = ' col-md-offset-3 ';
-                        } elseif ($seller_station_seq == 1 || $seller_station_seq == $num_station) {
-                            $class = 'hidden';
-                        }
-                        ?>                 
-                        <div class="col-md-6 <?= $class ?>">
-                            <legend>
-                                <i>ไป</i>
-                                <strong>
-                                    <?= $destination ?>   
-                                </strong>
-                            </legend>
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th style="width: 20%">เวลาออก</th>                                                                                                                                                                         
-                                        <th rowspan="2" style="width: 15%">รายรับ</th>
-                                        <th rowspan="2" style="width: 15%">รายจ่าย</th>
-                                        <th rowspan="2" style="width: 15%">คงเหลือ</th>                                                                   
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php
-                                    $total_outcome = 0;
-                                    $total_income = 0;
-                                    foreach ($schedules_in_route as $schedule) {
-                                        $tsid = $schedule['TSID'];
-                                        $start_time = $schedule['TimeDepart'];
-                                        $time_depart = '';
-                                        $temp = 0;
-                                        foreach ($stations_in_route as $s) {
-                                            if ($s['IsSaleTicket'] == '1') {
-                                                $station_name = $s['StationName'];
-                                                $travel_time = $s['TravelTime'];
-                                                if ($s['Seq'] == '1' || $s['Seq'] == $num_station) {
-//                                                                                  สถานีต้นทาง
-                                                    $time = strtotime($start_time);
-                                                } else {
-                                                    $temp+=$travel_time;
-                                                    $time = strtotime("+$temp minutes", strtotime($start_time));
-                                                }
-                                                if ($seller_station_id == $s['SID']) {
-                                                    $time_depart = date('H:i', $time);
-                                                    break;
-                                                }
-                                            }
-                                        }
-                                        $report_id = $schedule['ReportID'];
-                                        /*
-                                         * สถานะการส่งรายงาน
-                                         */
-
-                                        /*
-                                         * รายรับ,รายจ่าย
-                                         */
-
-                                        $income = 0;
-                                        $outcome = 0;
-
-                                        $num_ticket = count($tickets);
-                                        if ($num_ticket > 0) {
-                                            foreach ($tickets as $ticket) {
-                                                if ($tsid == $ticket['TSID']) {
-                                                    $income+=$ticket['PriceSeat'];
-                                                    $total_income+=$ticket['PriceSeat'];
-                                                    $total +=$ticket['PriceSeat'];
-                                                }
-                                            }
-                                        }
-
-                                        foreach ($cost_types as $cost_type) {
-                                            $cost_type_id = $cost_type['CostTypeID'];
-                                            foreach ($costs as $cost) {
-                                                $CostValue = $cost['CostValue'];
-                                                if ($tsid == $cost['TSID'] && $cost_type_id == $cost['CostTypeID'] && $report_id == NULL) {
-                                                    if ($cost_type_id == '1') {
-                                                        //รายรับ
-                                                        $income+=(int) $CostValue;
-                                                        $total_income+=$CostValue;
-                                                        $total +=(int) $CostValue;
-                                                    } else {
-                                                        //รายจ่าย
-                                                        $outcome+=(int) $CostValue;
-                                                        $total_outcome+=$CostValue;
-                                                        $total -=(int) $CostValue;
-                                                    }
-                                                }
-                                            }
-                                        }
-                                        if ($report_id == NULL && ($income > 0 || $outcome > 0 )) {
-                                            ?>
-                                            <tr>
-                                                <td class="text-center">
-                                                    <?= $time_depart; ?>
-                                                    <input type="hidden" name="TSID[]" value="<?= $tsid ?>">
-                                                </td>                                           
-                                                <td class="text-center"><?= number_format($income) ?></td>
-                                                <td class="text-center"><?= number_format($outcome) ?> </td>
-                                                <td class="text-right"><strong><?= number_format($income - $outcome) ?></strong></td>                                       
-                                            </tr>
-                                            <?php
-                                        }
-                                    }
-                                    ?>
-                                    <tr class="success">
-                                        <td class="text-center"><strong>รวม</strong></td>                                           
-                                        <td class="text-center"><strong><?= number_format($total_income) ?></strong></td>
-                                        <td class="text-center"><strong><?= number_format($total_outcome) ?></strong> </td>
-                                        <td class="text-right bg-info"><strong><?= number_format($total_income - $total_outcome) ?></strong></td>                                       
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                        <?php
-                    }
-                }
+            $form_id = "form_report_$RCode$VTID$seller_station_id";
+            echo form_open("report/send/$RCode/$VTID/$seller_station_id", array('class' => '', 'id' => "$form_id", 'name' => "$form_id"));
+            ?>
+            <div class="col-md-12 text-center">
+                <p class="lead">จุดจอด&nbsp;:&nbsp;<?= $seller_station_name ?></p>
+                <input type="hidden" name="RCode" value="<?= $RCode ?>">
+                <input type="hidden" name="VTID" value="<?= $VTID ?>">
+                <input type="hidden" name="SID" value="<?= $seller_station_id ?>">
+            </div>
+            <?php
+            foreach ($route['routes_detail'] as $rd) {
+                $total_rd = 0;
                 ?>
-            </div>
-            <hr>
-            <div class="row">  
-                <div class="col-md-6 col-md-offset-3">
-                    <div class="form-horizontal">
-                        <div class="form-group">
-                            <label for="" class="col-sm-3 control-label">รวม</label>
-                            <div class="col-sm-5">
-                                <input type="text" readonly=""  class="form-control input-lg" id="Total" name="Total"  placeholder="ยอดรวม" value="<?= number_format($total) ?>">
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label  class="col-sm-3 control-label">ค่าตอบแทน</label>
-                            <div class="col-sm-3">
-                                <input type="text"  class="form-control input-lg" id="Vage" name="Vage" placeholder="ค่าตอบเเทน" value="<?= (set_value('Vage') == NULL) ? 0 : set_value('Vage') ?>" onkeypress="return isNumberKey(event)" onchange="calNet()">                                
-                            </div>
-                            <div class="col-sm-3">
-                                <button type="button" class="btn btn-default" onclick="calNet()">ดูยอดคงเหลือ</button>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="" class="col-sm-3 control-label">คงเหลือ</label>
-                            <div class="col-sm-8">
-                                <input type="text" readonly=""  class="form-control input-lg" id="Net" name="Net" placeholder="ยอดคงเหลือ" value="<?= (set_value('Net') == NULL) ? $total : set_value('Net') ?>">
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="" class="col-sm-3 control-label">หมายเหตุ</label>
-                            <div class="col-sm-8">
-                                <textarea class="form-control" rows="3" id="ReportNote" name="ReportNote" placeholder="หมายเหตุ" value="<?= (set_value('ReportNote') == NULL) ? set_value('ReportNote') : set_value('ReportNote') ?>"></textarea>
-                            </div>
-                        </div>
-
-                        <div class="col-sm-12 text-center">                             
+                <div class="col-md-6  <?= ($num_along_road > 0 ) ? 'col-md-offset-1' : '' ?>">
+                    <p class=" text-center"><u><?= $rd['RouteName'] ?></u></p>
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th style="width: 20%">รอบเวลา</th>
+                                <th style="width: 60%">รายการ</th>
+                                <th style="width: 20%">จำนวนเงิน</th>
+                            </tr>
+                        </thead>
+                        <tbody>
                             <?php
-                            $cancle = array(
-                                'type' => "button",
-                                'class' => "btn btn-lg btn-danger",
-                            );
+                            foreach ($rd['schedules'] as $schedule) {
+                                $TSID = $schedule['TSID'];
+                                $num_ticket = count($schedule['tickets']);
+                                $num_income = count($schedule['Income']);
+                                $num_outcome = count($schedule['Outcome']);
+                                $total_data_row = $num_ticket + $num_income + $num_outcome;
+                                $row_span = '';
+                                if ($total_data_row > 0) {
+                                    $row_span = $total_data_row + 2;
+                                }
+                                if ($num_outcome <= 0) {
+                                    $row_span--;
+                                }
+                                $total +=$schedule['Total'] + $schedule['TotalAlongRoad'];
+                                $total_rd+=$schedule['Total'];
+                                ?>
+                                <tr>
+                                    <td class="text-center" rowspan="<?= $row_span ?>">
+                                        <?= $schedule['TimeDepart'] ?>
+                                        <input type="hidden" name="TSID[]" value="<?= $TSID ?>">                                        
+                                    </td>
+                                    <td class="text-left" colspan="2"><strong><?= ($num_ticket > 0 || $num_income > 0) ? 'รายรับ' : '' ?></strong></td>                                    
 
-                            $save = array(
-                                'class' => "btn btn-lg btn-success",
-                                'title' => "$page_title",
-                                'data-id' => "5",
-                                'data-title' => "ส่งรายงาน จุดจอด : $seller_station_name",
-                                'data-sub_title' => "$route_name",
-                                'data-info' => "",
-                                'data-toggle' => "modal",
-                                'data-target' => "#confirm",
-                                'data-href' => "",
-                                'data-form_id' => "$form_id",
-                            );
-                            echo anchor(($previous_page == NULL) ? 'report/' : $previous_page, '<i class="fa fa-times" ></i>&nbsp;ยกเลิก', $cancle) . '  ';
-                            echo anchor('#', '<span class="fa fa-save">&nbsp;&nbsp;ส่งรายงาน</span>', $save);
-                            ?>  
-                        </div>                       
-                    </div>
+                                </tr>
+                                <?php
+                                if ($num_ticket > 0) {
+                                    foreach ($schedule['tickets']as $ticket) {
+                                        $total_ticket_price = $ticket['Total'];
+                                        ?>
+                                        <tr>
+                                            <td class="text-left bg-success"><i>ไป</i>&nbsp;<strong><?= $ticket['DestinationName'] ?></strong>&nbsp;(&nbsp;<?= $ticket['NumberTicket'] ?> &nbsp;ที่นั่ง&nbsp;)</td>
+                                            <td class="text-right bg-success"><?= number_format($total_ticket_price, 1) ?></td>
+                                        </tr>
+                                        <?php
+                                    }
+                                }
+                                ?>                                        
+                                <?php
+                                if ($num_income > 0) {
+                                    foreach ($schedule['Income']as $income) {
+                                        $total_income = $income['Total'];
+                                        ?>
+                                        <tr>
+                                            <td class="text-left bg-success"><?= $income['CostDetail'] ?></td>
+                                            <td class="text-right bg-success"><?= number_format($total_income, 1) ?></td>
+                                        </tr>
+                                        <?php
+                                    }
+                                }
+                                ?>
+
+                                <?php
+                                if ($num_outcome > 0) {
+                                    echo '<tr> <td class="text-left" colspan="2"><strong>รายจ่าย</strong></td></tr>';
+                                    foreach ($schedule['Outcome']as $outcome) {
+                                        $total_outcome = $outcome['Total'];
+                                        ?>
+                                        <tr>
+                                            <td class="text-left bg-warning"><?= $outcome['CostDetail'] ?></td>
+                                            <td class="text-right bg-warning"><?= number_format($total_outcome, 2) ?></td>
+                                        </tr>
+                                        <?php
+                                    }
+                                }
+                                ?>
+                            <?php } ?>
+                        </tbody>
+                        <tfoot>
+                            <tr class="info">
+                                <td colspan="2" class="text-center"><strong>คงเหลือ</strong></td>
+                                <td class="text-right"><strong><?= number_format($total_rd, 1) ?></strong></td>
+                            </tr>
+
+                        </tfoot>
+                    </table>
                 </div>
-            </div>
-            <?= form_close() ?>
-        </div>        
+                <?php
+            }
+            $total_along_road = 0;
+            if ($num_along_road > 0) {
+                ?>
+                <div class="col-md-4">
+                    <p class="text-center"><u>รายทาง</u></p>                    
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th style="width: 60%;">รอบเวลา</th>                            
+                                <th style="width: 40%">จำนวนเงิน</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php
+                            foreach ($route['cost_along_road']['schedules'] as $schedule) {
+
+                                $income_along_road = 0;
+                                $TSID = '';
+                                if (count($schedule['AlongRoad']) > 0) {
+                                    $TSID = $schedule['TSID'];
+                                    $income_along_road = $schedule['AlongRoad'][0]['Total'];
+                                    $total_along_road+=$income_along_road;
+                                }
+                                ?>
+                                <tr>
+                                    <td class="text-center">
+                                        <strong><?= $schedule['TimeDepart'] ?></strong>
+                                        <input type="hidden" name="TSID[]" value="<?= $TSID ?>">
+                                    </td>
+                                    <td class="text-right"><?= number_format($income_along_road, 1) ?></td>
+                                </tr>
+                            <?php } ?>
+                        </tbody>
+                        <tfoot>
+                            <tr class="info">
+                                <td class="text-center"><strong>รวม</strong></td>
+                                <td class="text-right"><strong><?= number_format($total_along_road, 1) ?></strong></td>
+                            </tr>
+                        </tfoot>
+
+                    </table>
+
+                </div>
+
+                <?php
+            }
+            $total +=$total_along_road;
+            ?>
+            <hr>
+            <br>
+            <div class="col-md-6 col-md-offset-3">
+                <div class="form-horizontal">
+                    <div class="form-group">
+                        <label for="" class="col-sm-3 control-label">รวม</label>
+                        <div class="col-sm-5">
+                            <input type="text" readonly=""  class="form-control input-lg" id="Total" name="Total"  placeholder="ยอดรวม" value="<?= floor($total); ?>">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label  class="col-sm-3 control-label">ค่าตอบแทน</label>
+                        <div class="col-sm-3">
+                            <input type="text"  class="form-control input-lg" id="Vage" name="Vage" placeholder="ค่าตอบเเทน" value="<?= (set_value('Vage') == NULL) ? 0 : set_value('Vage') ?>" onkeypress="return isNumberKey(event)" onchange="calNet()">                                
+                        </div>
+                        <div class="col-sm-3">
+                            <button type="button" class="btn btn-default" onclick="calNet()">ดูยอดคงเหลือ</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="" class="col-sm-3 control-label">คงเหลือ</label>
+                        <div class="col-sm-8">
+                            <input type="text" readonly=""  class="form-control input-lg" id="Net" name="Net" placeholder="ยอดคงเหลือ" value="<?= (set_value('Net') == NULL) ? floor($total) : set_value('Net') ?>">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="" class="col-sm-3 control-label">หมายเหตุ</label>
+                        <div class="col-sm-8">
+                            <textarea class="form-control" rows="3" id="ReportNote" name="ReportNote" placeholder="หมายเหตุ" value="<?= (set_value('ReportNote') == NULL) ? set_value('ReportNote') : set_value('ReportNote') ?>"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-12 text-center">                             
+                        <?php
+                        $cancle = array(
+                            'type' => "button",
+                            'class' => "btn btn-lg btn-danger",
+                        );
+
+                        $save = array(
+                            'class' => "btn btn-lg btn-success",
+                            'title' => "$page_title",
+                            'data-id' => "5",
+                            'data-title' => "ส่งรายงาน จุดจอด : $seller_station_name",
+                            'data-sub_title' => "$route_name",
+                            'data-info' => "",
+                            'data-toggle' => "modal",
+                            'data-target' => "#confirm",
+                            'data-href' => "",
+                            'data-form_id' => "$form_id",
+                        );
+                        echo anchor(($previous_page == NULL) ? 'report/' : $previous_page, '<i class="fa fa-times" ></i>&nbsp;ยกเลิก', $cancle) . '  ';
+                        echo anchor('#', '<span class="fa fa-save">&nbsp;&nbsp;ส่งรายงาน</span>', $save);
+                        ?>  
+                    </div>                       
+                </div>        
+            </div>   
+
+            <?php
+            echo form_close();
+        }
+        ?>          
     </div>
 </div>
+
+<div class="container report-print" >
+    <div class="row">
+        <?php
+        foreach ($data['data'] as $route) {
+            $RCode = $route['RCode'];
+            $VTID = $route['VTID'];
+            $num_along_road = count($route['cost_along_road']);
+            $seller_station_id = $route['seller_station_id'];
+            $seller_station_name = $route['seller_station_name'];
+            $route_name = $route['RouteName'];
+
+            $total = 0;
+            ?>
+        <div class="col-md-12 text-center title" style="padding-bottom: 5px">                
+                <strong>รายงาน</strong>
+                <br>
+                <?= $this->m_datetime->getDateThaiStringShort() ?>
+                <br>
+                จุดจอด&nbsp;:&nbsp;<?= $seller_station_name ?>                               
+            </div>            
+            <?php
+            foreach ($route['routes_detail'] as $rd) {
+                $total_rd = 0;
+                ?>
+                <div class="col-md-6 col-md-offset-3">                    
+                    <p class=" text-left sub-title"><u><?= $rd['RouteName'] ?></u></p>
+                    <table class="table-bordered">
+                        <thead>
+                            <tr class="note">
+                                <th style="width: 18%">รอบเวลา</th>
+                                <th style="width: 57%">รายการ</th>
+                                <th style="width: 25%">จำนวนเงิน</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php
+                            foreach ($rd['schedules'] as $schedule) {
+                                $TSID = $schedule['TSID'];
+                                $num_ticket = count($schedule['tickets']);
+                                $num_income = count($schedule['Income']);
+                                $num_outcome = count($schedule['Outcome']);
+                                $total_data_row = $num_ticket + $num_income + $num_outcome;
+                                $row_span = '';
+                                if ($total_data_row > 0) {
+                                    $row_span = $total_data_row + 2;
+                                }
+                                if ($num_outcome <= 0) {
+                                    $row_span--;
+                                }
+                                $total +=$schedule['Total'] + $schedule['TotalAlongRoad'];
+                                $total_rd+=$schedule['Total'];
+                                ?>
+                                <tr>
+                                    <td class="text-center sub-title" rowspan="<?= $row_span ?>">
+                                        <?= $schedule['TimeDepart'] ?>                                                                                
+                                    </td>
+                                    <td class="text-left sub-title" colspan="2"><strong><?= ($num_ticket > 0 || $num_income > 0) ? 'รายรับ' : '' ?></strong></td>                                    
+
+                                </tr>
+                                <?php
+                                if ($num_ticket > 0) {
+                                    foreach ($schedule['tickets']as $ticket) {
+                                        $total_ticket_price = $ticket['Total'];
+                                        ?>
+                                        <tr class="sub-title">
+                                            <td class="text-left"><i>ไป</i>&nbsp;<strong><?= $ticket['DestinationName'] ?></strong>&nbsp;(&nbsp;<?= $ticket['NumberTicket'] ?> &nbsp;ที่นั่ง&nbsp;)</td>
+                                            <td class="text-right"><?= number_format($total_ticket_price, 1) ?></td>
+                                        </tr>
+                                        <?php
+                                    }
+                                }
+                                ?>                                        
+                                <?php
+                                if ($num_income > 0) {
+                                    foreach ($schedule['Income']as $income) {
+                                        $total_income = $income['Total'];
+                                        ?>
+                                        <tr class="sub-title">
+                                            <td class="text-left"><?= $income['CostDetail'] ?></td>
+                                            <td class="text-right"><?= number_format($total_income, 1) ?></td>
+                                        </tr>
+                                        <?php
+                                    }
+                                }
+                                ?>
+
+                                <?php
+                                if ($num_outcome > 0) {
+                                    echo '<tr> <td class="text-left sub-title" colspan="2"><strong>รายจ่าย</strong></td></tr>';
+                                    foreach ($schedule['Outcome']as $outcome) {
+                                        $total_outcome = $outcome['Total'];
+                                        ?>
+                                        <tr class="sub-title">
+                                            <td class="text-left"><?= $outcome['CostDetail'] ?></td>
+                                            <td class="text-right">-<?= number_format($total_outcome, 2) ?></td>
+                                        </tr>
+                                        <?php
+                                    }
+                                }
+                                ?>
+                            <?php } ?>
+                        </tbody>
+                        <tfoot>
+                            <tr class="sub-title info">
+                                <td colspan="2" class="text-center"><strong>คงเหลือ</strong></td>
+                                <td class="text-right"><strong><?= number_format($total_rd, 1) ?></strong></td>
+                            </tr>
+
+                        </tfoot>
+                    </table>
+                </div>
+                <?php
+            }
+            $total_along_road = 0;
+            if ($num_along_road > 0) {
+                ?>
+                <div class="col-md-6 col-md-offset-3">
+                    <p class="text-left sub-title"><u>รายทาง</u></p>                    
+                    <table class="table-bordered">
+                        <thead>
+                            <tr class="note">
+                                <th style="width: 60%;">รอบเวลา</th>                            
+                                <th style="width: 40%">จำนวนเงิน</th>
+                            </tr>
+                        </thead>
+                        <tbody class="sub-title">
+                            <?php
+                            foreach ($route['cost_along_road']['schedules'] as $schedule) {
+
+                                $income_along_road = 0;
+                                $TSID = '';
+                                if (count($schedule['AlongRoad']) > 0) {
+                                    $TSID = $schedule['TSID'];
+                                    $income_along_road = $schedule['AlongRoad'][0]['Total'];
+                                    $total_along_road+=$income_along_road;
+                                }
+                                ?>
+                                <tr>
+                                    <td class="text-center">
+                                        <strong><?= $schedule['TimeDepart'] ?></strong>
+                                        <input type="hidden" name="TSID[]" value="<?= $TSID ?>">
+                                    </td>
+                                    <td class="text-right"><?= number_format($income_along_road, 1) ?></td>
+                                </tr>
+                            <?php } ?>
+                        </tbody>
+                        <tfoot class="sub-title">
+                            <tr class="">
+                                <td class="text-center"><strong>รวม</strong></td>
+                                <td class="text-right"><strong><?= number_format($total_along_road, 1) ?></strong></td>
+                            </tr>
+                        </tfoot>
+
+                    </table>
+
+                </div>
+
+                <?php
+            }
+            $total +=$total_along_road;
+            ?>            
+            <div class="col-md-6 col-md-offset-3">
+                <div class="form-horizontal">
+                    <div class="form-group">
+                        <label for="" class="col-sm-3 control-label">รวม</label>
+                        <div class="col-sm-5">
+                            <input type="text" readonly=""  class="form-control" id="Total_print" name="Total"  placeholder="ยอดรวม" value="<?= floor($total); ?>">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label  class="col-sm-3 control-label">ค่าตอบแทน</label>
+                        <div class="col-sm-3">
+                            <input type="text"  class="form-control input-lg" id="Vage_print" name="Vage" placeholder="ค่าตอบเเทน" value="<?= (set_value('Vage') == NULL) ? 0 : set_value('Vage') ?>" onkeypress="return isNumberKey(event)" onchange="calNet()">                                
+                        </div>                        
+                    </div>
+                    <div class="form-group">
+                        <label for="" class="col-sm-3 control-label">คงเหลือ</label>
+                        <div class="col-sm-8">
+                            <input type="text" readonly=""  class="form-control" id="Net_print" name="Net" placeholder="ยอดคงเหลือ" value="<?= (set_value('Net') == NULL) ? floor($total) : set_value('Net') ?>">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="" class="col-sm-3 control-label">หมายเหตุ</label>
+                        <div class="col-sm-8">
+                            <textarea class="form-control" rows="3" id="ReportNote" name="ReportNote" placeholder="หมายเหตุ" value="<?= (set_value('ReportNote') == NULL) ? set_value('ReportNote') : set_value('ReportNote') ?>"></textarea>
+                        </div>
+                    </div>                                        
+                </div>        
+            </div>   
+
+            <?php
+        }
+        ?>          
+    </div>
+</div>
+
+

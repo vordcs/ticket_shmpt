@@ -115,6 +115,7 @@
                 </div>              
                 <div class="col-md-12 text-center">
                     <?php
+                    $TimeDepart =$form['TimeDepart_show'];
                     $cancle = array(
                         'type' => "button",
                         'class' => "btn btn-lg btn-danger",

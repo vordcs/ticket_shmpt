@@ -12,10 +12,12 @@ class m_schedule extends CI_Model {
         $this->db->join('t_routes', ' t_schedules_day.RID = t_routes.RID ', 'left');
         $this->db->join('vehicles_has_schedules', ' vehicles_has_schedules.TSID = t_schedules_day.TSID', 'left');
         $this->db->join('vehicles', ' vehicles.VID = vehicles_has_schedules.VID', 'left');
+        $this->db->join('vehicles_type', ' vehicles.VTID = vehicles_type.VTID', 'left');
         $this->db->join('t_schedules_day_has_report', ' t_schedules_day.TSID = t_schedules_day_has_report.TSID', 'left');
+        $this->db->join('t_schedules_day_has_cost', ' t_schedules_day_has_cost.TSID = t_schedules_day.TSID AND t_schedules_day_has_cost.TSID = t_schedules_day_has_report.TSID', 'left');
 
-        if ($date != NULL) {
-            $this->db->where('Date', $date);
+        if ($date == NULL) {
+            $date = $this->m_datetime->getDateToday();
         }
         if ($rcode != NULL) {
             $this->db->where('t_routes.RCode', $rcode);
@@ -30,9 +32,12 @@ class m_schedule extends CI_Model {
             $this->db->where('t_schedules_day.TSID', $tsid);
         }
 
+        $this->db->where('Date', $date);
         $this->db->where('t_schedules_day.ScheduleStatus', '1');
 
+        $this->db->group_by('t_schedules_day.TSID');
         $this->db->order_by('TimeDepart', 'asc');
+
         $query_schedule = $this->db->get("t_schedules_day");
         return $query_schedule->result_array();
     }
@@ -47,7 +52,7 @@ class m_schedule extends CI_Model {
         return $query_schedule->result_array();
     }
 
-    public function get_time_depart($date, $rid, $tsid = NULL, $sid = NULL) {
+    public function get_time_depart($date, $rid,$tsid = NULL, $sid = NULL) {
         /*
          * ข้อมูลเส้นทาง
          */

@@ -29,7 +29,7 @@ class cost extends CI_Controller {
     public function index() {
         $date = $this->m_datetime->getDateToday();
         $date_th = $this->m_datetime->DateThaiToDay();
-        $schedules = $this->m_schedule->get_schedule($date);
+        $schedules = $this->m_cost->get_schedule($date);
 
         if (count($schedules) <= 0) {
             $alert['alert_message'] = "ไม่พบข้มูลรอบเวลา วันที่ $date_th";
@@ -67,7 +67,7 @@ class cost extends CI_Controller {
             'schedules' => $schedules,
             'stations' => $stations,
             'tickets' => $tickets,
-            'data' => $this->m_cost->set_view_cost($date, $routes, $routes_detail),
+            'data' => $this->m_cost->set_view_cost_all($date),
         );
         $data_debug = array(
 //            'from_search' => $data['from_search'],           
@@ -136,6 +136,7 @@ class cost extends CI_Controller {
             'TimeDepart' => $time_depart,
             'VCode' => $vcode,
             'tickets' => $tickets,
+            'data' => $this->m_cost->set_form_view($tsid),
         );
 
         $data_debug = array(
@@ -146,6 +147,7 @@ class cost extends CI_Controller {
 //            'TSID'=>$tsid,
 //            'schedule' => $schedule,
 //            'tickets' => $data['tickets'],
+//            'data' => $data['data'],
         );
 
         $this->m_template->set_Debug($data_debug);
@@ -176,7 +178,10 @@ class cost extends CI_Controller {
 
         $RID = $schedules[0]['RID'];
 
-        $SID = $this->m_route->get_route_by_seller(NULL, NULL, $RID)[0]['SID'];
+        $route = $this->m_route->get_route_by_seller(NULL, NULL, $RID)[0];
+        $SID = $route['SID'];
+        $RCode = $route['RCode'];
+        $VTID = $route['VTID'];
 
         $time_departs = $this->m_schedule->get_time_depart($date, $RID, $tsid, $SID)[0];
         $time_depart = $time_departs['TimeDepart'];
@@ -191,7 +196,13 @@ class cost extends CI_Controller {
             $alert['alert_mode'] = "success";
             $this->session->set_flashdata('alert', $alert);
 
-            redirect("cost/view/$tsid");
+            if ($cost_detail_id == NULL) {
+                redirect("cost/view/$tsid");
+            } else {
+                $this->session->set_flashdata('RCode', $RCode);
+                $this->session->set_flashdata('VTID', $VTID);
+                redirect("cost/");
+            }
         }
         $page_title = 'เพิ่ม ' . $this->m_cost->get_cost_type($ctid)[0]['CostTypeName'] . ' ';
         $data = array(
@@ -211,6 +222,7 @@ class cost extends CI_Controller {
 //            'saller_station' => $this->m_user->get_saller_station(),
 //            '$time_departs' => $time_departs,
 //            'SID' => $SID,
+//            'post' => $this->input->post(),
         );
 
         $this->m_template->set_Debug($data_debug);
@@ -219,51 +231,54 @@ class cost extends CI_Controller {
         $this->m_template->showTemplate();
     }
 
-    public function edit($cost_type_id, $cost_id, $rid, $tsid) {
+    public function edit($CostID, $tsid, $CostDetailID = NULL) {
 
-        $cost = $this->m_cost->get_cost($cost_id)[0];
-        $CostTypeName = $cost['CostTypeName'];
-        $date = date('Y-m-d', strtotime($cost['CostDate']));
+        $cost = $this->m_cost->get_cost($CostID)[0];
+        $cost_type_id = $cost['CostTypeID'];
 
+        $schedule = $this->m_schedule->get_schedule(NULL, NULL, NULL, NULL, $tsid)[0];
 
-        $route = $this->m_cost->get_route(NULL, NULL, $rid)[0];
-        $RCode = $route['RCode'];
-        $VTID = $route['VTID'];
-        $source = $route['RSource'];
-        $desination = $route['RDestination'];
-        $vt_name = $route['VTDescription'];
-        $route_name = "$vt_name เส้นทาง " . $RCode . ' ' . ' ' . $source . ' - ' . $desination;
-
-
-        $SID = $this->m_user->get_saller_station(NULL, NULL, $rid)[0]['SID'];
-
-        $time_departs = $this->m_schedule->get_time_depart($date, $rid, $tsid, $SID)[0];
-        $time_depart = $time_departs['TimeDepart'];
-
+        /*
+         * ข้อมูลเส้นทาง
+         */
+        $RID = $schedule['RID'];
+        $RCode = $schedule['RCode'];
+        $VTID = $schedule['VTID'];
+        
         $form_data = '';
         $rs = '';
+        $previous_page = '';
         if ($this->m_cost->validation_form_edit() && $this->form_validation->run() == TRUE) {
-            $form_data = $this->m_cost->get_post_form_edit($cost_type_id);
-            $rs = $this->m_cost->update_cost($cost_id, $form_data);
+            $form_data = $this->m_cost->get_post_form_edit($cost_type_id, $CostDetailID);
+            $rs = $this->m_cost->update_cost($CostID, $form_data);
             $alert['alert_message'] = "แก้ไข ข้อมูลค่าใช้จ่าย";
             $alert['alert_mode'] = "success";
             $this->session->set_flashdata('alert', $alert);
-            redirect("cost/view/$tsid");
+
+            if ($CostDetailID == NULL) {
+                redirect("cost/view/$tsid");
+                $previous_page = "cost/view/$tsid";
+            } else {
+                $this->session->set_flashdata('RCode', $RCode);
+                $this->session->set_flashdata('VTID', $VTID);
+                redirect("cost/");                
+                $previous_page = "cost/";
+            }
         }
         $data = array(
-            'page_title' => "แก้ไขข้อมูล :  $CostTypeName  ",
+            'page_title' => "แก้ไขข้อมูล :    ",
             'page_title_small' => "",
-            'previous_page' => "cost/view/$tsid",
+            'previous_page' => "$previous_page",
             'next_page' => '',
-            'form' => $this->m_cost->set_form_edit($route, $cost),
-            'TimeDepart' => $time_depart,
-            'route_name' => $route_name,
+            'form' => $this->m_cost->set_form_edit($CostID, $tsid, $CostDetailID),
         );
 
         $data_debug = array(
 //            'form_data' => $form_data,
 //            'data_upadte' => $rs,
 //            'route' => $route,
+//            '$schedule' => $schedule,
+//            'CostID' => $CostID,
 //            'cost' => $cost,
 //            "schedule" => $this->m_cost->get_schedule($date),
         );

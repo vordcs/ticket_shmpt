@@ -22,9 +22,14 @@ class m_ticket extends CI_Model {
 
         return $query->result_array();
     }
+    
+    public function get_ticket_by_seller(){
+        
+    }
 
     public function get_ticket_by_station($sid, $tsid = NULL) {
         $this->check_ticket();
+
 
         $this->db->where('SourceID', $sid);
         if ($tsid != NULL) {
@@ -36,12 +41,36 @@ class m_ticket extends CI_Model {
         return $query->result_array();
     }
 
-    public function get_ticket_by_saller($tsid) {
+    public function get_ticket_for_booking($tsid = NULL) {
         $this->check_ticket();
-
         $eid = $this->session->userdata('EID');
 
         $this->db->where('TSID', $tsid);
+
+        $this->db->where('Seller', $eid);
+
+        $query = $this->db->get('ticket_sale');
+
+        return $query->result_array();
+    }
+
+    public function get_ticket_by_saller($date = NULL, $rid = NULL, $tsid = NULL, $SourceID = NULL) {
+        $this->check_ticket();
+        $eid = $this->session->userdata('EID');
+
+
+        $this->db->select('TicketID,ticket_sale.TSID as TSID,SourceID,SourceName,DestinationID,DestinationName,StatusSeat, COUNT(TicketID) as num_ticket,SUM(PriceSeat) as total_price_ticket,DateSale');
+
+        if ($date == NULL) {
+            $date = $this->m_datetime->getDateToday();
+        }
+        if ($tsid != NULL) {
+            $this->db->where('TSID', $tsid);
+        }
+        if ($SourceID != NULL) {
+            $this->db->where('SourceID', $SourceID);
+        }
+        $this->db->where('DateSale', $date);
         $this->db->where('Seller', $eid);
 
         $query = $this->db->get('ticket_sale');
@@ -68,7 +97,6 @@ class m_ticket extends CI_Model {
 
         return $query->row_array();
     }
-    
 
     public function generate_ticket_id($tsid, $source_id, $destination_id, $vcode, $seat) {
         $str_vcode = explode('-', $vcode);
