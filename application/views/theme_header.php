@@ -137,7 +137,7 @@
         </div>  
         <?php
         if (isset($debug) && $debug != NULL) {
-            echo '<div class="container" style="margin-top: 60px;">';
+            echo '<div class="container hidden-print" style="margin-top: 60px;">';
             print '<pre>';
             print_r($debug);
             print '</pre>';

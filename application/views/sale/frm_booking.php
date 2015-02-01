@@ -492,12 +492,22 @@
                             if ($schedules_id == $tsid) {
                                 $class = "active";
                             }
-                            ?>
-                            <a class="list-group-item <?= $class ?>" name="<?= "schedulet$tsid" ?>" href="<?= base_url("sale/booking/$rid/$source_id/$destination_id") . "/$tsid" ?>">  
-                                <?= $time_depart ?>
-                                <span class="badge <?= $class_seat ?>"><?= $seat_blank ?></span>                          
-                            </a> 
-                        <?php } ?>
+                            if ($sd['ReportID'] == NULL) {
+                                ?>
+                                <a class="list-group-item <?= $class ?>" name="<?= "schedulet$tsid" ?>" href="<?= base_url("sale/booking/$rid/$source_id/$destination_id") . "/$tsid" ?>">  
+                                    <?= $time_depart ?>
+                                    <span class="badge <?= $class_seat ?>"><?= $seat_blank ?></span>                          
+                                </a> 
+                            <?php } else {
+                                ?>
+                                <a class="list-group-item disabled" name="<?= "schedulet$tsid" ?>" href="<?= base_url("sale/booking/$rid/$source_id/$destination_id") ?>">  
+                                    <?= $time_depart ?>
+                                    <span class="badge <?= $class_seat ?>"><?= $seat_blank ?></span>                          
+                                </a>
+                                <?php
+                            }
+                        }
+                        ?>
                     </div>  
                 </div> 
             </div>

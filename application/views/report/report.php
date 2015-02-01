@@ -47,35 +47,6 @@
         </div>
     </div>
 </div>
-
-<div class="container-fluid">
-    <div class="row-fluid ">   
-        <ul class="nav nav-tabs nav-justified" role="tablist" id="TabSche">
-            <li class="">
-                <a href="#264_1" role="tab" data-toggle="tab">รถตู้  264 ขอนแก่น - กาฬสินธุ์</a>
-            </li>
-            <li class="">
-                <a href="#278_1" role="tab" data-toggle="tab">รถตู้  278 ขอนแก่น - มุกดาหาร</a>
-            </li>
-        </ul>
-        <div class="tab-content">
-            <div role="tabpanel" class="tab-pane" id="264_1">
-111111111
-
-
-            </div>
-
-            <div role="tabpanel" class="tab-pane" id="278_1">
-
-222222222
-
-            </div>
-
-        </div>
-    </div>
-</div>
-
-
 <div class="container-fluid">
     <?php
     foreach ($vehicle_types as $type) {
@@ -89,447 +60,202 @@
         }
         if ($num_route > 0) {
             ?>
-            <div class="row-fluid ">   
-                <ul class="nav nav-tabs nav-justified" role="tablist" id="TabSche">
-                    <?php
-                    foreach ($routes as $r) {
-                        $rcode = $r['RCode'];
-                        $route_name = "$vt_name  $rcode" . ' ' . $r['RSource'] . ' - ' . $r['RDestination'];
-                        $id = $rcode . '_' . $vtid;
-                        ?>
-                        <li class="">
-                            <a href="#<?= $id ?>" role="tab" data-toggle="tab"><?= $route_name ?></a>
-                        </li>
+            <div class="row-fluid ">  
+                <legend><?= $vt_name ?></legend>
+
+                <div role="tabpanel">
+                    <!-- Nav tabs -->
+                    <ul class="nav nav-tabs nav-justified" role="tablist" id="TabRoute<?= $vtid ?>">
                         <?php
-                    }
-                    ?>
-                </ul>
-                <div class="tab-content">
-                    <?php
-                    foreach ($routes as $r) {
+                        foreach ($data as $route) {
+                            $rcode = $route['RCode'];
+                            $vtid = $route['VTID'];
+                            $route_name = $route['RouteName'];
 
-                        $rcode = $route['RCode'];
-                        $vtid = $route['VTID'];
-                        $vt_name = $route['VTDescription'];
-                        $source = $route['RSource'];
-                        $destination = $route['RDestination'];
-                        $route_name = "$vt_name เส้นทาง " . $rcode . ' ' . ' ' . $source . ' - ' . $destination;
-                        $id = $rcode . "_" . $vtid;
-
-                        $seller_station_id = $route['SID'];
-                        $seller_station_name = $route['StationName'];
-                        $seller_station_seq = $route['Seq'];
-                        if ($route['SellerNote'] != NULL) {
-                            $note = $route['SellerNote'];
-                            $seller_station_name .= " ($note) ";
-                        }
-                        /*
-                         * สรุปข้อมูลรายรับรายจ่าย 
-                         */
-                        $income = 0;
-                        $outcome = 0;
-                        foreach ($cost_types as $cost_type) {
-                            $cost_type_id = $cost_type['CostTypeID'];
-                            foreach ($costs as $cost) {
-                                $CostValue = $cost['CostValue'];
-                                if ($cost_type_id == $cost['CostTypeID'] && $seller_station_id == $cost['SID']) {
-                                    if ($cost_type_id == '1') {
-                                        //รายรับ
-                                        $income+=(int) $CostValue;
-                                    } else {
-                                        //รายจ่าย
-                                        $outcome+=(int) $CostValue;
-                                    }
-                                }
+                            $id = $rcode . "_" . $vtid;
+                            $id_active = $this->session->flashdata('RCode') . '_' . $this->session->flashdata('VTID');
+                            if ($this->session->flashdata('RCode') == $rcode && $this->session->flashdata('VTID') == $vtid) {
+                                $class_tab = 'active';
+                            } elseif ($num_route == 1) {
+                                $class_tab = 'active';
+                            } else {
+                                $class_tab = '';
                             }
-                        }
-                        foreach ($routes_detail as $rd) {
-                            if ($rcode == $rd['RCode'] && $vtid == $rd['VTID']) {
-                                $rid = $rd['RID'];
-                                $source = $rd['RSource'];
-                                $destination = $rd['RDestination'];
-                                $start_point = $rd['StartPoint'];
 
-
-                                //นับจำนวนสถานี
-                                $num_station = 0;
-                                $num_sale_station = 0;
-                                foreach ($stations as $s) {
-                                    if ($rcode == $s['RCode'] && $vtid == $s['VTID']) {
-                                        $num_station ++;
-                                        if ($s['IsSaleTicket'] == '1') {
-                                            $num_sale_station ++;
-                                        }
-                                    }
-                                }
-
-                                $stations_in_route = array();
-
-                                if ($start_point == "S") {
-                                    $n = 0;
-                                    foreach ($stations as $station) {
-                                        if ($rcode == $station['RCode'] && $vtid == $station['VTID']) {
-                                            $stations_in_route[$n] = $station;
-                                            $n++;
-                                        }
-                                    }
-                                }
-                                if ($start_point == "D") {
-                                    $n = 0;
-                                    for ($i = $num_station; $i >= 0; $i--) {
-                                        foreach ($stations as $station) {
-                                            if ($rcode == $station['RCode'] && $vtid == $station['VTID'] && $station['Seq'] == $i) {
-                                                $stations_in_route[$n] = $station;
-                                                $n++;
-                                            }
-                                        }
-                                    }
-                                }
-
-                                $schedules_in_route = array();
-
-                                foreach ($schedules as $sd) {
-                                    if ($rid == $sd['RID']) {
-                                        array_push($schedules_in_route, $sd);
-                                    }
-                                }
-
-                                $class = ' ';
-                                if ($seller_station_seq == 1 && $start_point == 'S') {
-                                    $class = '';
-                                } elseif ($seller_station_seq == $num_station && $start_point == 'D') {
-                                    $class = ' ';
-                                } elseif ($seller_station_seq == 1 || $seller_station_seq == $num_station) {
-                                    $class = 'hidden';
-                                }
+                            if ($vtid == $route['VTID']) {
                                 ?>
-                                <div role="tabpanel" class="tab-pane" id="<?= $id ?>">
-
-
-
-                                </div>
-
+                                <li class="<?= $class_tab ?>">
+                                    <a href="#<?= $id ?>" role="tab" data-toggle="tab"><?= $route_name ?></a>
+                                </li>
                                 <?php
                             }
                         }
-                    }
-                    ?>
-                </div>
-            </div>
-            <?php
-        }
-    }
-    ?>
+                        ?>
+                    </ul>
+                    <!-- Tab panes -->
+                    <div class="tab-content"> 
+                        <?php
+                        foreach ($data as $route) {
+                            if ($vtid == $route['VTID']) {
+                                $rcode = $route['RCode'];
+                                $route_name = $route['RouteName'];
 
-</div>
+                                $seller_station_id = $route['seller_station_id'];
+                                $seller_station_name = $route['seller_station_name'];
 
-<div class="container-fluid hidden">     
-    <?php
-    foreach ($vehicle_types as $type) {
-        $vtid = $type['VTID'];
-        $vt_name = $type['VTDescription'];
-        $num_route = 0;
-        foreach ($routes as $route) {
-            if ($vtid == $route['VTID']) {
-                $num_route++;
-            }
-        }
-        if ($num_route > 0) {
-            ?>
-            <div class="row-fluid ">   
-                <!--<legend><? $vt_name ?></legend>-->              
-                <?php
-                foreach ($routes as $r) {
+                                $id = $rcode . "_" . $vtid;
 
-                    $rcode = $route['RCode'];
-                    $vtid = $route['VTID'];
-                    $vt_name = $route['VTDescription'];
-                    $source = $route['RSource'];
-                    $destination = $route['RDestination'];
-                    $route_name = "$vt_name เส้นทาง " . $rcode . ' ' . ' ' . $source . ' - ' . $destination;
-                    $id = $rcode . "_" . $vtid;
-
-                    $seller_station_id = $route['SID'];
-                    $seller_station_name = $route['StationName'];
-                    $seller_station_seq = $route['Seq'];
-                    if ($route['SellerNote'] != NULL) {
-                        $note = $route['SellerNote'];
-                        $seller_station_name .= " ($note) ";
-                    }
-                    /*
-                     * สรุปข้อมูลรายรับรายจ่าย 
-                     */
-                    $income = 0;
-                    $outcome = 0;
-                    foreach ($cost_types as $cost_type) {
-                        $cost_type_id = $cost_type['CostTypeID'];
-                        foreach ($costs as $cost) {
-                            $CostValue = $cost['CostValue'];
-                            if ($cost_type_id == $cost['CostTypeID'] && $seller_station_id == $cost['SID']) {
-                                if ($cost_type_id == '1') {
-                                    //รายรับ
-                                    $income+=(int) $CostValue;
+                                if ($this->session->flashdata('RCode') == $rcode && $this->session->flashdata('VTID') == $vtid) {
+                                    $class_tab_content = 'active in';
+                                } elseif ($num_route == 1) {
+                                    $class_tab_content = 'active in';
                                 } else {
-                                    //รายจ่าย
-                                    $outcome+=(int) $CostValue;
+                                    $class_tab_content = '';
                                 }
-                            }
-                        }
-                    }
-                    ?>                         
-                    <div class="widget">                       
-                        <div class="widget-content">
-                            <div class="col-md-12 text-center">
-                                <h3><?= $route_name ?></h3>
-                                <p class="lead">จุดจอด : <strong><?= $seller_station_name ?></strong></p>
-                            </div>
-                            <div class="col-md-12" style="padding-bottom: 0%">
-                                <div class="stats-box">
-                                    <div class="col-md-4">
-                                        <div class="stats-box-title">รายรับ</div>
-                                        <div class="stats-box-all-info"><i class="fa fa-arrow-circle-o-down" style="color:#3366cc;"></i><?= number_format($income) ?></div>                            
-                                    </div>
 
-                                    <div class="col-md-4">
-                                        <div class="stats-box-title">รายจ่าย</div>
-                                        <div class="stats-box-all-info"><i class="fa fa-arrow-circle-o-up" style="color:#F30"></i><?= number_format($outcome) ?></div>                         
-                                    </div>
-
-                                    <div class="col-md-4">
-                                        <div class="stats-box-title">คงเหลือ</div>
-                                        <div class="stats-box-all-info"><i class="fa fa-shopping-cart" style="color:#3C3"></i><?= number_format($income - $outcome) ?></div>                            
-                                    </div>                                
-                                </div>    
-                            </div>  
-                            <div class="col-md-12 text-right">
-                                <?php
-                                $send_report = array(
-                                    'class' => "btn btn-lg btn-info",
-                                    'type' => "button",
-                                    'data-toggle' => "tooltip",
-                                    'data-placement' => "top",
-                                    'title' => "ส่งรายงาน $route_name",
-                                );
-                                echo anchor("report/send/$rcode/$vtid/$seller_station_id", '<i class="fa fa-send-o"></i>&nbsp;&nbsp;ส่งรายงาน', $send_report);
-                                ?>                                      
-                            </div>
-
-                            <?php
-                            foreach ($routes_detail as $rd) {
-                                if ($rcode == $rd['RCode'] && $vtid == $rd['VTID']) {
-                                    $rid = $rd['RID'];
-                                    $source = $rd['RSource'];
-                                    $destination = $rd['RDestination'];
-                                    $start_point = $rd['StartPoint'];
-
-
-                                    //นับจำนวนสถานี
-                                    $num_station = 0;
-                                    $num_sale_station = 0;
-                                    foreach ($stations as $s) {
-                                        if ($rcode == $s['RCode'] && $vtid == $s['VTID']) {
-                                            $num_station ++;
-                                            if ($s['IsSaleTicket'] == '1') {
-                                                $num_sale_station ++;
-                                            }
-                                        }
-                                    }
-
-                                    $stations_in_route = array();
-
-                                    if ($start_point == "S") {
-                                        $n = 0;
-                                        foreach ($stations as $station) {
-                                            if ($rcode == $station['RCode'] && $vtid == $station['VTID']) {
-                                                $stations_in_route[$n] = $station;
-                                                $n++;
-                                            }
-                                        }
-                                    }
-                                    if ($start_point == "D") {
-                                        $n = 0;
-                                        for ($i = $num_station; $i >= 0; $i--) {
-                                            foreach ($stations as $station) {
-                                                if ($rcode == $station['RCode'] && $vtid == $station['VTID'] && $station['Seq'] == $i) {
-                                                    $stations_in_route[$n] = $station;
-                                                    $n++;
-                                                }
-                                            }
-                                        }
-                                    }
-
-                                    $schedules_in_route = array();
-
-                                    foreach ($schedules as $sd) {
-                                        if ($rid == $sd['RID']) {
-                                            array_push($schedules_in_route, $sd);
-                                        }
-                                    }
-
-                                    $class = ' ';
-                                    if ($seller_station_seq == 1 && $start_point == 'S') {
-                                        $class = '';
-                                    } elseif ($seller_station_seq == $num_station && $start_point == 'D') {
-                                        $class = ' ';
-                                    } elseif ($seller_station_seq == 1 || $seller_station_seq == $num_station) {
-                                        $class = 'hidden';
-                                    }
+                                if ($vtid == $route['VTID']) {
                                     ?>
-
-                                    <div class="col-md-12 <?= $class ?>">
-                                        <legend><?= '<i> ไป </i> ' . $destination ?></legend>
-                                    </div>
-                                    <div class="col-md-12 <?= $class ?>">
-                                        <div class="col-md-6">  
-                                            <table class="table table-hover table-striped table-bordered">
-                                                <thead>
-                                                    <tr>
-                                                        <th style="width: 20%">รอบเวลา</th>
-                                                        <th style="width: 20%">รายรับ</th>
-                                                        <th style="width: 20%">รายจ่าย</th> 
-                                                        <th style="width: 20%">คงเหลือ</th> 
-                                                        <th style="width: 20%">สถานะ</th>                                                   
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <?php
-                                                    $data_graph = array();
-                                                    foreach ($schedules_in_route as $schedule) {
-                                                        $tsid = $schedule['TSID'];
-                                                        $start_time = strtotime($schedule['TimeDepart']);
-                                                        $time_depart = ' - ';
-                                                        $travel_time = 0;
-                                                        $report_id = $schedule['ReportID'];
-                                                        $i = 0;
-                                                        foreach ($stations_in_route as $s) {
-                                                            if ($s['IsSaleTicket'] == '1') {
-                                                                $station_id = $s['SID'];
-                                                                $station_name = $s['StationName'];
-                                                                $station_seq = $s['Seq'];
-                                                                $temp_travel_time = $s['TravelTime'];
-
-                                                                if ($station_seq == '1' || $station_seq == $num_station) {
-                                                                    $time = $start_time;
-                                                                } else {
-                                                                    $travel_time+=$temp_travel_time;
-                                                                    $time = strtotime("+$travel_time minutes", $start_time);
-                                                                }
-                                                                if ($seller_station_id == $station_id) {
-                                                                    $time_depart = date('H:i', $time);
-                                                                    break;
-                                                                }
-                                                            }
-                                                        }
-
-                                                        /*
-                                                         * รายรับ,รายจ่าย
-                                                         */
-                                                        $income = 0;
-                                                        $outcome = 0;
-                                                        /*
-                                                         * รายการรายรับที่เกิดจากการซื้อตั๋ว
-                                                         */
-                                                        foreach ($tickets as $ticket) {
-                                                            if ($tsid == $ticket['TSID']) {
-                                                                $income+=$ticket['PriceSeat'];
-                                                            }
-                                                        }
-                                                        foreach ($cost_types as $cost_type) {
-                                                            $cost_type_id = $cost_type['CostTypeID'];
-                                                            foreach ($costs as $cost) {
-                                                                $CostValue = $cost['CostValue'];
-                                                                if ($tsid == $cost['TSID'] && $cost_type_id == $cost['CostTypeID']) {
-                                                                    if ($cost_type_id == '1') {
-                                                                        //รายรับ
-                                                                        $income+=(int) $CostValue;
-                                                                    } else {
-                                                                        //รายจ่าย
-                                                                        $outcome+=(int) $CostValue;
-                                                                    }
-                                                                }
-                                                            }
-                                                        }
-
-                                                        $temp_data_graph = array(
-                                                            'TSID' => $tsid,
-                                                            'SID' => $seller_station_id,
-                                                            'TimeDepart' => $time_depart,
-                                                            'Income' => $income,
-                                                            'Outcome' => $outcome,
-                                                        );
-                                                        array_push($data_graph, $temp_data_graph);
-                                                        $status_report = '<i class="fa fa-square-o fa-lg" style="color:  #DA4453" ></i>&nbsp;ยังไม่ส่ง';
-                                                        if ($report_id != NULL) {
-                                                            $status_report = '<i class="fa fa-check-square-o fa-lg" style="color: #37BC9B" ></i>&nbsp;ส่งเเล้ว';
-                                                        }
-                                                        ?>
-
-                                                        <tr>    
-                                                            <td class="text-center"><?= $time_depart ?></td>
-                                                            <td class="text-center"><?= number_format($income) ?></td>
-                                                            <td class="text-center"><?= number_format($outcome) ?> </td>
-                                                            <td class="text-right"><strong><?= number_format($income - $outcome) ?></strong></td>
-                                                            <td class="text-center"><?= $status_report ?></td>
-                                                        </tr> 
-                                                        <?php
-                                                    }
-                                                    ?>  
-                                                </tbody>
-                                            </table>
+                                    <div role="tabpanel" class = "tab-pane fade <?= $class_tab_content ?>" id="<?= $id ?>">                                 
+                                        <div class="col-md-12 text-center">
+                                            <h3><?= $route_name ?></h3>
+                                            <p class="lead">จุดจอด : <strong><?= $seller_station_name ?></strong></p>
                                         </div>
-                                        <div class="col-md-6">
-                                            <?"จำนวนข้อมูล : " . count($data_graph) ?>
-                                            <table class="highchart" data-graph-container-before="1" data-graph-type="column" style="display:none">
-                                                <thead>
-                                                    <tr>                                  
-                                                        <th>รอบเวลา</th>
-                                                        <th>รายรับ</th>
-                                                        <th>รายจ่าย</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <?php
-                                                    if (count($data_graph) > 0) {
-                                                        foreach ($data_graph as $data) {
+                                        <div class="col-md-12 text-right">
+                                            <?php
+                                            $send_report = array(
+                                                'class' => "btn btn-lg btn-info",
+                                                'type' => "button",
+                                                'data-toggle' => "tooltip",
+                                                'data-placement' => "top",
+                                                'title' => "ส่งรายงาน $route_name",
+                                            );
+                                            echo anchor("report/send/$rcode/$vtid/$seller_station_id", '<i class="fa fa-send-o"></i>&nbsp;&nbsp;ส่งรายงาน', $send_report);
+                                            ?>                                      
+                                        </div>
+                                        <?php
+                                        $num_route_detail = count($route['routes_detail']);
+                                        $num_cost_along_road = count($route['cost_along_road']);
+                                        foreach ($route['routes_detail'] as $rd) {
+                                            $r_destination_name = $rd['RDestination'];
+                                            ?>
+                                            <div class="col-md-6 <?= ($num_cost_along_road > 0) ? 'col-md-offset-1' : '' ?>">
+                                                <legend><i>ไป</i>&nbsp;&nbsp;<strong> <?= $r_destination_name ?></strong></legend>
+                                                <table class="table table-hover table-striped table-bordered">
+                                                    <thead>
+                                                        <tr>
+                                                            <th style="width: 20%">รอบเวลา</th>
+                                                            <th style="width: 20%">รายรับ</th>
+                                                            <th style="width: 20%">รายจ่าย</th> 
+                                                            <th style="width: 20%">คงเหลือ</th> 
+                                                            <th style="width: 20%">สถานะ</th>                                                   
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <?php
+                                                        foreach ($rd['schedules'] as $schedule) {
+                                                            $TSID = $schedule['TSID'];
+                                                            $TimeDepart = $schedule['TimeDepart'];
+                                                            $Income = $schedule['Income'];
+                                                            $Outcome = $schedule['Outcome'];
+                                                            $Total = $schedule['Total'];
+
+                                                            $ReportID = $schedule['ReportID'];
+
+                                                            if ($ReportID != NULL) {
+                                                                $status_report = '<i class="fa fa-check-square-o fa-lg" style="color: #37BC9B" data-toggle="tooltip" data-placement="left" title="ส่งเเล้ว"></i>';
+                                                            } else {
+                                                                $status_report = '<i class="fa fa-square-o fa-lg" style="color:  #DA4453" data-toggle="tooltip" data-placement="left" title="ยังไม่ส่ง" ></i>';
+                                                            }
                                                             ?>
                                                             <tr>
-                                                                <td><?= $data['TimeDepart'] ?></td>
-                                                                <td><?= $data['Income'] ?></td>
-                                                                <td><?= $data['Outcome'] ?></td>
+                                                                <td class="text-center"><?= $TimeDepart ?></td>
+                                                                <td class="text-center"><?= $Income ?></td>
+                                                                <td class="text-center"><?= $Outcome ?></td>
+                                                                <td class="text-center"><?= $Total ?></td>
+                                                                <td class="text-center"><?= $status_report ?></td>
                                                             </tr>
-
                                                             <?php
                                                         }
-                                                    }
-                                                    ?>
-                                                    <?php ?>
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
+                                                        ?>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <?php
+                                        }
+                                        $num_cost_along_road = count($route['cost_along_road']);
+                                        if ($num_route_detail == 1 && $num_cost_along_road > 0) {
+                                            $cost_along_road = $route['cost_along_road'];
+                                            $source_form = $cost_along_road['RSource'];
+                                            ?>
+                                            <div class="col-md-4">
+                                                <legend>รายทาง</legend>
+                                                <table class="table table-striped table-hover table-bordered">
+                                                    <thead>
+                                                        <tr>
+                                                            <th style="width: 20%">ออกจาก</th> 
+                                                            <th rowspan="2" style="width: 15%">รถเบอร์</th>                                                                                                                                  
+                                                            <th rowspan="2" style="width: 20%">จำนวนเงิน</th>
+                                                            <th rowspan="2" style="width: 20%"></th>
+                                                        </tr>
+                                                        <tr>
+                                                            <th><?= $source_form ?></th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <?php
+                                                        $rid_along_road = $cost_along_road['RID'];
+                                                        foreach ($cost_along_road['schedules'] as $schedule) {
+                                                            $tsid = $schedule['TSID'];
+                                                            $time_depart = $schedule['TimeDepart'];
+                                                            $vid = $schedule['VID'];
+                                                            $vcode = $schedule['VCode'];
 
+                                                            $cost_id = $schedule['CostID'];
+
+                                                            if ($vcode == '') {
+                                                                $vcode = '-';
+                                                            }
+                                                            $along_road = $schedule['AlongRoad'];
+
+                                                            $ReportID = $schedule['ReportID'];
+
+                                                            if ($ReportID != NULL) {
+                                                                $status_report = '<i class="fa fa-check-square-o fa-lg" style="color: #37BC9B" data-toggle="tooltip" data-placement="left" title="ส่งเเล้ว"></i>';
+                                                            } else {
+                                                                $status_report = '<i class="fa fa-square-o fa-lg" style="color:  #DA4453" data-toggle="tooltip" data-placement="left" title="ยังไม่ส่ง" ></i>';
+                                                            }
+                                                            ?>
+                                                            <tr>
+                                                                <td class="text-center"><strong><?= $time_depart ?></strong></td>
+                                                                <td class="text-center"><?= $vcode ?></td>
+                                                                <td class="text-right"><?= $along_road ?></td>
+                                                                <td class="text-center"><?= $status_report ?> </td>
+                                                            </tr>
+                                                        <?php } ?>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        <?php } ?>
+                                    </div>
                                     <?php
                                 }
                             }
-                            ?>
-
-                        </div>
-                    </div>
-                    <?php
-                }
-                ?>
-            </div>
-            <?php
+                        }
+                        ?>
+                    </div> 
+                </div>
+                <?php
+            }
         }
-    }
-    ?>
-</div>
+        ?>
+    </div>
 
 
-<script>
-    $(document).ready(function () {
-        $('table.highchart').highchartTable();
 
-    });
+    <script>
+        $(document).ready(function () {
+            $('table.highchart').highchartTable();
 
-</script>
+        });
+
+    </script>

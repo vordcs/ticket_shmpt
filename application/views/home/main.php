@@ -95,7 +95,7 @@
     </div>
 
     <?php if (isset($timeline) && count($timeline) > 0) { ?>
-        <div class="row">  
+        <div class="row hidden">  
             <div class="col-md-12">
                 <div class="timeline">
                     <dl>
