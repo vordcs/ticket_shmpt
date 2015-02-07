@@ -22,8 +22,8 @@ class m_ticket extends CI_Model {
 
         return $query->result_array();
     }
-    
-    public function get_ticket_by_seller(){
+
+    public function get_ticket_by_seller() {
         
     }
 
@@ -54,12 +54,11 @@ class m_ticket extends CI_Model {
         return $query->result_array();
     }
 
-    public function get_ticket_by_saller($date = NULL, $rid = NULL, $tsid = NULL, $SourceID = NULL) {
+    public function get_ticket_by_saller($date = NULL, $tsid = NULL, $SourceID = NULL, $StatusSeat = NULL) {
         $this->check_ticket();
         $eid = $this->session->userdata('EID');
 
-
-        $this->db->select('TicketID,ticket_sale.TSID as TSID,SourceID,SourceName,DestinationID,DestinationName,StatusSeat, COUNT(TicketID) as num_ticket,SUM(PriceSeat) as total_price_ticket,DateSale');
+        $this->db->select('ticket_sale.TSID as TSID,SourceID,SourceName,DestinationID,DestinationName,PriceSeat,StatusSeat, COUNT(TicketID) as num_ticket,SUM(PriceSeat) as total_price_ticket,DateSale');
 
         if ($date == NULL) {
             $date = $this->m_datetime->getDateToday();
@@ -70,10 +69,19 @@ class m_ticket extends CI_Model {
         if ($SourceID != NULL) {
             $this->db->where('SourceID', $SourceID);
         }
+        if ($StatusSeat != NULL) {
+            $this->db->where('StatusSeat', $StatusSeat);
+        }
         $this->db->where('DateSale', $date);
         $this->db->where('Seller', $eid);
 
         $query = $this->db->get('ticket_sale');
+
+        if ($tsid != NULL) {
+            
+        } else {
+            
+        }
 
         return $query->result_array();
     }
@@ -237,14 +245,14 @@ class m_ticket extends CI_Model {
         $today = $this->m_datetime->getDateToday();
         $tickets_reseve = $this->get_ticket($today, $tsid, 2);
         foreach ($tickets_reseve as $ticket) {
-            $tsid = $ticket['TSID'];
-            $seat = $ticket['Seat'];
+            $ticket_id = $ticket['TicketID'];            
             $now = $this->m_datetime->getDateTimeNow();
             $date_time_sale = $ticket['CreateDate'];
             $diff = strtotime($now) - strtotime($date_time_sale);
             $minutes = floor($diff / (60));
             if ((int) $minutes > 2) {
-                $this->delete_ticket($tsid, $seat);
+                $this->db->where('TicketID', $ticket_id);
+                $this->db->delete('ticket_sale');
             }
         }
     }
