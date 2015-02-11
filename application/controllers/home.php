@@ -82,7 +82,7 @@ class Home extends CI_Controller {
 //            'timeline' => $data['timeline'],
 //            'seller_detail' => $data['seller_detail'],
 //            'all_sid' => $data['all_sid'],
-//            'test' => (in_array('0', $data['all_sid'])) ? '1' : '2',
+//            'test' => $data['timeline'],
         );
         $this->m_template->set_Debug($data_debug);
         $this->m_template->set_Title('ระบบขายตั๋วหน้าเค้ฆาเตอร์');

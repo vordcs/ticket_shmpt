@@ -60,11 +60,10 @@ class m_home extends CI_Model {
         $ans = $query_schedule->result_array();
 
         if ($sid != NULL) {
-            for ($i = 0; $i < count($ans); $i++) {
-                $temp_sid = $ans[$i]['SID'];
+            foreach ($ans as $key => $value) {
+                $temp_sid = $ans[$key]['SID'];
                 if (in_array($temp_sid, $sid) == FALSE) {
-                    unset($ans[$i]);
-                    $i--;
+                    unset($ans[$key]);
                 }
             }
         }
