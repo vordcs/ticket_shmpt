@@ -21,8 +21,6 @@
         <?php echo js('jquery.js?v=' . $version); ?>
         <?php echo js('bootstrap.js?v=' . $version); ?>
 
-
-
     </head>
     <body>
         <div class="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -37,7 +35,7 @@
                     <a class="navbar-brand" href="#">บริษัท สหมิตรภาพ(2512) จำกัด</a>
                 </div>
                 <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-2">
-                    <p class="navbar-text navbar-right"></p>
+                    <span id="exit" class="hidden navbar-right btn btn-danger" style="margin-top: 6px;"><i class="fa fa-times"></i> ออกโปรแกรม</span>
                 </div>
             </div>
         </div>
@@ -47,18 +45,16 @@
 
 
             <!--<form class="form-signin" role="form">-->
-                <?= $form_action ?>
-                <h2 class="form-signin-heading">Member Login</h2>
+            <?= $form_action ?>
+            <h2 class="form-signin-heading">Member Login</h2>
 
-                <?= $form_input['user'] ?>
-                <?= $form_input['pass'] ?>               
-                <button class="btn btn-lg btn-success btn-block" type="submit">Sign in</button>
-                <?= form_close() ?>
-<!--            </form>-->
+            <?= $form_input['user'] ?>
+            <?= $form_input['pass'] ?>               
+            <button class="btn btn-lg btn-success btn-block" type="submit">เข้าใช้งาน</button>
+            <?= form_close() ?>
+            <!--            </form>-->
 
             <!-- /container -->
-
-
         </div> <!-- /login-container -->
 
     </body>
