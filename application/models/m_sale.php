@@ -32,8 +32,17 @@ class m_sale extends CI_Model {
         
     }
 
-    public function set_form_booking($route, $s_station, $d_station, $schedule = NULL, $fare = NULL) {
-        $rid = $route['RID'];
+    public function set_form_booking($rid, $s_station, $d_station, $tsid = NULL) {
+
+        $this->load->model('m_route');
+        $this->load->model('m_station');
+        $this->load->model('m_schedule');
+        $this->load->model('m_fares');
+        $this->load->model('m_ticket');
+
+        $date = $this->m_datetime->getDateToday();
+        $route = $this->m_route->get_route_by_seller(NULL, NULL, $rid)[0];
+
         $rcode = $route['RCode'];
         $vtid = $route['VTID'];
         $vt_name = $route['VTDescription'];
@@ -41,7 +50,9 @@ class m_sale extends CI_Model {
         $desination = $route['RDestination'];
         $route_name = "$vt_name  $rcode  $source - $desination";
 
-        $this->load->model('m_station');
+        $seller_station_id = $route['SID'];
+
+
         $stations = $this->m_station->get_stations($rcode, $vtid);
         $num_station = count($stations);
 
@@ -55,18 +66,33 @@ class m_sale extends CI_Model {
         $destination_seq = $d_station['Seq'];
         $destination_travel_time = $d_station['TravelTime'];
 
+        /*
+         * ตารางเวลาเดินรถ
+         */
+        if ($tsid != NULL) {
+            $schedule = $this->get_schedule($tsid)[0];
+        } else {
+            $schedule = array();
+        }
+        /*
+         * ค่าโดยสาร
+         */
+        $price = 0;
+        $price_dis = 0;
+        $fare = $this->m_fares->get_fares($rcode, $vtid, $source_id, $destination_id)[0];
+        if (count($fare) > 0 && $fare != NULL) {
+            $price = $fare['Price'];
+            $price_dis = $fare['PriceDicount'];
+        }
+
 //        รหัสตารางเวลาเดินรถ
-        $tsid = '';
 //        เวลาออกจาก $source_id
         $time_depart = "";
 //        เวลาถึง $destination_id
         $time_arrive = "-";
 //        วันเดินทาง
-        $date = '';
-//        ราคาค่าโดยสาร
-        $price = 0;
-        $price_dis = 0;
 
+        $date_th = '';
 //        รถโดยสาร
         $vid = '-';
         $vcode = '-';
@@ -83,7 +109,6 @@ class m_sale extends CI_Model {
             } else {
                 $time_depart = date('H:i', strtotime("+$source_travel_time minutes", strtotime($start_time)));
             }
-
             if (($source_seq != '1' || $source_seq != $num_station)) {
                 if ($destination_travel_time != '0') {
                     $time_arrive = date('H:i', strtotime("+$destination_travel_time minutes", strtotime($start_time)));
@@ -92,10 +117,7 @@ class m_sale extends CI_Model {
                 $date_th = $this->m_datetime->getDateThaiString($schedule['Date']);
             }
         }
-        if (count($fare) > 0 && $fare != NULL) {
-            $price = $fare['Price'];
-            $price_dis = $fare['PriceDicount'];
-        }
+
 
         $i_route_name = array(
             'type' => "text",
@@ -120,6 +142,14 @@ class m_sale extends CI_Model {
             'class' => "from-control",
             'readonly' => "TRUE",
             'value' => $vid,
+        );
+        $i_VTID = array(
+            'type' => "hidden",
+            'name' => "VTID",
+            'id' => "VTID",
+            'class' => "from-control",
+            'readonly' => "TRUE",
+            'value' => $vtid,
         );
         $i_TSID = array(
             'type' => "hidden",
@@ -224,6 +254,7 @@ class m_sale extends CI_Model {
             'route_name' => form_input($i_route_name),
             'RID' => form_input($i_RID),
             'VID' => form_input($i_VID),
+            'VTID' => form_input($i_VTID),
             'TSID' => form_input($i_TSID),
             'SourceID' => form_input($i_SourceID),
             'SourceName' => form_input($i_SourceName),
@@ -238,7 +269,222 @@ class m_sale extends CI_Model {
             'VCode' => form_input($i_VCode),
             'Seat' => "",
         );
-        return $form_sale_ticket;
+
+
+        $data = $this->set_data_form_booking($date, $rid, $source_id, $destination_id, $tsid);
+
+        $rs = array(
+            'form' => $form_sale_ticket,
+            'routes_seller' => $data['routes_seller'],
+            'schedules' => $data['schedules'],
+            'schedule_select' => $data['schedule_select'],
+        );
+        return $rs;
+    }
+
+    public function set_data_form_booking($date, $RID, $SourceID, $DestinationID, $TSID = NULL) {
+
+        $EID = $this->m_user->get_user_id();
+        /*
+         * set infomation route seller permission
+         */
+
+        $routes = $this->m_route->get_route_by_seller();
+        $data_routes_seller = array();
+        foreach ($routes as $route) {
+            $rcode = $route['RCode'];
+            $vtid = $route['VTID'];
+            $vt_name = $route['VTDescription'];
+            $source = $route['RSource'];
+            $destination = $route['RDestination'];
+            $route_name = "$vt_name " . $rcode . ' ' . ' ' . $source . ' - ' . $destination;
+
+
+            $seller_station_id = $route['SID'];
+            $seller_station_name = $route['StationName'];
+            $seller_station_seq = $route['Seq'];
+
+            if ($route['SellerNote'] != NULL) {
+                $note = $route['SellerNote'];
+                $seller_station_name .= " ($note) ";
+            }
+            /*
+             * ตรวจสอบข้อมูลพนักงานขายตั๋ว 
+             * ว่าเป็นจุดเริ่มต้นหรือว่าสุดท้าย
+             * ถ้าเป็นจุดต้นทาง ให้แสดง เฉพาะ S
+             * ถ้าเป็นจุดปลายทาง ให้แสดง เฉพาะ D
+             */
+
+            $stations = $this->m_station->get_stations($rcode, $vtid);
+            $num_station = count($stations);
+            foreach ($stations as $station) {
+                if ($seller_station_id == $station['SID']) {
+                    $seller_station_seq = $station['Seq'];
+                }
+            }
+
+            $route_detail = $this->m_route->get_route_detail_by_seller($rcode, $vtid);
+            $detail_in_routes = array();
+            foreach ($route_detail as $rd) {
+                $rid = $rd['RID'];
+                $start_point = $rd['StartPoint'];
+                $stations = $this->m_station->get_stations_by_start_point($start_point, $rcode, $vtid, $seller_station_seq);
+
+                $temp_detail_in_routes = array(
+                    'RID' => $rid,
+                    'SourceName' => $rd['RSource'],
+                    'DestinationName' => $rd['RDestination'],
+                    'stations' => $stations,
+                );
+                array_push($detail_in_routes, $temp_detail_in_routes);
+            }
+
+            if ($seller_station_seq == 1) {
+                $start_point = 'S';
+                array_pop($detail_in_routes);
+            } elseif ($seller_station_seq == $num_station) {
+                $start_point = 'D';
+                array_shift($detail_in_routes);
+            } else {
+                $start_point = 'กลางทาง';
+            }
+            $temp_route = array(
+                'RCode' => $rcode,
+                'VTID' => $vtid,
+                'RouteName' => $route_name,
+                'seller_station_id' => $seller_station_id,
+                'seller_station_seq' => $seller_station_seq,
+                'seller_station_name' => $seller_station_name,
+                'start_point' => $start_point,
+                'routes_deatil' => $detail_in_routes,
+            );
+            array_push($data_routes_seller, $temp_route);
+        }
+
+
+        /*
+         * ข้อมูลเสนทาง
+         */
+        $route = $this->m_route->get_route_by_seller(NULL, NULL, $RID)[0];
+
+        $rcode = $route['RCode'];
+        $vtid = $route['VTID'];
+        $vt_name = $route['VTDescription'];
+        $source = $route['RSource'];
+        $desination = $route['RDestination'];
+        $start_point = $route['StartPoint'];
+        $route_name = "$vt_name  $rcode  $source - $desination";
+
+        $seller_station_id = $route['SID'];
+        $seller_station_seq = $route['Seq'];
+
+        /*
+         * ข้อมูลสถานีปลายทาง
+         */
+        $StationDestination = $this->m_station->get_stations($rcode, $vtid, $DestinationID)[0];
+        $DestinationSeq = $StationDestination['Seq'];
+        /*
+         * ข้อมูลตารางเวลาเดินรถ
+         */
+
+        $schedules_in_route = array();
+        $schedule_select = array(
+            'NumberSeat' => 0,
+            'NumberTicketsExtra' => 0,
+        );
+        $schedules = $this->m_schedule->get_schedule($date, $rcode, $vtid, $RID);
+
+        foreach ($schedules as $schedule) {
+            $TSID_schedule = $schedule['TSID'];
+            $RID_schedule = $schedule['RID'];
+            $Date_schedule = $schedule['Date'];
+            $TimeDepart = $this->m_schedule->get_time_depart($Date_schedule, $RID, $TSID_schedule, $SourceID)[0]['TimeDepart'];
+
+            $ticket_book = $this->get_ticket($start_point, $TSID_schedule, 2, $seller_station_seq, $DestinationSeq);
+            $ticket_book_seller = $this->get_ticket($start_point, $TSID_schedule, 2, $seller_station_seq, $DestinationSeq, $EID);
+
+            $ticket_sale = $this->get_ticket($start_point, $TSID_schedule, 1, $seller_station_seq, $DestinationSeq);
+            $ticket_sale_seller = $this->get_ticket($start_point, $TSID_schedule, 1, $seller_station_seq, $DestinationSeq, $EID);
+
+            $NumberSeat = $schedule['VSeat'];
+            $NumberSeatBook = count($ticket_book);
+            $NumberSeatSale = count($ticket_sale);
+
+            $NumberSeatBookBySeller = count($ticket_book_seller);
+            $NumberSeatSaleBySeller = count($ticket_sale_seller);
+
+
+
+            $TicketsExtra = $this->get_ticket($start_point, $TSID_schedule, NULL, $seller_station_seq, $DestinationSeq, NULL, $NumberSeat);
+
+            $NumberTicketsExtra = 0;
+            if ($NumberSeat <= $NumberSeatSale) {
+                $NumberTicketsExtra = count($TicketsExtra);
+            }
+
+
+            $Tickets = $this->get_ticket($start_point, $TSID_schedule, NULL, $seller_station_seq);
+
+            $fare = $this->m_fares->get_fares($rcode, $vtid, $seller_station_id, $DestinationID)[0];
+            $i_Fare = array(
+                $fare['PriceDicount'] => $fare['PriceDicount'] . ' (ลด) ',
+                $fare['Price'] => $fare['Price'] . ' (เต็ม) ',
+            );
+
+            $Reports = array();
+
+            if ($NumberSeatSaleBySeller > 0) {
+                $Reports = $this->get_report_by_seller($TSID_schedule, $seller_station_id);
+            }
+
+            $NumberSeatTotal = array(
+                'type' => "text",
+                'name' => "NumberSeatTotal",
+                'id' => "NumberSeatTotal ",
+                'class' => "from-control",
+                'readonly' => "TRUE",
+                'value' => $NumberSeatSale + $NumberSeatBook,
+            );
+
+            $temp = array(
+                'RID' => $schedule['RID'],
+                'RouteName' => $route_name,
+                'StartPoint' => $start_point,
+                'SourceID' => $seller_station_id,
+                'SourceSeq' => $seller_station_seq,
+                'DestinationID' => $DestinationID,
+                'DestinationSeq' => $DestinationSeq,
+                'TSID' => $TSID_schedule,
+                'TimeDepart' => $TimeDepart,
+                'Date' => $Date_schedule,
+                'VID' => $schedule['VID'],
+                'VCode' => $schedule['VCode'],
+                'VTID' => $schedule['VTID'],
+                'Fare' => $i_Fare,
+                'NumberSeat' => $NumberSeat,
+                'NumberSeatBook' => $NumberSeatBook,
+                'NumberSeatSale' => $NumberSeatSale,
+                'NumberTicketsExtra' => $NumberTicketsExtra,
+                'NumberSeatBookBySeller' => $NumberSeatBookBySeller,
+                'NumberSeatSaleBySeller' => $NumberSeatSaleBySeller,
+                'NumberSeatTotal' => form_input($NumberSeatTotal),
+                'TicketsBook' => $ticket_book_seller,
+                'TicketsSale' => array(),
+                'TicketsExtra' => $TicketsExtra,
+                'ScheduleReport' => $Reports,
+                'Tickets' => $Tickets,
+            );
+            if ($TSID != NULL && $TSID == $TSID_schedule) {
+                $schedule_select = $temp;
+            }
+            array_push($schedules_in_route, $temp);
+        }
+        $rs = array(
+            'routes_seller' => $data_routes_seller,
+            'schedules' => $schedules_in_route,
+            'schedule_select' => $schedule_select,
+        );
+        return $rs;
     }
 
     public function get_post_form_booking() {
@@ -383,6 +629,45 @@ class m_sale extends CI_Model {
         }
 
         return $rs;
+    }
+
+    public function get_ticket($StartPoint, $TSID, $StatusSeat = NULL, $SourceSeq = NULL, $DestinationSeq = NULL, $EID = NULL, $Seat = NULL) {
+
+        $this->db->select('TSID,TicketID,Seat,StatusSeat,SourceName,DestinationName,PriceSeat,Seller,t_stations.Seq as DestinationSeq,IsDiscount');
+        $this->db->join('t_stations', 't_stations.SID = ticket_sale.DestinationID', 'left');
+        $this->db->where('TSID', $TSID);
+
+        if ($StatusSeat != NULL) {
+            $this->db->where('StatusSeat', $StatusSeat);
+        }
+        if ($StartPoint == 'S' && $SourceSeq != NULL) {
+            $this->db->where('t_stations.Seq >=', $SourceSeq);
+        }
+        if ($StartPoint == 'D' && $SourceSeq != NULL) {
+            $this->db->where('t_stations.Seq <=', $SourceSeq);
+        }
+        if ($EID != NULL) {
+            $this->db->where('Seller', $EID);
+        }
+
+        if ($Seat != NULL) {
+            $this->db->where('Seat >', $Seat);
+        }
+
+        $query = $this->db->get('ticket_sale');
+
+        return $query->result_array();
+    }
+
+    public function get_report_by_seller($TSID, $SourceID) {
+        $this->db->select('SourceID,SourceName,DestinationID,DestinationName,PriceSeat,COUNT(TicketID) as NumberTicket,SUM(PriceSeat) as Total');
+        $this->db->where('SourceID', $SourceID);
+        $this->db->where('TSID', $TSID);
+        $this->db->where('StatusSeat', 1);
+        $this->db->where('Seller', $this->m_user->get_user_id());
+        $this->db->group_by('SourceID,DestinationID');
+        $query = $this->db->get('ticket_sale');
+        return $query->result_array();
     }
 
     public function validate_form_sale() {

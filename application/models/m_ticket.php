@@ -23,8 +23,14 @@ class m_ticket extends CI_Model {
         return $query->result_array();
     }
 
-    public function get_ticket_by_seller() {
-        
+    public function get_ticket_report_by_seller($TSID, $SourceID) {
+        $this->db->select('SourceID,SourceName,DestinationID,DestinationName,PriceSeat,COUNT(TicketID) as NumberTicket,SUM(PriceSeat) as Total');
+        $this->db->where('SourceID', $SourceID);
+        $this->db->where('TSID', $TSID);
+        $this->db->where('Seller', $this->m_user->get_user_id());
+        $this->db->group_by('SourceID,DestinationID');
+        $query = $this->db->get('ticket_sale');
+        return $query->result_array();
     }
 
     public function get_ticket_by_station($sid, $tsid = NULL) {
@@ -120,10 +126,19 @@ class m_ticket extends CI_Model {
         return $ticket_id;
     }
 
-    public function get_TicketID($tsid, $seat) {
+    public function get_TicketID($tsid, $seat, $SourceID = NULL, $Seller = NULL) {
         $ticket_id = NULL;
         $this->db->where('TSID', $tsid);
         $this->db->where('Seat', $seat);
+
+        if ($SourceID != NULL) {
+            $this->db->where('SourceID', $SourceID);
+        }
+
+        if ($Seller != NULL) {
+            $this->db->where('Seller', $Seller);
+        }
+
         $query = $this->db->get('ticket_sale');
 
         if ($query->num_rows() > 0) {
@@ -141,7 +156,15 @@ class m_ticket extends CI_Model {
      */
 
     public function resever_ticket($data) {
-        $TicketID = $this->insert_ticket($data, 2);
+        $TSID = $data['TSID'];
+        $SourceID = $data['SourceID'];
+        $Seat = $data['Seat'];
+        $Seller = $data['Seller'];
+        if ($this->get_TicketID($TSID, $Seat, $SourceID, $Seller) == NULL) {
+            $TicketID = $this->insert_ticket($data, 2);
+        } else {
+            $TicketID = NULL;
+        }
         return $TicketID;
     }
 
@@ -210,10 +233,13 @@ class m_ticket extends CI_Model {
         return $this->get_TicketID($tsid, $seat);
     }
 
-    public function delete_ticket($tsid, $seat) {
+    public function delete_ticket($tsid, $seat, $SourceID = NULL) {
         $EID = $this->session->userdata('EID');
         $this->db->where('TSID', $tsid);
         $this->db->where('Seat', $seat);
+        if ($SourceID != NULL) {
+            $this->db->where('SourceID', $SourceID);
+        }
         $this->db->where('Seller', $EID);
         $this->db->delete('ticket_sale');
 
@@ -245,7 +271,7 @@ class m_ticket extends CI_Model {
         $today = $this->m_datetime->getDateToday();
         $tickets_reseve = $this->get_ticket($today, $tsid, 2);
         foreach ($tickets_reseve as $ticket) {
-            $ticket_id = $ticket['TicketID'];            
+            $ticket_id = $ticket['TicketID'];
             $now = $this->m_datetime->getDateTimeNow();
             $date_time_sale = $ticket['CreateDate'];
             $diff = strtotime($now) - strtotime($date_time_sale);

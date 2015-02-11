@@ -2,7 +2,7 @@
 <html lang="en">
     <head>
         <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">        
         <meta name="viewport" content="width=device-width, initial-scale=1">        
         <meta name="description"
               content="ระบบขายตั๋วโดยสาร">
@@ -33,6 +33,7 @@
 
 
         <script type="text/javascript">
+
             $(window).scroll(function () {
                 if ($(this).scrollTop() > 50) { //use `this`, not `document`
                     $('#top-nav').fadeOut();
@@ -48,6 +49,9 @@
                 }
             });
             jQuery(window).load(function () {
+//                setInterval(function () {                    
+//                    window.location.reload();
+//                }, 30000/2);
                 $('#alert').delay(3000).fadeOut();
             });
         </script>
@@ -83,7 +87,9 @@
             }
         </style>
     </head>
-    <body>        
+    <body>
+        <?php
+        ?>
         <?php
         if (isset($debug) && $debug != NULL) {
             echo '<div class="container hidden-print" style="margin-top: 60px;">';

@@ -112,11 +112,13 @@ class sale extends CI_Controller {
         $tickets = $this->m_ticket->get_ticket_by_station($seller_station_id, $schedules_id);
         $tickets_today = $this->m_ticket->get_ticket_by_station($seller_station_id);
 
+        $set_data = $this->m_sale->set_form_booking($rid, $s_station, $d_station,$schedules_id);
+
         $data = array(
-            'form' => $this->m_sale->set_form_booking($route, $s_station, $d_station, $schedule, $fare),
+            'form' => $set_data['form'],
             'date' => $this->m_datetime->getDateThaiString($date),
             'route' => $route,
-            'routes_seller' => $this->m_route->get_route_by_seller(),
+            'routes_seller_' => $this->m_route->get_route_by_seller(),
             'routes_detail' => $this->m_route->get_route_detail_by_seller(),
             'stations' => $stations,
             's_station' => $s_station,
@@ -128,6 +130,9 @@ class sale extends CI_Controller {
             'tickets_by_seller' => $tickets_by_seller,
             'tickets' => $tickets,
             'tickets_today' => $tickets_today,
+            'routes_seller' => $set_data['routes_seller'],
+            'schedules' => $set_data['schedules'],
+            'schedule_select'=>$set_data['schedule_select'],
         );
         $data['vehicles_types'] = $this->m_route->get_vehicle_types();
 
@@ -149,6 +154,11 @@ class sale extends CI_Controller {
 //            'tickets' => $data['tickets'],
 //            'tickets_today' => $data['tickets_today'],
 //            'paramiter' => "$date, $rcode, $vtid, $rid, $schedules_id",
+//            'routes_seller' => $data['routes_seller'],
+//            'schedule_select' => $data['schedule_select'],
+//                        'TicketsSaleData' => $data['schedule_select']['TicketsSaleData'],
+//            'schedules' => $data['schedules'],            
+//            'test_time_depart'=>$this->m_schedule->get_time_depart($schedule['Date'], $rid, $schedules_id, $seller_station_id)[0]['TimeDepart'],
         );
 
         if ($this->m_sale->validate_form_sale() && $this->form_validation->run() == TRUE) {
@@ -252,25 +262,21 @@ class sale extends CI_Controller {
         );
         $ticket_id = $this->m_ticket->resever_ticket($ticket_data);
         if ($ticket_id != NULL || $ticket_id != '') {
-            $rs = true;
+            echo json_encode('1');
         } else {
-            $rs = FALSE;
-        }
-
-        echo json_encode($ticket_id);
+           echo json_encode('0');
+        }        
     }
 
     public function cancle_seat() {
         $tsid = $this->input->post('TSID');
-        $seat = $this->input->post("Seat");
-        $vcode = $this->input->post("VCode");
-        $source_id = $this->input->post("SourceID");
-        $destination_id = $this->input->post("DestinationID");
-        $rs = $this->m_ticket->delete_ticket($tsid, $seat);
+        $seat = $this->input->post("Seat");        
+        $source_id = $this->input->post("SourceID");        
+        $rs = $this->m_ticket->delete_ticket($tsid, $seat,$source_id);
         if ($rs) {
-            echo json_encode('true');
+            echo json_encode('1');
         } else {
-            echo json_encode('false');
+            echo json_encode('0');
         }
     }
 
@@ -278,6 +284,17 @@ class sale extends CI_Controller {
         $ticket_id = $this->input->post('TicketID');
         $rs = $this->m_ticket->sale_ticket($ticket_id);
 
+        if ($rs) {
+            echo json_encode('true');
+        } else {
+            echo json_encode('false');
+        }
+    }
+    
+    public function check_seat_plan(){
+        
+        $rs = FALSE;
+        
         if ($rs) {
             echo json_encode('true');
         } else {

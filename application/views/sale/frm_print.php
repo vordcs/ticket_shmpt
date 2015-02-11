@@ -10,7 +10,7 @@
         window.print();
     }
     function print_sucess() {
-        var url = '<?= base_url() . "sale/booking/$rid/$source_id/$destination_id/$tsid" ?>'
+        var url = '<?= base_url() . "sale/booking/$rid/$source_id/$destination_id/$tsid" ?>';
         $('.ticket-print').each(function () {
             var ticket_id = $(this).attr('id');
             ticket_sale(ticket_id);
@@ -147,15 +147,15 @@
     }
 
 </style>
-<div class="container" style="padding-bottom: 10%;">
-    <div class="row"></div>
+<div class="container" style="padding-bottom: 10%;">   
     <div class="row">
         <?php
         $i = 1;
         foreach ($data as $ticket) {
             ?> 
-        <div class="col-md-3 ticket-print well " id="<?=$ticket['TicketID']?>">
-                <div class="page-break<?= ($i == 1) ? "-no" : "" ?>">&nbsp;</div>  
+            <div class="page-break<?= ($i == 1) ? "-no" : "" ?>">&nbsp;</div> 
+            <?php $i++; ?>
+            <div class="col-md-3 ticket-print well " id="<?= $ticket['TicketID'] ?>">
                 <table width="500px" border="0" align="center" cellpadding="0" cellspacing="0"> 
                     <thead>
                         <tr class="hidden-print">
@@ -164,7 +164,7 @@
                         </tr>
                         <tr>
                             <th colspan="2">
-                                <img src="<?= base_url() . "/assets/img/ticket_logo.png" ?>" class="" width="70%" height="80px" alt="">                                 
+                                <img src="<?= base_url() . "/assets/img/ticket_logo.png" ?>" class="" width="70%" height="50px" alt="">                                 
                             </th>
                         </tr>
                         <tr>
@@ -283,7 +283,7 @@
                 </table>  
             </div>
             <?php
-            $i++;
+            
         }
         ?>
     </div>  

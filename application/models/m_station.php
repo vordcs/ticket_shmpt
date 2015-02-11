@@ -18,7 +18,7 @@ class m_station extends CI_Model {
         if ($seq != NULL) {
             $this->db->where('Seq', $seq);
         }
-        $this->db->order_by('Seq','asc');
+        $this->db->order_by('Seq', 'asc');
         $query = $this->db->get('t_stations');
 
         $rs = $query->result_array();
@@ -68,20 +68,27 @@ class m_station extends CI_Model {
         return $rs;
     }
 
-    public function get_stations_by_start_point($start_point, $rcode = null, $vtid = null) {
+    public function get_stations_by_start_point($start_point, $rcode = null, $vtid = null, $seq = NULL) {
         if ($rcode != NULL) {
             $this->db->where('RCode', $rcode);
         }
         if ($vtid != NULL) {
             $this->db->where('VTID', $vtid);
         }
+        if ($seq != NULL && $start_point == 'S') {
+            $this->db->where('Seq >', $seq);
+        }
+        if ($seq != NULL && $start_point == 'D') {
+            $this->db->where('Seq <', $seq);            
+        }
+
         if ($start_point == 'S') {
             $this->db->order_by('Seq', 'asc');
         }
         if ($start_point == 'D') {
             $this->db->order_by('Seq', 'desc');
         }
-        
+
         $query = $this->db->get('t_stations');
         $rs = $query->result_array();
 

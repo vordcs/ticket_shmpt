@@ -836,7 +836,7 @@ class m_cost extends CI_Model {
          * รายได้จากการขายตั๋ว
          */
         $income += $this->m_ticket->sum_ticket_price($date, $seller_station_id, $TSID)['Total'];
-        $tickets = $this->m_ticket->get_ticket_by_saller($date, $rid, $TSID, $seller_station_id);
+        $tickets = $this->m_ticket->get_ticket_by_seller($date,$TSID, $seller_station_id);
 
 
         /*
