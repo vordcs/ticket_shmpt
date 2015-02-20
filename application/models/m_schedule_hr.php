@@ -256,12 +256,15 @@ class m_schedule_hr extends CI_Model {
 
         $time = 10 * 60; //10 minutes
         $time_start = ceil((time() + $time) / 300) * 300;
+        $time_end = '23:50';
+        $temp_time = date('H:i', strtotime("+0 minutes", $time_start));
         $temp = 0;
         $i_TimeDepart[0] = "เลือกเวลา";
-        for ($n = 1; $n < 30; $n++) {
+        while($temp_time<$time_end){
             $t = date('H:i', strtotime("+$temp minutes", $time_start));
             $i_TimeDepart[$t] = $t;
             $temp +=5;
+            $temp_time = $t;
         }
         $dropdown = 'class="selecter_3" data-selecter-options = \'{"cover":"true"}\' ';
         $form_search_add = array(
