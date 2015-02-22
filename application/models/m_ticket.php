@@ -60,7 +60,7 @@ class m_ticket extends CI_Model {
         return $query->result_array();
     }
 
-    public function get_ticket_by_saller($date = NULL, $tsid = NULL, $SourceID = NULL, $StatusSeat = NULL) {
+    public function get_ticket_by_seller($date = NULL, $tsid = NULL, $SourceID = NULL, $StatusSeat = NULL) {
         $this->check_ticket();
         $eid = $this->session->userdata('EID');
 

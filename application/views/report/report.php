@@ -129,8 +129,67 @@
                                                 'data-placement' => "top",
                                                 'title' => "ส่งรายงาน $route_name",
                                             );
-                                            echo anchor("report/send/$rcode/$vtid/$seller_station_id", '<i class="fa fa-send-o"></i>&nbsp;&nbsp;ส่งรายงาน', $send_report);
+                                            echo anchor("report/send/$rcode/$vtid/$seller_station_id", '<i class="fa fa-send-o"></i>&nbsp;&nbsp;ส่งเงิน', $send_report);
                                             ?>                                      
+                                        </div>
+                                        <div class="col-md-10 col-md-offset-1 <?= (count($route['Reports']) > 0) ? '' : 'hidden' ?>" style="padding-top: 3% ; padding-bottom: 3%;">
+                                            <?php if (count($route['Reports']) > 0) { ?>
+                                                <table class="table table-hover table-condensed">
+                                                    <thead>
+                                                        <tr>
+                                                            <th style="width: 15%">เวลาที่ส่ง</th>
+                                                            <th style="width: 15%">จำนวนเงิน</th>
+                                                            <th style="width: 15%">เบี้ยเลี้ยง</th>
+                                                            <th style="width: 20%">ยอดคงเหลือ</th>
+                                                            <th style="width: 15%">สถานะ</th>
+                                                            <th style="width: 15%"></th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <?php
+                                                        $total = 0;
+                                                        $total_vage = 0;
+                                                        $total_net = 0;
+                                                        foreach ($route['Reports'] as $report) {
+                                                            $ReportID = $report['ReportID'];
+                                                            $ReportTime = date('H:s', strtotime($report['ReportTime']));
+                                                            $Total = $report['Total'];
+                                                            $Vage = $report['Vage'];
+                                                            $Net = $report['Net'];
+                                                            $print_report = array(
+                                                                'class' => "btn",
+                                                                'type' => "button",
+                                                                'data-toggle' => "tooltip",
+                                                                'data-placement' => "top",
+                                                                'title' => "พิมพ์",
+                                                            );
+
+                                                            $total+=$Total;
+                                                            $total_vage+=$Vage;
+                                                            $total_net+=$Net;
+                                                            ?>
+                                                            <tr>
+                                                                <td class="text-center"><?= $ReportTime ?></td>
+                                                                <td class="text-center"><?= number_format($Total) ?></td>
+                                                                <td class="text-center"><?= number_format($Vage) ?></td>
+                                                                <td class="text-center"> <strong><?= number_format($Net) ?></strong></td>
+                                                                <td class="text-center"><i class="fa fa-check fa-lg" style="color: #37BC9B" data-toggle="tooltip" data-placement="left" title="ส่งเเล้ว"></</td>
+                                                                <td class="text-center">
+                                                                    <?= anchor("report/print_report/$ReportID/$rcode/$vtid/$seller_station_id", '<i class="fa fa-print fa-lg"></i> พิมพ์รายงาน', $print_report) ?>
+                                                                </td>
+                                                            </tr>
+                                                        <?php } ?>
+                                                    </tbody>
+                                                    <tfoot>
+                                                        <tr>
+                                                            <td class=" text text-center">รวม</td>
+                                                            <td class="text-right"><strong><?= number_format($total) ?></strong></td>
+                                                            <td class="text-right"><strong><?= number_format($total_vage) ?></strong></td>
+                                                            <td class="text-right"><h5><?= number_format($total_net) ?></h5></td>
+                                                        </tr>
+                                                    </tfoot>
+                                                </table>
+                                            <?php } ?>
                                         </div>
                                         <?php
                                         $num_route_detail = count($route['routes_detail']);

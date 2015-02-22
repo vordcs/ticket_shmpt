@@ -18,6 +18,18 @@ class m_user extends CI_Model {
         return $rs[0]['FirstName'];
     }
 
+    public function get_user_full_name() {
+        $eid = $this->session->userdata('EID');
+        $this->db->where('EID', $eid);
+        $query = $this->db->get_where('employees');
+        $rs = $query->result_array();
+
+
+        $full_name = $rs[0]['FirstName'].'  '.$rs[0]['LastName'];
+
+        return $full_name;
+    }
+
     public function get_saller_station($rcode = NULL, $vtid = NULL, $rid = NULL) {
 //        $this->db->select('*');
         $this->db->join('t_routes', 'sellers.RCode = t_routes.RCode AND sellers.VTID = t_routes.VTID');

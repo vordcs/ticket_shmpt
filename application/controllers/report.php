@@ -125,7 +125,7 @@ class report extends CI_Controller {
         $route_name = "$vt_name เส้นทาง $rcode $source - $detination";
 
         $form_data = '';
-        $rs = '';
+        $ReportID = '';
 
         if ($this->m_report->validation_form_add() && $this->form_validation->run() == TRUE) {
             $form_data = $this->m_report->get_post_form_send();
@@ -134,8 +134,8 @@ class report extends CI_Controller {
             $form_data['report']['Vage'] = str_replace(",", "", $form_data['report']['Vage']);
             $form_data['report']['Net'] = str_replace(",", "", $form_data['report']['Net']);
 
-            $rs = $this->m_report->insert_report($form_data);
-            if ($form_data != FALSE) {
+            $ReportID = $this->m_report->insert_report($form_data);
+            if ($form_data != FALSE && $ReportID != NULL) {
                 $alert['alert_message'] = "ส่งรายงาน $route_name วันที่ $date_th";
                 $alert['alert_mode'] = "success";
                 $this->session->set_flashdata('alert', $alert);
@@ -146,7 +146,8 @@ class report extends CI_Controller {
             }
             $this->session->set_flashdata('RCode', $rcode);
             $this->session->set_flashdata('VTID', $vtid);
-            redirect("report");
+
+            redirect("report/print_report/$ReportID/$rcode/$vtid/$sid");
         } else {
             $form_data = 'false';
         }
@@ -183,8 +184,45 @@ class report extends CI_Controller {
 //            'data' => $data['data'],
         );
         $this->m_template->set_Debug($data_debug);
-        $this->m_template->set_Title('ส่งรายงาน');
+        $this->m_template->set_Title('ส่งเงิน');
         $this->m_template->set_Content('report/frm_report', $data);
+        $this->m_template->showTemplate();
+    }
+
+    public function print_report($ReportID, $RCode = NULL, $VTID = NULL, $SID = NULL) {
+
+        if ($RCode == NULL || $VTID == NULL || $SID == NULL) {
+            redirect('report');
+        }
+        
+        
+
+        $routes = $this->m_route->get_route_by_seller($RCode, $VTID);
+        $rcode = $routes[0]['RCode'];
+        $vt_name = $routes[0]['VTDescription'];
+        $source = $routes[0]['RSource'];
+        $detination = $routes[0]['RDestination'];
+        $route_name = " $vt_name  $rcode $source - $detination";
+
+        $this->session->set_flashdata('RCode', $RCode);
+        $this->session->set_flashdata('VTID', $VTID);
+
+        $reports = $this->m_report->set_form_print($ReportID, $RCode, $VTID, $SID);
+
+        $data = array(
+            'page_title' => 'พิมพ์รายงาน',
+            'page_title_small' => " : $route_name ",
+            'previous_page' => "",
+            'next_page' => "",
+            'reports' => $reports,
+        );
+        $data_debug = array(
+//            'reports' => $reports,
+        );
+
+        $this->m_template->set_Debug($data_debug);
+        $this->m_template->set_Title('พิมพ์ใบส่งเงิน');
+        $this->m_template->set_Content('report/frm_report_print', $data);
         $this->m_template->showTemplate();
     }
 
