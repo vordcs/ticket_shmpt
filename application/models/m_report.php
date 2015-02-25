@@ -41,12 +41,12 @@ class m_report extends CI_Model {
 
         return $query->result_array();
     }
-   
-    public function check_report($EID, $TSID = NULL, $SID = NULL) {
+
+    public function check_report($EID = NULL, $TSID = NULL, $SID = NULL) {
         $this->db->select('*,report_day.CreateBy as CreateBy');
         $this->db->join('t_schedules_day_has_report', 'report_day.ReportID = t_schedules_day_has_report.ReportID', 'left');
-        if ($EID != NULL) {
-            $this->db->where('report_day.CreateBy', $EID);
+        if ($EID == NULL) {
+           $EID = $this->m_user->get_user_id();
         }
         if ($TSID != NULL) {
             $this->db->where('t_schedules_day_has_report.TSID', $TSID);
@@ -58,8 +58,7 @@ class m_report extends CI_Model {
         $query = $this->db->get('report_day');
 
         if ($query->num_rows() > 0) {
-            $rs = $query->row_array()['ReportID'];
-            ;
+            $rs = $query->row_array()['ReportID'];            
         } else {
             $rs = NULL;
         }

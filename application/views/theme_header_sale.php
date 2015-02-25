@@ -19,19 +19,34 @@
         <?php echo css('bootflat.min.css?v=' . $version); ?>
         <?php echo css('theme.css?v=' . $version); ?>
         <?php echo css('animate.css?v=' . $version); ?>
-        <?php echo css('font-awesome.css?v=' . $version); ?>
-        <?php echo css('customCSS.css?v=' . $version); ?>
+        <?php echo css('font-awesome.css?v=' . $version); ?>        
         <?php echo js('jquery.js?v=' . $version); ?>
         <?php echo js('bootstrap.js?v=' . $version); ?>
 
         <?php echo js('customJS.js?v=' . $version); ?>
+        <?php echo js('jquery.fs.selecter.min.js?v=' . $version); ?>
 
+        <?php echo css('sale/jquery.fs.selecter.min.css?v=' . $version); ?>
         <?php echo css('sale/style_sale.css?v=' . $version); ?>
 
         <?php echo css('sale/navmenu-push.css?v=' . $version); ?>
         <?php echo css('sale/jasny-bootstrap.min.css?v=' . $version); ?>
 
+        <style>
+            body{
+                padding-top: 1%;
+            }            
+            table tbody tr td{               
+                color: #333333;
+            }
+           
+            .selecter.custom { max-width: 600px; margin: 0 0 auto;padding: 0 0 auto}
+            .selecter.custom .selecter-selected { border-width: 1px; }
+            .selecter.custom .selecter-options { border-width: 0 2px 2px; padding: 1%; }
+            .selecter.custom .selecter-item { border-radius: 3px !important; border: none; margin: 0 0 auto; }
+            .selecter.custom .selecter-item:last-child { margin: 0; }
 
+        </style>
         <script type="text/javascript">
 
             $(window).scroll(function () {
@@ -53,39 +68,12 @@
 //                    window.location.reload();
 //                }, 30000/2);
                 $('#alert').delay(3000).fadeOut();
+                $("select").selecter({
+                    customClass: "custom"
+                });
             });
-        </script>
-        <style>
-            body{
-                padding-top: 1%;
-            }
-            .message-box{
-                position: fixed;
-                bottom: 0;
-                left: 0;        
-                opacity: 0.7;
-                width: 30%;        
-                vertical-align: middle; 
-                margin-right:20%;
-                z-index: 50px;
 
-                -webkit-transition: all .2s ease-in-out;
-                -moz-transition: all .2s ease-in-out;
-                -o-transition: all .2s ease-in-out;
-                -ms-transition: all .2s ease-in-out;
-            }
-            .message-box:hover {
-                opacity: 1.0; 
-
-                -webkit-transform: scale(1);
-                -moz-transform: scale(1);
-                -o-transform: scale(1);
-                transform: scale(1);
-            } 
-            table tbody tr td{               
-                color: #333333;
-            }
-        </style>
+        </script>     
     </head>
     <body>
         <?php

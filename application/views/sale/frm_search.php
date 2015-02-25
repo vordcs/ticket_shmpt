@@ -20,10 +20,55 @@
 <div id="" class="container"> 
     <div class="row">      
         <div class="col-lg-8 col-lg-offset-2 well">
-            <div class="col-lg-12 text-center">
+            <div class="col-md-12 text-center">
                 <h3 class="fs-title">เลือกเส้นทาง</h3>
                 <p class="fs-subtitle"></p>                    
             </div> 
+            <div class="col-md-12 hidden">
+                <div class="panel-group" id="accordionRoutes" role="tablist" aria-multiselectable="true">
+                    <?php
+                    foreach ($data as $route) {
+                        $RCode = $route['RCode'];
+                        $VTID = $route['VTID'];
+                        $route_name = $route['RouteName'];
+                        $id = $RCode . '-' . $VTID;
+
+                        $seller_station_id = $route['SID'];
+                        $seller_station_name = $route['StationName'];
+                        $seller_station_seq = $route['Seq'];
+                        ?>
+                        <div class="panel panel-default">
+                            <div class="panel-heading" role="tab" id="heading<?= $id ?>">
+                                <h4 class="panel-title" style="padding-left: 3%;">
+                                    <a data-toggle="collapse" data-parent="#accordionRoutes" href="#collapse<?= $id ?>" aria-expanded="true" aria-controls="collapse<?= $id ?>">
+                                        <?= $route_name ?>
+                                    </a>
+                                </h4>
+                            </div>
+                            <div id="collapse<?= $id ?>" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading<?= $id ?>">
+                                <div class="panel-body">
+                                    <p class="lead text-center">จุดขึ้นรถ&nbsp;:&nbsp;<strong><?= $seller_station_name ?></strong></p>
+                                    <?php
+                                    foreach ($route['route_details'] as $rd) {
+                                        $RID = $rd['RID'];
+                                        $DestinationName = $rd['DestinationName'];
+                                        ?>
+                                        <div class="col-md-6 <?= (count($route['route_details']) == 1) ? 'col-md-offset-3' : '' ?>">
+                                            <button type="button" class="btn btn-default btn-block"></button>
+                                            <?php
+                                            $go_to_booking = array(
+                                                'class' => "btn btn-default btn-block",
+                                            );
+                                            echo anchor("sale/booking/$RID/$seller_station_id", "ไป&nbsp;$DestinationName", $go_to_booking);
+                                            ?>
+                                        </div>
+                                    <?php } ?>
+                                </div>
+                            </div>
+                        </div>  
+                    <?php } ?>
+                </div>               
+            </div>
             <div class="col-lg-12">
                 <div class="panel-group" id="accordionRoute" role="tablist" aria-multiselectable="true">
                     <?php

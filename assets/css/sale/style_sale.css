@@ -8,12 +8,170 @@ and open the template in the editor.
     Author     : vord
 */
 
+html {
+    height: 100% ! important;
+}
+
+body {
+    min-height: 100% ! important;
+}
+/* Custom page CSS */
+
+table{
+    width: 100%;
+}
+th{
+    text-align: center;
+    vertical-align: middle ! important;
+}
+tr th{
+    text-align: center;
+    vertical-align: middle ! important;
+}
+td{
+    vertical-align: middle ! important;
+}
+table tbody tr td{               
+    color: #333333;
+}
+
+.container-fluid .row .page-header{
+    padding-left: 30px;
+}
+/* Progress Step  */
+ol.progtrckr {
+    margin: 0;
+    padding: 0;
+    list-style-type : none;
+}
+
+ol.progtrckr li {
+    display: inline-block;
+    text-align: center;
+    line-height: 3em;
+}
+ol.progtrckr[data-progtrckr-steps="2"] li { width: 49%; }
+ol.progtrckr[data-progtrckr-steps="3"] li { width: 33%; }
+ol.progtrckr[data-progtrckr-steps="4"] li { width: 24%; }
+ol.progtrckr[data-progtrckr-steps="5"] li { width: 19%; }
+ol.progtrckr[data-progtrckr-steps="6"] li { width: 16%; }
+ol.progtrckr[data-progtrckr-steps="7"] li { width: 14%; }
+ol.progtrckr[data-progtrckr-steps="8"] li { width: 12%; }
+ol.progtrckr[data-progtrckr-steps="9"] li { width: 11%; }
+
+ol.progtrckr li.progtrckr-done {
+    color: black;
+    border-bottom: 4px solid yellowgreen;
+}
+ol.progtrckr li.progtrckr-todo {
+    color: silver; 
+    border-bottom: 4px solid silver;
+}
+
+ol.progtrckr li:after {
+    content: "\00a0\00a0";
+}
+ol.progtrckr li:before {
+    position: relative;
+    bottom: -2.5em;
+    float: left;
+    left: 50%;
+    line-height: 1em;
+}
+ol.progtrckr li.progtrckr-done:before {
+    content: "\2713";
+    color: white;
+    background-color: yellowgreen;
+    height: 1.2em;
+    width: 1.2em;
+    line-height: 1.2em;
+    border: none;
+    border-radius: 1.2em;
+}
+ol.progtrckr li.progtrckr-todo:before {
+    content: "\039F";
+    color: silver;
+    background-color: white;
+    font-size: 1.5em;
+    bottom: -1.6em;
+}
+
+#list {      
+    width: 100%;
+    max-height: 450px;
+    overflow-y: scroll;
+    /*margin-top: 2%;*/
+}
+
+.time-checkin{
+    display:inline; 
+    font-size:1.4em; 
+    text-align:center; 
+    font-family:'BebasNeueRegular', Arial, Helvetica, sans-serif; 
+    text-shadow:0 0 5px #cccccc;
+}
+
+/*------------------------------------------------------------------
+clock
+*/
+
+
+
+.clock {
+    width:80%; 
+    /*margin: 2% auto;*/  
+    /*padding: 3% auto;*/
+    /*border:1px solid #333;*/ 
+    color:#333333; 
+
+}
+#Date { 
+    font-family:'BebasNeueRegular', Arial, Helvetica, sans-serif; 
+    font-size:0.9em; 
+    text-align:center; 
+    text-shadow:0 0 5px #cccccc;
+
+}
+.clock ul {
+    /*width:100%;*/ 
+    margin:0 auto; 
+    padding:0px; 
+    list-style:none; 
+    text-align:center; 
+}
+.clock ul li { 
+    display:inline; 
+    font-size:1.4em; 
+    text-align:center; 
+    font-family:'BebasNeueRegular', Arial, Helvetica, sans-serif; 
+    text-shadow:0 0 5px #cccccc;
+
+}
+
+#point { 
+    position:relative; 
+    -moz-animation:mymove 1s ease infinite; 
+    -webkit-animation:mymove 1s ease infinite; 
+    padding-left:10px; padding-right:10px;
+}
+
+@-webkit-keyframes mymove 
+{
+    0% {opacity:1.0; text-shadow:0 0 20px #cccccc;}
+    50% {opacity:0; text-shadow:none; }
+    100% {opacity:1.0; text-shadow:0 0 20px #cccccc; }	
+}
+@-moz-keyframes mymove 
+{
+    0% {opacity:1.0; text-shadow:0 0 20px #00c6ff;}
+    50% {opacity:0; text-shadow:none; }
+    100% {opacity:1.0; text-shadow:0 0 20px #00c6ff; }	
+}
+
 
 /*------------------------------------------------------------------
 [6. Widget / .widget]
 */
-
-
 
 .widget {
 

@@ -27,7 +27,11 @@ class checkin extends CI_Controller {
 
         $date = $this->m_datetime->getDateToday();
         $date_th = $this->m_datetime->DateThaiToDay();
-        $schedules = $this->m_checkin->get_schedule($date);
+        $schedules = $this->m_schedule->get_schedule($date);
+
+        if (count($schedules) <= 0) {
+            redirect("checkin/");
+        }
 
         if (count($schedules) <= 0) {
             $alert['alert_message'] = "ไม่พบข้มูลรอบเวลา วันที่ $date_th";
@@ -36,43 +40,17 @@ class checkin extends CI_Controller {
 
             redirect('home/');
         }
-
+        $data_form_checkin = $this->m_checkin->set_form_check_in();
         $data = array(
             'page_title' => 'ลงเวลา : ',
             'page_title_small' => '',
             'previous_page' => '',
             'next_page' => '',
+            'data' => $data_form_checkin,
         );
-     
-        $vehicle_types = $this->m_route->get_vehicle_types();
-        $routes = $this->m_route->get_route_by_seller();
-        $routes_detail = $this->m_route->get_route_detail_by_seller();        
-        $stations = $this->m_station->get_stations();
-        $stations_sale_ticket = $this->m_station->get_station_sale_ticket();
-
-
-        if (count($schedules) <= 0) {
-            redirect("checkin/");
-        }
-
-        $data['vehicle_types'] = $vehicle_types;
-        $data['routes'] = $routes;
-        $data['routes_detail'] = $routes_detail;
-        $data['schedules'] = $schedules;
-        $data['stations'] = $stations;
-        $data['stations_sale_ticket'] = $stations_sale_ticket;
 
         $data_debug = array(
-//            'from_search' => $data['from_search'],           
-//            'cost_types' => $data['cost_types'],
-//            'costs' => $data['costs'],
-//            'costs_detail' => $data['costs_detail'],
-//            'routes' => $data['routes'],
-//            'routes_detail' => $data['routes_detail'],
-//            'schedules' => $data['schedules'],
-//            'stations'=>$data['stations'], 
-//            'station_sale_ticket' => $data['station_sale_ticket'],
-                //    ''=>$data[''],           
+//            'data' => $data['data'],
         );
 
         $this->m_template->set_Debug($data_debug);
@@ -82,18 +60,18 @@ class checkin extends CI_Controller {
         $this->m_template->showTemplate();
     }
 
-    public function add($rid, $tsid, $vid, $sid) {
-        if ($rid == NULL || $tsid == NULL || $vid == NULL || $sid == NULL) {
+    public function add($RCode = NULL, $VTID = NULL, $tsid = NULL, $sid = NULL) {
+        if ($RCode == NULL || $VTID == NULL || $tsid == NULL || $sid == NULL) {
             $alert['alert_message'] = "กรุณาเลือกรอบเวลา";
             $alert['alert_mode'] = "warning";
             $this->session->set_flashdata('alert', $alert);
 
             redirect('checkin/');
         }
+        $data_insert = $this->m_checkin->get_post_form_add($tsid, $sid);
 
-        $data_insert = $this->m_checkin->get_post_form_add($rid, $tsid, $vid, $sid);
+
         $rs = $this->m_checkin->insert_checkin($data_insert);
-
         if ($rs != '' || $rs != NULL) {
             $alert['alert_message'] = "ลงเวลาสำเร็จ";
             $alert['alert_mode'] = "success";
@@ -103,11 +81,15 @@ class checkin extends CI_Controller {
             $alert['alert_mode'] = "danger";
             $this->session->set_flashdata('alert', $alert);
         }
+
+        $this->session->set_flashdata('RCode', $RCode);
+        $this->session->set_flashdata('VTID', $VTID);
+
         redirect('checkin/');
     }
 
-    public function edit($tsid, $sid) {
-        if ($tsid == NULL || $sid == NULL) {
+    public function edit($RCode = NULL, $VTID = NULL, $CheckInID = NULL) {
+        if ($RCode == NULL || $VTID == NULL || $CheckInID == NULL) {
             $alert['alert_message'] = "กรุณาเลือกรอบเวลา";
             $alert['alert_mode'] = "warning";
             $this->session->set_flashdata('alert', $alert);
@@ -115,18 +97,22 @@ class checkin extends CI_Controller {
             redirect('checkin/');
         }
 
-        $data_update = $this->m_checkin->get_post_form_edit($tsid, $sid);
-        $rs = $this->m_checkin->update_checkin($tsid, $sid, $data_update);
+        $data_update = $this->m_checkin->get_post_form_edit();
+        $rs = $this->m_checkin->update_checkin($CheckInID, $data_update);
 
         if ($rs != '' || $rs != NULL) {
             $alert['alert_message'] = "แก้ไข เวลา สำเร็จ";
             $alert['alert_mode'] = "success";
             $this->session->set_flashdata('alert', $alert);
         } else {
-            $alert['alert_message'] = "แก้ไข เวลา สำเร็จ";
+            $alert['alert_message'] = "แก้ไขข้อมูลเวลาออกไม่สำเร็จ";
             $alert['alert_mode'] = "danger";
             $this->session->set_flashdata('alert', $alert);
         }
+        
+        $this->session->set_flashdata('RCode', $RCode);
+        $this->session->set_flashdata('VTID', $VTID);
+        
         redirect('checkin/');
     }
 

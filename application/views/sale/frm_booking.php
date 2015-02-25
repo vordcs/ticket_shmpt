@@ -7,7 +7,7 @@
             $(this).attr("data-progtrckr-steps",
                     $(this).children("li").length);
         });
-        var schedules_id = '<?= $schedules_id ?>';
+        var schedules_id = '<?= $TSID ?>';
         if (schedules_id !== '') {
             var timer;
             $('#select_time').addClass('animated fadeOutLeft');
@@ -28,7 +28,7 @@
         }
 
     });
-    var schedules_id = '<?= $schedules_id ?>';
+    var schedules_id = '<?= $TSID ?>';
     var NumberSeat = '';
     if (schedules_id !== '') {
         NumberSeat = parseInt('<?= $schedule_select['NumberSeat'] + $schedule_select['NumberTicketsExtra'] ?>');
@@ -39,7 +39,7 @@
         var num = $('#tb_ticket_sale tbody tr').length;
         var price = $('#Price').val();
         var price_dis = $('#PriceDicount').val();
-        var fare = '<select id="FareType' + num + '" name="PriceSeat[]" class="form-control" onchange="calTotalFare()" >';
+        var fare = '<select id="FareType" name="PriceSeat[]" class="form-control fare" onchange="calTotalFare()" >';
         fare += '<option value="' + price + '" selected="" >' + price + ' (เต็ม)</option>';
         fare += '<option value="' + price_dis + '">' + price_dis + ' (ลด)</option>';
         fare += '</select>';
@@ -54,10 +54,23 @@
         row += '</button>';
         row += '</td>';
         row += '</tr>';
-        if (document.getElementById(seat_no) === null && booking(seat_no) !== 'false') {
 
-            document.getElementById("user_action").innerHTML = schedules_id + ' กำลังเลือก ' + seat_no;
-            document.getElementById("debug").style.background = 'green';
+        var book = booking(seat_no);
+//        alert(book);
+
+        if (document.getElementById(seat_no) !== null) {
+            document.getElementById("user_action").innerHTML = 'ที่นั่ง ' + seat_no + ' ถูกเลือกเเล้ว';
+            document.getElementById("debug").style.background = '#FFCE54';
+
+        } else if (book === false) {
+            document.getElementById("user_action").innerHTML = 'ที่นั่ง ' + seat_no + ' ไม่ว่าง';
+            document.getElementById("debug").style.background = '#ED5565';
+        }
+
+        if (document.getElementById(seat_no) === null && book) {
+            document.getElementById("user_action").innerHTML = 'เลือกที่นั่ง  ' + seat_no;
+            document.getElementById("debug").style.background = '#37BC9B';
+
             $('#guest_info').removeAttr('class');
             $('#guest_info').addClass('col-lg-12 animated zoomIn');
 
@@ -81,7 +94,7 @@
         var num = $('#tb_ticket_sale tbody tr').length;
         var price = $('#Price').val();
         var price_dis = $('#PriceDicount').val();
-        var fare = '<select id="FareType' + num + '" name="PriceSeat[]" class="form-control" onchange="calTotalFare()" >';
+        var fare = '<select id="FareType' + num + '" name="PriceSeat[]" class="form-control fare" onchange="calTotalFare()" >';
         fare += '<option value="' + price + '" selected="" >' + price + ' (เต็ม)</option>';
         fare += '<option value="' + price_dis + '">' + price_dis + ' (ลด)</option>';
         fare += '</select>';
@@ -96,11 +109,14 @@
         row += '</button>';
         row += '</td>';
         row += '</tr>';
-        if (document.getElementById(seat_no) === null && booking(seat_no) !== 'false') {
-            $('#guest_info').removeAttr('class');
-            $('#guest_info').addClass('col-lg-12 animated');
-            document.getElementById("user_action").innerHTML = 'เพิ่มที่นั่งเสริม -> ' + seat_no;
+        if (document.getElementById(seat_no) === null && booking(seat_no)) {
+
+            document.getElementById("user_action").innerHTML = 'เพิ่มที่นั่งเสริม ' + seat_no;
             document.getElementById("debug").style.background = 'gray';
+
+            $('#guest_info').removeAttr('class');
+            $('#guest_info').addClass('col-lg-12 animated zoomIn');
+
             tb_ticket_body.append(row);
             var seat = '<div id="seat_' + seat_no + '"  class="col-xs-3 seat-extra">';
             seat += '       <div onclick="" ondblclick="removeSeatExtra(\'' + seat_no + '\')" class="seat bg-reserve">';
@@ -117,30 +133,36 @@
             NumberSeat = NumberSeat + 1;
             calTotalFare();
         }
+        return true;
     }
     function removeSeat(seat_no) {
-        document.getElementById("user_action").innerHTML = 'ยกเลิกที่นั่ง ' + seat_no;
-        document.getElementById("debug").style.background = 'red';
-        var row_id = 'row_' + seat_no;
-        var seat_id = $('#seat_' + seat_no);
-        seat_id.removeClass('bg-reserve');
-        seat_id.addClass('bg-blank');
-        cancel(seat_no);
-        var seat_info = $('#seat_info_' + seat_no);
-        var row = document.getElementById(row_id);
-        row.parentNode.removeChild(row);
-        var info = '<span class="badge badge-info" style="font-size: 8pt;">';
-        info += seat_no;
-        info += '</span>';
-        seat_info.html(info);
-        calTotalFare();
+        if (cancel(seat_no)) {
+            document.getElementById("user_action").innerHTML = 'ยกเลิกที่นั่ง -> ' + seat_no;
+            document.getElementById("debug").style.background = '#DA4453';
+            var row_id = 'row_' + seat_no;
+            var seat_id = $('#seat_' + seat_no);
+            seat_id.removeClass('bg-reserve');
+            seat_id.addClass('bg-blank');
+
+            var seat_info = $('#seat_info_' + seat_no);
+            var row = document.getElementById(row_id);
+            row.parentNode.removeChild(row);
+            var info = '<span class="badge badge-info" style="font-size: 8pt;">';
+            info += seat_no;
+            info += '</span>';
+            seat_info.html(info);
+            calTotalFare();
+        }
+
+        return true;
     }
     function removeSeatExtra(seat_no) {
         var no = $('#ticket_guest tr:last').attr('id').toString().split('_');
         seat_no = no[1];
 
+
         document.getElementById("user_action").innerHTML = 'ยกเลิกที่นั่ง ' + seat_no;
-        document.getElementById("debug").style.background = 'red';
+        document.getElementById("debug").style.background = '#F6BB42';
 
         var row_id = 'row_' + seat_no;
         var row = document.getElementById(row_id);
@@ -158,7 +180,7 @@
     }
     function calTotalFare() {
         var total = 0;
-        $('select').each(function () {
+        $('.fare').each(function () {
             var selectedOption = $(this).find('option:selected');
 //            alert('Value: ' + selectedOption.val() + ' Text: ' + selectedOption.text());
             total += parseInt(selectedOption.val());
@@ -166,6 +188,7 @@
         if (total === 0) {
             $('#guest_info').removeAttr('class');
             $('#guest_info').addClass('animated zoomOut');
+
             document.getElementById("user_action").innerHTML = 'เลือกที่นั่ง';
             document.getElementById("debug").style.background = 'white';
         }
@@ -173,10 +196,10 @@
 
         return true;
     }
-    function booking(seat_no) {
 
+    function booking(seat_no) {
 //        alert(seate_no);      
-        var PriceSeat = parseInt($('#Price').val());
+
         var seat_info = {
             'TSID': schedules_id,
             'Seat': seat_no,
@@ -185,30 +208,22 @@
             'SourceName': document.getElementById("SourceName").value,
             'DestinationID': document.getElementById("DestinationID").value,
             'DestinationName': document.getElementById("DestinationName").value,
-            'PriceSeat': PriceSeat
+            'PriceSeat': parseInt($('#Price').val())
         };
-        $.ajax({
+
+        var result = $.ajax({
             url: '<?= base_url() . "sale/booking_seat" ?>',
             type: 'POST',
             ContentType: 'application/json',
             data: seat_info,
-            success: function (json) {
-                try {
-                    var obj = jQuery.parseJSON(json)
-                    if (parseInt(obj) === 1) {
-                        return true;
-                    } else {
-                        return false;
-                    }
+            async: false
+        }).responseText;
 
-                } catch (e) {
-                    return false;
-                }
-            },
-            error: function () {
-                return false;
-            }
-        });
+        if (parseInt(result) === 1) {
+            return true;
+        } else {
+            return false;
+        }
 
     }
     function cancel(seat_no) {
@@ -220,28 +235,18 @@
             'SourceID': document.getElementById("SourceID").value,
             'DestinationID': document.getElementById("DestinationID").value
         };
-        $.ajax({
+        var result = $.ajax({
             url: '<?= base_url() . "sale/cancle_seat" ?>',
             type: 'POST',
             ContentType: 'application/json',
             data: seat_info,
-            success: function (json) {
-                try {
-                    var obj = jQuery.parseJSON(json)
-                    if (parseInt(obj) === 1) {
-                        return true;
-                    } else {
-                        return false;
-                    }
-
-                } catch (e) {
-                    return false;
-                }
-            },
-            error: function () {
-                return false;
-            }
-        });
+            async: false
+        }).responseText;
+        if (parseInt(result) === 1) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     function check_chang() {
@@ -265,6 +270,15 @@
                 return false;
             }
         });
+    }
+
+    function change_destination() {
+        var destination = document.getElementById("StationDestination");
+        var SourceID = document.getElementById("SourceID").value;
+        var DestinationID = destination.value;
+        var RID = document.getElementById("RID").value; 
+        window.location.href = '<?= base_url() ?>' + 'sale/booking/' + RID + '/' + SourceID + '/' + DestinationID + '/' + schedules_id;
+
     }
 
 
@@ -378,14 +392,14 @@ function search_tickets($array, $Seat, $eid = NULL, $SeatStatus = NULL) {
 
 <nav id="myNavmenu" class="navmenu navmenu-default navmenu-fixed-left offcanvas" role="navigation">
     <a class="navmenu-brand" href="<?= base_url('home/') ?>">ระบบขายตั๋วโดยสาร</a> 
-    <ul class="nav navmenu-nav">
-        <li class=""><a href="<?= base_url('home/') ?>"><i class="fa fa-home"></i>&nbsp;<span>หน้าหลัก</span> </a> </li>
-        <li id="btnSale"><a href="<?= base_url('sale/') ?>"><i class="fa fa-bullhorn fa-fw"></i>&nbsp;<span>ขายตั๋วโดยสาร</span> </a> </li>
-        <li id="btnSchedule"><a href="<?= base_url('schedule/') ?>"><i class="fa fa-list fa-fw"></i>&nbsp;<span>ตารางเดินรถ</span> </a> </li>                                  
-        <li id="btnCheckIn"><a href="<?= base_url('checkin/') ?>"><i class="fa fa-clock-o fa-fw"></i>&nbsp;<span>ลงเวลา</span></a></li>
-        <li id="btnCost"><a href="<?= base_url('cost/') ?>"><i class="fa fa-pencil-square-o fa-fw" ></i>&nbsp;<span>ค่าใช้จ่าย</span></a></li>
-        <li id="btnReport"><a href="<?= base_url('report/') ?>"><i class="fa fa-calendar-o fa-fw"></i>&nbsp;<span>รายงาน</span> </a> </li> 
-        <li class=""><a><i class="fa fa-bus"></i><strong>เส้นทางเดินรถ</strong></a></li>
+    <ul class="nav navmenu-nav" style="font-size: 1.14em;">
+        <li id="btnHome"><a href="<?= base_url('home/') ?>"><i class="fa fa-home fa-lg"></i>&nbsp;&nbsp;<span>หน้าหลัก</span> </a> </li>
+        <li id="btnSale"><a href="<?= base_url('sale/') ?>"><i class="fa fa-ticket fa-lg"></i>&nbsp;&nbsp;<span>ขายตั๋วโดยสาร</span> </a> </li>
+        <li id="btnSchedule"><a href="<?= base_url('schedule/') ?>"><i class="fa fa-list fa-lg"></i>&nbsp;&nbsp;<span>ตารางเดินรถ</span> </a> </li>                                  
+        <li id="btnCheckIn"><a href="<?= base_url('checkin/') ?>"><i class="fa fa-clock-o fa-lg"></i>&nbsp;&nbsp;<span>ลงเวลา</span></a></li>
+        <li id="btnCost"><a href="<?= base_url('cost/') ?>"><i class="fa fa-pencil-square-o fa-lg" ></i>&nbsp;&nbsp;<span>ค่าใช้จ่าย</span></a></li>
+        <li id="btnReport"><a href="<?= base_url('report/') ?>"><i class="fa fa-calendar-o fa-lg"></i>&nbsp;&nbsp;<span>ส่งเงิน</span> </a> </li> 
+        <li class=""><a>&nbsp;&nbsp;<strong>เส้นทางเดินรถ</strong></a></li>
 
         <?php
         if (count($routes_seller) > 0) {
@@ -394,7 +408,7 @@ function search_tickets($array, $Seat, $eid = NULL, $SeatStatus = NULL) {
                 $seller_station_name = $route['seller_station_name'];
                 ?>
                 <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-cab fa-fw" ></i>&nbsp;&nbsp;<?= $route['RouteName'] ?> <b class="caret"></b></a>
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-bus fa-lg"></i>&nbsp;&nbsp;<?= $route['RouteName'] ?> <b class="caret"></b></a>
                     <ul class="dropdown-menu navmenu-nav">
                         <li class="dropdown-header"><?= "จุดขึ้นรถ : $seller_station_name" ?></li>                   
                         <li class="divider"></li>
@@ -443,12 +457,27 @@ function search_tickets($array, $Seat, $eid = NULL, $SeatStatus = NULL) {
         </div>
     </div>
 </div>
+<?php
+$CheckInID = NULL;
+$TimeCheckIn = NULL;
+$ReportID = NULL;
+
+if (array_key_exists('CheckInID', $schedule_select)) {
+    $CheckInID = $schedule_select['CheckInID'];
+}
+if (array_key_exists('TimeCheckIn', $schedule_select)) {
+    $TimeCheckIn = $schedule_select['TimeCheckIn'];
+}
+if (array_key_exists('ReportID', $schedule_select)) {
+    $ReportID = $schedule_select['ReportID'];
+}
+?>
 <div id="" class="container-fluid" style="padding-bottom: 5%;">
     <?php echo $form['form']; ?>
     <?php echo validation_errors() ?>
     <div class="row-fluid">
         <div id="select_time" class="col-lg-4 col-lg-offset-4">
-            <div id="route_info"  class="col-lg-12">
+            <div id="route_info"  class="col-lg-12" style="padding-bottom: 2%;">
                 <div class="form-group">
                     <div class="col-md-12">
                         <label for="">เส้นทาง</label>
@@ -462,18 +491,25 @@ function search_tickets($array, $Seat, $eid = NULL, $SeatStatus = NULL) {
                         <label for="">ต้นทาง</label>                                
                         <?php echo $form['SourceID'] ?>
                         <?php echo $form['SourceName'] ?>
+
                     </div>
                     <div class="col-md-6">
                         <label for="">ปลายทาง</label>
                         <?php echo $form['DestinationID'] ?>
                         <?php echo $form['DestinationName'] ?>
+                        <?php echo $form['StationDestination'] ?>                        
                     </div>
                 </div>  
+                <div class="col-md-12 text-center" style="padding-top: 2%;">
+                    <strong>
+                        <?= $this->m_datetime->getDateThaiString() ?>
+                    </strong>
+                </div>
             </div>
             <div class="col-lg-12" style="padding-top: 2%;padding-bottom: 2%;">
                 <span class="text pull-left">เวลาเดินทาง&nbsp;&nbsp; :</span>
                 <span class="badge badge-danger pull-right">&nbsp;เต็ม&nbsp;</span>
-                <span class="badge badge-success pull-right text" style="color:white;"> &nbsp;ว่าง&nbsp;</span> 
+                <span class="badge badge-info pull-right text" style="color:white;"> &nbsp;ว่าง&nbsp;</span> 
             </div>
             <div id="time_list" class="col-lg-12">                
                 <div id = "list">                    
@@ -485,25 +521,45 @@ function search_tickets($array, $Seat, $eid = NULL, $SeatStatus = NULL) {
                                 $source_id = $schedule['SourceID'];
                                 $destination_id = $schedule['DestinationID'];
                                 $tsid = $schedule['TSID'];
+                                $checkin_id = $schedule['CheckInID'];
+                                $checkin_time = $schedule['TimeCheckIn'];
+                                $report_id = $schedule['ReportID'];
+
 
                                 $seat_blank = $schedule['NumberSeat'] - $schedule['NumberSeatBook'] - $schedule['NumberSeatSale'];
 
-                                $class_seat = 'badge-success';
+                                $class_seat = 'badge-info';
                                 if ($seat_blank <= 0) {
                                     $class_seat = 'badge-danger';
                                     $seat_blank = 'เต็ม';
                                 }
 
                                 $class_li = '';
+                                $icon = '<i class="fa fa-clock-o fa-2x"style="color:#48CFAD;"></i>';
                                 if ($schedule_select['NumberSeat'] > 0) {
                                     if ($tsid == $schedule_select['TSID']) {
                                         $class_li = "active";
                                     }
                                 }
+
+                                $can_sale = '';
+                                if ($checkin_id != NULL) {
+                                    $can_sale = 'disabled';
+                                    $icon = '<i class="fa fa-user-times fa-2x" style="color:#FC6E51;"></i>';
+                                    $class_seat = 'badge-normal';
+
+                                    $seat_blank = "ออกเเล้ว <br> ว่าง : $seat_blank ";
+                                }
+                                if ($report_id != NULL) {
+                                    $icon = '<i class="fa fa-user-times fa-2x" style="color:#FC6E51;"></i>';
+                                    $class_seat = 'badge-normal';
+                                    $seat_blank = "ส่งเงินเเล้ว";
+                                }
                                 ?>
-                                <a class="list-group-item <?= $class_li ?>" name="<?= "schedule_$tsid" ?>" href="<?= base_url("sale/booking/$rid/$source_id/$destination_id/$tsid"); ?>">  
-                                    <i class="fa fa-clock-o fa-lg"></i><span class="text" style="font-size: 16pt"> <?= $schedule['TimeDepart'] ?></span>
-                                    <span class="badge <?= $class_seat ?>" style="font-size: 12pt"><?= $seat_blank ?></span>                          
+
+                                <a class="list-group-item <?= $can_sale ?> <?= $class_li ?>" name="<?= "schedule_$tsid" ?>" href="<?= base_url("sale/booking/$rid/$source_id/$destination_id/$tsid"); ?>">  
+                                    <?= $icon ?> <span class="text" style="font-size: 18pt"> <?= $schedule['TimeDepart'] ?></span>
+                                    <span class="badge <?= $class_seat ?>" style="<?= ($checkin_id != NULL || $report_id != NULL) ? '' : 'font-size: 16pt' ?>" ><?= $seat_blank ?></span>                          
                                 </a>
                                 <?php
                             }
@@ -633,11 +689,18 @@ function search_tickets($array, $Seat, $eid = NULL, $SeatStatus = NULL) {
                                                             $click_remove = "";
                                                         }
                                                     }
+
+                                                    if ($schedule['ReportID'] != NULL || $schedule['CheckInID'] != NULL) {
+                                                        $click_book = "";
+                                                        $click_remove = "";
+                                                        $class_seat .='  ';
+                                                    }
+
                                                     $id_seat = "seat_$seat_no";
                                                     $id_seat_info = "seat_info_$seat_no";
                                                     ?>
                                                 <div id="<?= $id_seat ?>" onclick="<?= $click_book ?>" ondblclick="<?= $click_remove ?>" class="col-xs-12 seat <?php echo $class_seat; ?>">
-                                                    <span class="seat-info" id="<?= $id_seat_info ?>">  
+                                                    <span class="seat-info" id="<?= $id_seat_info ?>" >  
                                                         <?= $user ?>
                                                         <span class="badge <?= $class_info ?>" style="font-size: 8pt;">
                                                             <?= $seat_info ?>
@@ -652,10 +715,16 @@ function search_tickets($array, $Seat, $eid = NULL, $SeatStatus = NULL) {
                                         echo '</tr>';
                                     }
                                     if ($schedule['NumberSeat'] <= $schedule['NumberSeatSale']) {
+                                        $click_book = "addSeatExtra()";
+                                        $class_add_extra = '';
+                                        if ($CheckInID != NULL || $ReportID != NULL) {
+                                            $click_book = "";
+                                            $class_add_extra = 'hidden';
+                                        }
                                         echo '<tr>';
                                         ?>                              
-                                        <td colspan="4" class="text-center"> 
-                                            <button type="button"class="btn btn-info" onclick="addSeatExtra()"><i class="fa fa-plus fa-lg"></i>&nbsp;เพิ่ม</button>
+                                        <td colspan="4" class="text-center <?= $class_add_extra ?>"> 
+                                            <button type="button"class="btn btn-info " onclick="<?= $click_book ?>"><i class="fa fa-user-plus fa-lg"></i>&nbsp;เพิ่มที่นั่งเสริม</button>
                                         </td>
                                         <?php
                                         echo '</tr>';
@@ -689,6 +758,11 @@ function search_tickets($array, $Seat, $eid = NULL, $SeatStatus = NULL) {
                                         $class_info = "badge-warning";
                                         $click_remove = "removeSeatExtra($seat_no)";
                                     }
+
+                                    if ($CheckInID != NULL || $ReportID != NULL) {
+                                        $click_remove = '';
+                                    }
+
                                     $id_seat = "seat_$seat_no";
                                     $id_seat_info = "seat_info_$seat_no";
                                     ?>
@@ -768,19 +842,92 @@ function search_tickets($array, $Seat, $eid = NULL, $SeatStatus = NULL) {
                     </div>
                 </div>
                 <br>
-                <div class="row hidden">
+                <div class="row">
+
                     <div class="col-md-6">
-                        <div class="well text-center">                                    
-                            เวลาออก&nbsp;:
+                        <label class="">เวลาออก</label> 
+                        <div class="well text-center">  
+                            <span class="clock  <?= ( $TimeCheckIn != NULL) ? 'hidden' : '' ?>" id="clock">                                
+                                <ul id="time">
+                                    <li id="hours"> </li>
+                                    <li id="point">:</li>
+                                    <li id="min"> </li>                                    
+                                </ul>
+                            </span>
+                            <span class="time-checkin <?= ( $TimeCheckIn != NULL) ? '' : 'hidden' ?>">
+                                <?= date('H:i', strtotime($TimeCheckIn)) ?>
+                            </span>
                         </div>
                     </div>
                     <div class="col-md-6 text-center">
-                        <a class="btn btn-success"><i class="fa fa-check-square-o fa-lg"></i>&nbsp;ลงเวลาออก</a>
+
+                        <?php
+                        $time_depart_ = '';
+                        $vcode_ = '';
+                        if (array_key_exists('VCode', $schedule_select)) {
+                            $vcode_ = $schedule_select['VCode'];
+                        }
+                        if (array_key_exists('TimeDepart', $schedule_select)) {
+                            $time_depart_ = $schedule_select['TimeDepart'];
+                        }
+
+                        $class_checkin = '';
+
+                        if ($ReportID != NULL) {
+                            $class_checkin = 'disabled';
+                        }
+
+
+                        if ($CheckInID == NULL) {
+                            $checkin = array(
+                                'class' => "btn btn-block  btn-success $class_checkin",
+                                'type' => "button",
+                                'data-id' => "1",
+                                'data-title' => "ลงเวลาออก รถเบอร์ $vcode_",
+                                'data-sub_title' => "รอบเวลา ",
+                                'data-info' => "$time_depart_",
+                                'data-content' => "",
+                                'data-toggle' => "modal",
+                                'data-target' => "#confirm",
+                                'data-href' => "sale/checkin/$RID/$SourceID/$DestinationID/$TSID",
+                            );
+                        } else {
+                            $checkin = array(
+                                'class' => "btn btn-block btn-warning $class_checkin",
+                                'type' => "button",
+                                'data-id' => "1",
+                                'data-title' => "แก้ไขเวลาออก รถเบอร์ $vcode_",
+                                'data-sub_title' => "รอบเวลา ",
+                                'data-info' => "$time_depart_",
+                                'data-content' => "",
+                                'data-toggle' => "modal",
+                                'data-target' => "#confirm",
+                                'data-href' => "sale/checkin/$RID/$SourceID/$DestinationID/$TSID/$CheckInID",
+                            );
+                        }
+
+
+
+                        $print_log = array(
+                            'class' => 'btn btn-block btn-normal hidden ',
+                            'type' => "button",
+                            'data-id' => "1",
+                            'data-title' => "ลงเวลาออก รถเบอร์ $vcode_",
+                            'data-sub_title' => "รอบเวลา ",
+                            'data-info' => "$time_depart_",
+                            'data-content' => "",
+                            'data-toggle' => "modal",
+                            'data-target' => "#confirm",
+                            'data-href' => "sale/print_log/$RID/$SourceID/$DestinationID/$TSID",
+                        );
+                        echo anchor('#', '<i class="fa fa-check-square-o fa-lg"></i>&nbsp;ลงเวลาออก', $checkin);
+                        echo anchor('#', '<i class="fa fa-print fa-lg"></i>&nbsp;พิมพ์ใบล๊อก', $print_log);
+                        ?>                       
                     </div>
                 </div>  
             </div>
-            <div id="debug" class="col-lg-12 text-center" style="margin: 2% auto;padding-top: 5%; padding-bottom: 5%;background-color: #FFFF99;">
-                <div id="user_action">
+            <div id="debug" class="col-lg-12 text-center" style="margin: 2% auto;padding-top: 5%; padding-bottom: 5%;">
+                <div id="user_action" class="time-checkin">
                 </div>                      
             </div> 
             <div id="guest_info" class="<?= (($schedule_select['NumberSeatBookBySeller'] > 0) ? 'animated zoomIn' : 'hidden') ?>">
@@ -800,7 +947,7 @@ function search_tickets($array, $Seat, $eid = NULL, $SeatStatus = NULL) {
                             if ($schedule_select['NumberSeatBookBySeller'] > 0) {
                                 foreach ($schedule_select['TicketsBook'] as $ticket) {
                                     $seat_no = $ticket['Seat'];
-                                    $drop_down = "id = \"FareType$seat_no \" " . 'class="form-control" onchange="calTotalFare()"';
+                                    $drop_down = "id = \"FareType \" " . 'class="form-control fare" onchange="calTotalFare()"';
                                     $total +=$ticket['PriceSeat'];
                                     if ($seat_no > $schedule_select['NumberSeat']) {
                                         $click_remove = "removeSeatExtra($seat_no)";
@@ -837,7 +984,7 @@ function search_tickets($array, $Seat, $eid = NULL, $SeatStatus = NULL) {
                     </div>                            
                 </div>
                 <div class="col-lg-12 col-sm-12 text-center" style="margin-top: 5%;">                            
-                    <button type="submit" class="btn btn-block btn-lg">พิมพ์บัตรโดยสาร</button>
+                    <button type="submit" class="btn btn-block btn-lg"><i class="fa fa-print fa-lg"></i>&nbsp;&nbsp;พิมพ์บัตรโดยสาร</button>
                 </div>
 
             </div>

@@ -134,6 +134,10 @@ class m_schedule extends CI_Model {
 
         return $TimeDepart;
     }
+    
+    public function get_time_arrive($param) {
+        
+    }
 
     public function get_stations($rcode = null, $vtid = null, $sid = NULL) {
         if ($rcode != NULL) {

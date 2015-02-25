@@ -14,6 +14,7 @@ class sale extends CI_Controller {
         $this->load->model('m_schedule');
         $this->load->model('m_fares');
         $this->load->model('m_ticket');
+        $this->load->model('m_checkin');
         $this->load->library('form_validation');
 
 //Initial language
@@ -39,6 +40,7 @@ class sale extends CI_Controller {
             'routes' => $this->m_route->get_route_by_seller(),
             'routes_detail' => $this->m_route->get_route_detail_by_seller(),
             'stations' => $this->m_station->get_stations(),
+            'data' => $this->m_sale->set_form_search(),
         );
 
         $data_debug = array(
@@ -47,6 +49,7 @@ class sale extends CI_Controller {
 //            'routes_detail' => $data['routes_detail'],
 //            'stations' => $data['stations'],
 //            'eid' => $this->session->userdata('EID'),
+//            'data' => $data['data'],
         );
         $this->m_template->set_Debug($data_debug);
 
@@ -57,108 +60,43 @@ class sale extends CI_Controller {
 
     public function booking($rid = NULL, $source_id = NULL, $destination_id = NULL, $schedules_id = NULL) {
         $date = $this->m_datetime->getDateToday();
+        
+        $this->m_ticket->check_ticket($schedules_id);
 
-        if ($rid == NULL || $source_id == NULL || $destination_id == NULL) {
+        if ($rid == NULL || $source_id == NULL) {
             $alert['alert_message'] = "เลือกข้อมูลรอบเวลา";
             $alert['alert_mode'] = "warning";
             $this->session->set_flashdata('alert', $alert);
 
             redirect('sale/');
         }
-//        Check detail and sent to load form
-        $detail = $this->m_route->get_route_by_seller(NULL, NULL, $rid);
-        if (count($detail) > 0) {
-            $rcode = $detail[0]['RCode'];
-            $vtid = $detail[0]['VTID'];
-            $vt_name = $detail[0]['VTDescription'];
-            $route_name = " $vt_name เส้นทาง" . $detail[0]['RCode'] . ' ' . ' ' . $detail[0]['RSource'] . ' - ' . $detail[0]['RDestination'];
-        }
-        $stations = $this->m_station->get_stations($rcode, $vtid);
-        $s_station = $this->m_station->get_stations($rcode, $vtid, $source_id)[0];
-        $d_station = $this->m_station->get_stations($rcode, $vtid, $destination_id)[0];
 
-        $schedules = $this->m_sale->get_schedule($schedules_id);
+        $schedules = $this->m_schedule->get_schedule($date, NULL, NULL, $rid, $schedules_id);
+
         if (count($schedules) <= 0) {
-            $alert['alert_message'] = "ไม่พบข้อมูลตารางเวลาเดิน $route_name กรุณาติดต่อผู้ดูแลระบบ";
-            $alert['alert_mode'] = "warning";
-            $this->session->set_flashdata('alert', $alert);
-
-            redirect('sale/');
-        }
-        $schedule = $schedules[0];
-        $schedules_detail = $this->m_schedule->get_schedule($date, $rcode, $vtid, $rid);
-
-        if (count($s_station) <= 0) {
-            redirect('sale/');
-        }
-        if (count($d_station) <= 0) {
-            redirect('sale/');
+            redirect("sale/");
         }
 
-        if (count($schedule) <= 0 || count($schedules_detail) <= 0) {
-            $alert['alert_message'] = "ไม่พบข้อมูลตารางเวลาเดิน $route_name กรุณาติดต่อผู้ดูแลระบบ";
-            $alert['alert_mode'] = "warning";
-            $this->session->set_flashdata('alert', $alert);
-            redirect('sale/');
-        }
-
-        $route = $this->m_route->get_route_by_seller(NULL, NULL, $rid)[0];
-        /*
-         * ข้อมูลคนขายตั๋ว
-         */
-        $seller_station_id = $route['SID'];
-        $fare = $this->m_fares->get_fares($rcode, $vtid, $source_id, $destination_id)[0];
-        $tickets_by_seller = $this->m_ticket->get_ticket_for_booking($schedules_id);
-        $tickets = $this->m_ticket->get_ticket_by_station($seller_station_id, $schedules_id);
-        $tickets_today = $this->m_ticket->get_ticket_by_station($seller_station_id);
-
-        $set_data = $this->m_sale->set_form_booking($rid, $s_station, $d_station,$schedules_id);
+        $set_data = $this->m_sale->set_form_booking($rid, $source_id, $destination_id, $schedules_id);
 
         $data = array(
             'form' => $set_data['form'],
-            'date' => $this->m_datetime->getDateThaiString($date),
-            'route' => $route,
-            'routes_seller_' => $this->m_route->get_route_by_seller(),
-            'routes_detail' => $this->m_route->get_route_detail_by_seller(),
-            'stations' => $stations,
-            's_station' => $s_station,
-            'd_station' => $d_station,
-            'schedules_id' => $schedules_id,
-            'schedule' => $schedule,
-            'schedules_detail' => $schedules_detail,
-            'fare' => $fare,
-            'tickets_by_seller' => $tickets_by_seller,
-            'tickets' => $tickets,
-            'tickets_today' => $tickets_today,
+            'RID' => $rid,
+            'SourceID' => $source_id,
+            'DestinationID' => $destination_id,
+            'TSID' => $schedules_id,
             'routes_seller' => $set_data['routes_seller'],
             'schedules' => $set_data['schedules'],
-            'schedule_select'=>$set_data['schedule_select'],
+            'schedule_select' => $set_data['schedule_select'],
         );
-        $data['vehicles_types'] = $this->m_route->get_vehicle_types();
+
 
         $data_debug = array(
+//            'parameter' => "RID = $rid || Source = $source_id || Destination = $destination_id || TSID = $schedules_id",
 //            'form' => $data['form'],
-//            'route' => $data['route'],
-//            'route_detail' => $data['route_detail'],
-//            'form_route' => $data['form_route'],
-//            's_station' => $data['s_station'],
-//            'd_station' => $data['d_station'],
-//            'schedule' => $data['schedule'],
-//            'schedules_detail' => $data['schedules_detail'],
-//            'schedules_id' => $data['schedules_id'],
-//            'fare' => $data['fare'],
-//            'parameter' => "vtid = $vtid | source_id = $source_id |  destination_id = $destination_id | schedules_id = $schedules_id",
-//            'post' => $this->input->post(),
-//            'session' => $this->session->userdata('EID'),
-//            'tickets_by_seller' => $data['tickets_by_seller'],
-//            'tickets' => $data['tickets'],
-//            'tickets_today' => $data['tickets_today'],
-//            'paramiter' => "$date, $rcode, $vtid, $rid, $schedules_id",
-//            'routes_seller' => $data['routes_seller'],
+//            'routes_seller'=>$data['routes_seller'],
+//            'schedules'=>$data['schedules'],
 //            'schedule_select' => $data['schedule_select'],
-//                        'TicketsSaleData' => $data['schedule_select']['TicketsSaleData'],
-//            'schedules' => $data['schedules'],            
-//            'test_time_depart'=>$this->m_schedule->get_time_depart($schedule['Date'], $rid, $schedules_id, $seller_station_id)[0]['TimeDepart'],
         );
 
         if ($this->m_sale->validate_form_sale() && $this->form_validation->run() == TRUE) {
@@ -169,7 +107,7 @@ class sale extends CI_Controller {
         }
 
         $this->m_template->set_Debug($data_debug);
-        $this->m_template->set_Title('ขายตั๋ว ' . $route_name);
+        $this->m_template->set_Title('ขายตั๋วโดยสาร ');
         $this->m_template->set_Content('sale/frm_booking', $data);
         $this->m_template->showSaleTemplate();
     }
@@ -225,6 +163,21 @@ class sale extends CI_Controller {
         $this->m_template->showSaleTemplate();
     }
 
+    public function checkin($RID, $SourceID, $DestinationID, $TSID, $CheckInID = NULL) {
+
+        if ($CheckInID == NULL) {
+            $data_checkin_add = $this->m_checkin->get_post_form_add($TSID, $SourceID);
+            $rs = $this->m_checkin->insert_checkin($data_checkin_add);
+        } else {
+            $data_checkin_edit = $this->m_checkin->get_post_form_edit();
+            $rs = $this->m_checkin->update_checkin($CheckInID, $data_checkin_edit);
+        }
+
+
+
+        redirect("sale/booking/$RID/$SourceID/$DestinationID/$TSID");
+    }
+
     /*
      * for ajax
      */
@@ -240,6 +193,7 @@ class sale extends CI_Controller {
         $price_seat = $this->input->post("PriceSeat");
         $price_dicount = $this->input->post('PriceDicount');
 
+        $this->m_ticket->check_ticket($tsid);
 
         if ($price_seat == $price_dicount) {
             $IsDiscount = 1;
@@ -260,23 +214,32 @@ class sale extends CI_Controller {
             'IsDiscount' => $IsDiscount,
             'Seller' => $this->m_user->get_user_id(),
         );
-        $ticket_id = $this->m_ticket->resever_ticket($ticket_data);
-        if ($ticket_id != NULL || $ticket_id != '') {
-            echo json_encode('1');
+
+        $check_ticket_id = $this->m_ticket->get_TicketID($tsid, $seat, $source_id);
+
+        if ($check_ticket_id == NULL) {
+            $ticket_id = $this->m_ticket->resever_ticket($ticket_data);
         } else {
-           echo json_encode('0');
-        }        
+            $ticket_id = NULL;
+        }
+
+
+        if ($ticket_id != NULL) {
+            echo json_encode(1);
+        } else {
+            echo json_encode(0);
+        }
     }
 
     public function cancle_seat() {
         $tsid = $this->input->post('TSID');
-        $seat = $this->input->post("Seat");        
-        $source_id = $this->input->post("SourceID");        
-        $rs = $this->m_ticket->delete_ticket($tsid, $seat,$source_id);
+        $seat = $this->input->post("Seat");
+        $source_id = $this->input->post("SourceID");
+        $rs = $this->m_ticket->delete_ticket($tsid, $seat, $source_id);
         if ($rs) {
-            echo json_encode('1');
+            echo json_encode(1);
         } else {
-            echo json_encode('0');
+            echo json_encode(0);
         }
     }
 
@@ -290,11 +253,13 @@ class sale extends CI_Controller {
             echo json_encode('false');
         }
     }
-    
-    public function check_seat_plan(){
-        
+
+    public function check_seat_plan() {
+
+
+
         $rs = FALSE;
-        
+
         if ($rs) {
             echo json_encode('true');
         } else {
