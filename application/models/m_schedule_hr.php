@@ -7,7 +7,7 @@ if (!defined('BASEPATH')) {
 class m_schedule_hr extends CI_Model {
 
     public function get_schedule($date = NULL, $rcode = NULL, $vtid = NULL, $rid = NULL) {
-        $this->db->select('*,t_schedules_day.RID as RID');
+        $this->db->select('*,t_schedules_day.TSID as TSID,t_schedules_day.RID as RID');
         $this->db->join('t_routes', ' t_schedules_day.RID = t_routes.RID ', 'left');
         $this->db->join('vehicles_has_schedules', ' vehicles_has_schedules.TSID = t_schedules_day.TSID', 'left');
         $this->db->join('vehicles', ' vehicles.VID = vehicles_has_schedules.VID', 'left');
@@ -546,6 +546,7 @@ class m_schedule_hr extends CI_Model {
 //    }
 
     function get_route_detail_by_TSID($TSID) {
+        $this->db->select('*,tsd.TSID as TSID,tsd.RID as RID,tr.VTID as VTID');
         $this->db->from('t_schedules_day as tsd');
         $this->db->join('t_routes as tr', ' tr.RID = tsd.RID', 'left');
         $this->db->join('vehicles_type as vt', ' vt.VTID = tr.VTID', 'left');
@@ -588,9 +589,16 @@ class m_schedule_hr extends CI_Model {
         $pre_vhs = array(
             'VID' => $data['VID']
         );
-        $this->db->where('TSID', $data['TSID']);
-        if ($this->db->update('vehicles_has_schedules', $pre_vhs))
+
+        $query = $this->db->get_where('vehicles_has_schedules', array('TSID' => $data['TSID']));
+        if ($query->num_rows() == 0) {
+            $this->db->insert('vehicles_has_schedules', array('TSID' => $data['TSID'], 'VID' => $data['VID'], 'RID' => '0'));
             $flag_vhs = TRUE;
+        } else {
+            $this->db->where('TSID', $data['TSID']);
+            if ($this->db->update('vehicles_has_schedules', $pre_vhs))
+                $flag_vhs = TRUE;
+        }
 
         $flag_tsd = FALSE;
         $pre_tsd = array(
