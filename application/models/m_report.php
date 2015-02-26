@@ -33,6 +33,9 @@ class m_report extends CI_Model {
             $this->db->where('SID', $SID);
         }
 
+        if ($RCode != NULL && $VTID != NULL && $SID != NULL) {
+            $this->db->order_by('ReportID', 'desc');
+        }
 
         $this->db->where('ReportDate', $date);
         $this->db->where('CreateBy', $this->m_user->get_user_id());
@@ -46,7 +49,7 @@ class m_report extends CI_Model {
         $this->db->select('*,report_day.CreateBy as CreateBy');
         $this->db->join('t_schedules_day_has_report', 'report_day.ReportID = t_schedules_day_has_report.ReportID', 'left');
         if ($EID == NULL) {
-           $EID = $this->m_user->get_user_id();
+            $EID = $this->m_user->get_user_id();
         }
         if ($TSID != NULL) {
             $this->db->where('t_schedules_day_has_report.TSID', $TSID);
@@ -58,7 +61,7 @@ class m_report extends CI_Model {
         $query = $this->db->get('report_day');
 
         if ($query->num_rows() > 0) {
-            $rs = $query->row_array()['ReportID'];            
+            $rs = $query->row_array()['ReportID'];
         } else {
             $rs = NULL;
         }
@@ -284,6 +287,7 @@ class m_report extends CI_Model {
         $this->load->model('m_cost');
 
         $data = array();
+        $EID = $this->m_user->get_user_id();
         $date = $this->m_datetime->getDateToday();
         $routes = $this->m_route->get_route_by_seller($RCode, $VTID);
 
@@ -337,7 +341,7 @@ class m_report extends CI_Model {
                 foreach ($schedules as $schedule) {
                     $tsid = $schedule['TSID'];
                     $start_time = $schedule['TimeDepart'];
-                    $report_id = $schedule['ReportID'];
+                    $report_id = $this->check_report($EID, $tsid, $seller_station_id);
                     $time_depart = '';
                     $vcode = $schedule['VCode'];
                     $temp = 0;
@@ -814,9 +818,20 @@ class m_report extends CI_Model {
 
     public function gennerate_report_id($RCode, $VTID, $SID) {
         $date = $this->m_datetime->getDateToday();
-        $Report = $this->get_report($date, $RCode, $VTID, $SID);
+//        $Report = $this->get_report($date, $RCode, $VTID,$SID);
+        $this->db->where('RCode', $RCode);
+        $this->db->where('VTID', $VTID);
+        $this->db->where('SID', $SID);
+        $this->db->where('ReportDate', $date);
+        $query = $this->db->get('report_day');
+
+        $Report = $query->result_array();
+
+
         $num_report = count($Report);
+
         $ReportID = '';
+
         if ($num_report >= 0) {
             //วันที่
             $date = new DateTime();
@@ -829,7 +844,6 @@ class m_report extends CI_Model {
             $ReportID .= str_pad($SID, 2, '0', STR_PAD_LEFT);
             //run number
             $ReportID .=str_pad($num_report, 2, '0', STR_PAD_LEFT);
-
             return $ReportID;
         }
         return FALSE;

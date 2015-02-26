@@ -40,7 +40,7 @@
                         <div class="panel panel-default">
                             <div class="panel-heading" role="tab" id="heading<?= $id ?>">
                                 <h4 class="panel-title" style="padding-left: 3%;">
-                                    <a data-toggle="collapse" data-parent="#accordionRoutes" href="#collapse<?= $id ?>" aria-expanded="true" aria-controls="collapse<?= $id ?>">
+                                    <a data-toggle="collapse" data-parent="#accordionRoutes" href="#collapse<?= $id ?>" aria-expanded="true" aria-controls="collapse<?= $id ?>" style="font-size: 1.4em;">
                                         <?= $route_name ?>
                                     </a>
                                 </h4>
@@ -93,7 +93,7 @@
                         <div class="panel panel-default">
                             <div class="panel-heading" role="tab" id="heading<?= $id ?>">
                                 <h4 class="panel-title" style="padding-left: 3%;">
-                                    <a data-toggle="collapse" data-parent="#accordionRoute" href="#collapse<?= $id ?>" aria-expanded="true" aria-controls="collapse<?= $id ?>">
+                                    <a data-toggle="collapse" data-parent="#accordionRoute" href="#collapse<?= $id ?>" aria-expanded="true" aria-controls="collapse<?= $id ?>" style="font-size: 1.4em;">
                                         <?= $route_name ?>
                                     </a>
                                 </h4>
