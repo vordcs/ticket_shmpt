@@ -37,16 +37,13 @@ class schedule extends CI_Controller {
             redirect('home/');
         }
 
+        $form = $this->m_schedule->set_form_view();
 
         $data = array(
             'page_title' => 'ตารางเวลาเดินรถ : ',
-            'page_title_small' => 'จุดจอดของคนขาย',
-//            'from_search' => $this->m_schedule->set_form_search_route(),
-            'vehicle_types' => $this->m_route->get_vehicle_types(),
-            'routes' => $this->m_route->get_route(),
-            'routes_seller' => $this->m_route->get_route_by_seller(),
-            'routes_detail' => $this->m_route->get_route_detail(),
-            'vehicle_types' => $this->m_route->get_vehicle_types(),
+            'page_title_small' => '',
+            'routes_seller' => $form['routes_seller'],            
+            'data' => $form['data'],
         );
         $data['stations'] = $this->m_station->get_stations();
         $data['schedules'] = $schedules;
@@ -55,8 +52,8 @@ class schedule extends CI_Controller {
 //            'routes' => $data['routes'],
 //            'stations' => $data['stations'],
 //            'schedules' => $data['schedules'],
-//            'routes_seller' => $data['routes_seller'],
-                //    ''=>$data[''],
+            'routes_seller' => $data['routes_seller'],
+//            'data' => $data['data'],
         );
         $this->m_template->set_Debug($data_debug);
         $this->m_template->set_Title('ตารางเวลาเดินรถ');

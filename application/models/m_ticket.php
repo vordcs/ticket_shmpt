@@ -18,6 +18,7 @@ class m_ticket extends CI_Model {
 //            $eid = $this->m_user->get_user_id();
             $this->db->where('Seller', $eid);
         }
+        $this->db->order_by('Seat');
         $query = $this->db->get('ticket_sale');
 
         return $query->result_array();
@@ -117,7 +118,6 @@ class m_ticket extends CI_Model {
         $vcode = $str_vcode[0] . $str_vcode[1];
         $ticket_id = '';
         $ticket_id .= $tsid;
-//        $ticket_id .= $EID;
         $ticket_id .= str_pad($source_id, 3, '0', STR_PAD_LEFT);
         $ticket_id .= str_pad($destination_id, 3, '0', STR_PAD_LEFT);
         $ticket_id .= $vcode;

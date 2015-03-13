@@ -244,13 +244,13 @@
                     <div class="form-group">
                         <label for="" class="col-sm-3 control-label">รวม</label>
                         <div class="col-sm-5">
-                            <input type="text" readonly=""  class="form-control input-lg" id="Total" name="Total"  placeholder="ยอดรวม" value="<?= floor($total); ?>">
+                            <?=$data['form']['Total']?>
                         </div>
                     </div>
                     <div class="form-group">
                         <label  class="col-sm-3 control-label">ค่าตอบแทน</label>
                         <div class="col-sm-3">
-                            <input type="text"  class="form-control input-lg" id="Vage" name="Vage" placeholder="ค่าตอบเเทน" value="<?= (set_value('Vage') == NULL) ? 0 : set_value('Vage') ?>" onkeypress="return isNumberKey(event)" onchange="calNet()">                                
+                            <?=$data['form']['Vage']?>
                         </div>
                         <div class="col-sm-3">
                             <button type="button" class="btn btn-default" onclick="calNet()">ดูยอดคงเหลือ</button>
@@ -259,13 +259,13 @@
                     <div class="form-group">
                         <label for="" class="col-sm-3 control-label">คงเหลือ</label>
                         <div class="col-sm-8">
-                            <input type="text" readonly=""  class="form-control input-lg" id="Net" name="Net" placeholder="ยอดคงเหลือ" value="<?= (set_value('Net') == NULL) ? floor($total) : set_value('Net') ?>">
+                            <?=$data['form']['Net']?>
                         </div>
                     </div>
                     <div class="form-group">
                         <label for="" class="col-sm-3 control-label">หมายเหตุ</label>
                         <div class="col-sm-8">
-                            <textarea class="form-control" rows="3" id="ReportNote" name="ReportNote" placeholder="หมายเหตุ" value="<?= (set_value('ReportNote') == NULL) ? set_value('ReportNote') : set_value('ReportNote') ?>"></textarea>
+                            <?=$data['form']['ReportNote']?>
                         </div>
                     </div>
 

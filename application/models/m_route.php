@@ -55,7 +55,7 @@ class m_route extends CI_Model {
         return $query->result_array();
     }
 
-    public function get_route_detail_by_seller($rcode = NULL, $vtid = NULL) {
+    public function get_route_detail_by_seller($rcode = NULL, $vtid = NULL, $RID = NULL) {
         $this->db->select('*');
         $this->db->join('t_routes', 'sellers.RCode = t_routes.RCode AND sellers.VTID = t_routes.VTID');
         $this->db->join('vehicles_type', 'vehicles_type.VTID = t_routes.VTID');
@@ -66,6 +66,9 @@ class m_route extends CI_Model {
         }
         if ($vtid != NULL) {
             $this->db->where('sellers.VTID', $vtid);
+        }
+        if ($RID != NULL) {
+            $this->db->where('t_routes.RID', $RID);
         }
 
         $this->db->where('sellers.EID', $this->m_user->get_user_id());

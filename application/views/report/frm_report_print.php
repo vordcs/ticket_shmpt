@@ -30,6 +30,27 @@
     .note{
         font-size: 4pt;
     }
+
+    .stats-box {
+        margin:40px 0px;
+        color:#5f5f5f;
+    }
+    .stats-box-title {
+        text-align:center;
+        font-weight:bold;
+    }
+    .stats-box-all-info {
+        text-align:center;
+        font-weight:bold;
+        font-size:48px;
+        margin-top:20px;
+        margin-bottom: 40px;
+    }
+    .stats-box-all-info i{
+        width:60px;
+        height:60px;
+    }
+
     @media all
     {
         .report-print	{ display:none; }         
@@ -48,7 +69,7 @@
                 <font color="#777777">
                 <span style="font-size: 23px; line-height: 23.399999618530273px;"><?php echo $page_title_small; ?></span>                
                 </font>
-            </h3>        
+            </h3> 
         </div>
     </div>
 </div>
@@ -70,11 +91,60 @@
             $form_id = "form_report_$RCode$VTID$seller_station_id";
             echo form_open("report/send/$RCode/$VTID/$seller_station_id", array('class' => '', 'id' => "$form_id", 'name' => "$form_id"));
             ?>
+            <div class="col-md-12">
+                <button type="button" class="btn btn-lg btn-info pull-right" onclick="print_report()"><i class="fa fa-print"></i>&nbsp;พิมพ์รายงานส่งเงิน</button>
+            </div>
             <div class="col-md-12 text-center">
-                <p class="lead">จุดจอด&nbsp;:&nbsp;<?= $seller_station_name ?></p>
+                <p class="lead"><strong><?= $route_name ?></strong></p>
+                <p class="lead"><strong>จุดจอด&nbsp;:&nbsp;<?= $seller_station_name ?></strong></p>
                 <input type="hidden" name="RCode" value="<?= $RCode ?>">
                 <input type="hidden" name="VTID" value="<?= $VTID ?>">
                 <input type="hidden" name="SID" value="<?= $seller_station_id ?>">
+            </div>       
+            <div class="col-md-12">
+                <div class="stats-box">                  
+                    <div class="col-md-4">
+                        <div class="stats-box-title">ยอดรวม</div>
+                        <div class="stats-box-all-info"><?= number_format($route['Total']) ?></div>                            
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="stats-box-title">เบี้ยเลี้ยง</div>
+                        <div class="stats-box-all-info"><?= number_format($route['Vage']) ?></div>                         
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="stats-box-title">คงเหลือ</div>
+                        <div class="stats-box-all-info"><?= number_format($route['Net']) ?></div>                            
+                    </div> 
+
+                </div>                
+            </div>
+            <div class="col-md-12">
+                <div class="col-md-4 text-center">
+                    <div class="form-group">
+                        <label class="control-label" for="">วันที่ส่ง</label> 
+                        <input type="text" class="form-control text-center" disabled="" value="<?= $route['ReportDate'] ?>">                        
+                    </div>
+                </div>
+                <div class="col-md-4 text-center">
+                    <div class="form-group">
+                        <label class="control-label" for="">เวลาส่ง</label> 
+                        <input type="text" class="form-control text-center" disabled="" value="<?= $route['ReportTime'] ?>">                        
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label class="control-label" for="">หมายเหตุ</label> 
+                        <blockquote>
+                            <p><?= $route['ReportNote'] ?></p>
+                        </blockquote>
+                    </div>
+                </div>
+
+            </div>
+            <div class="col-md-12">
+                <legend>ข้อมูลรายงานการส่งเงิน</legend>                
             </div>
             <?php
             foreach ($route['routes_detail'] as $rd) {
@@ -222,49 +292,22 @@
             ?>
             <hr>
             <br>
-            <div class="col-md-6 col-md-offset-3">
-                <div class="form-horizontal">
-                    <div class="form-group">
-                        <label for="" class="col-sm-3 control-label">รวม</label>
-                        <div class="col-sm-5">
-                            <input type="text" readonly=""  class="form-control input-lg" id="Total" name="Total"  placeholder="ยอดรวม" value="<?= floor($total); ?>">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label  class="col-sm-3 control-label">ค่าตอบแทน</label>
-                        <div class="col-sm-3">
-                            <input type="text" readonly="" class="form-control input-lg" id="Vage" name="Vage" placeholder="เบี้ยเลี้ยง" value="<?= $route['Vage'] ?>">                                
-                        </div>                        
-                    </div>
-                    <div class="form-group">
-                        <label for="" class="col-sm-3 control-label">คงเหลือ</label>
-                        <div class="col-sm-8">
-                            <input type="text" readonly=""  class="form-control input-lg" id="Net" name="Net" placeholder="ยอดคงเหลือ" value="<?= $route['Net'] ?>">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="" class="col-sm-3 control-label">หมายเหตุ</label>
-                        <div class="col-sm-8">
-                            <textarea class="form-control" readonly="" rows="3" id="ReportNote" name="ReportNote" placeholder="<?= $route['ReportNote'] ?>" value="<?= $route['ReportNote'] ?>"></textarea>
-                        </div>
-                    </div>
 
-                    <div class="col-sm-12 text-center">                             
-                        <?php
-                        $cancle = array(
-                            'type' => "button",
-                            'class' => "btn btn-lg btn-danger",
-                        );
-                        echo anchor(($previous_page == NULL) ? 'report/' : $previous_page, '<i class="fa fa-times" ></i>&nbsp;กลับ', $cancle) . '  ';
-                        ?>
-                        <button type="button" class="btn btn-lg btn-info" onclick="print_report()"><i class="fa fa-print"></i>&nbsp;พิมพ์รายงานส่งเงิน</button>
-                    </div>                       
-                </div>        
-            </div>   
+            <div class="col-sm-12 text-center">                             
+                <?php
+                $cancle = array(
+                    'type' => "button",
+                    'class' => "btn btn-lg btn-danger",
+                );
+                echo anchor(($previous_page == NULL) ? 'report/' : $previous_page, '<i class="fa fa-times" ></i>&nbsp;กลับ', $cancle) . '  ';
+                ?>
+            </div>                       
+
+        </div>   
 
 
-        <?php } ?>          
-    </div>
+    <?php } ?>          
+</div>
 </div>
 <div class="container report-print">
     <?php
@@ -288,7 +331,7 @@
             </div> 
             <div class="col-md-12 note">
                 <?= $this->m_datetime->getDateThaiStringShort() ?>
-                &nbsp;:&nbsp;
+                &nbsp;|&nbsp;
                 <?= $this->m_datetime->getTimeNow() ?>
             </div>
 
@@ -492,7 +535,7 @@
             </div>          
         </div>    
         <div class="row" style="font-size: 3pt ;padding-top: 2px;"> 
-            
+
             <div class="col-xs-6 text-center">
                 <?= $this->m_user->get_user_full_name() ?>
             </div>

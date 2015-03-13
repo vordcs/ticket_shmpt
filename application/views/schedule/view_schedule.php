@@ -93,21 +93,31 @@
         <div class="col-md-12">
             <div class="panel panel-info">
                 <div class="panel-heading">
-                    <h3 class="panel-title">ค้นหา</h3>
+                    <h3 class="panel-title">คำแนะนำ</h3>
                 </div>
                 <div class="panel-body">
                     <div class="col-md-6">
-                        <form class="form-horizontal" role="form">
-                            <div class="form-group">
-                                <label for="" class="col-sm-3 control-label">วันที่</label>
-                                <div class="col-sm-7">
-                                    <input type="text" class="form-control datepicker" id="" placeholder="">
-                                </div>
-                            </div>
-                            <div class="text-center">
-                                <button type="submit" class="btn btn-default">Submit</button>
-                            </div>                            
-                        </form>  
+
+                        <dl>
+                            <dt>การเพิ่ม</dt>
+                            <dd>
+                                <ul>
+                                    <li>การเพิ่มเวลาต้องทำการเพิ่มก่อนเวลาออกเป็นเวลา 30 นาที </li>                                    
+                                </ul>
+                            </dd>
+                            <dt>การยกเลิก</dt>
+                            <dd> 
+                                <ul>
+                                    <li>ต้องทำการยกเลิกก่อนเวลา ณ ปัจจุบัน</li>                                    
+                                </ul>
+                            </dd>
+                            <dt>การเปลี่ยนรถ</dt>
+                            <dd> 
+                                <ul>
+                                    <li>สามารถทำการเปลี่ยนได้ทุกช่วงเวลา</li>                                   
+                                </ul>
+                            </dd>
+                        </dl>
                     </div>
                     <div class="col-md-6">
                         <div class="clock" id="clock">

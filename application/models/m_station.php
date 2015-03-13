@@ -26,20 +26,24 @@ class m_station extends CI_Model {
         return $rs;
     }
 
-    public function get_station_sale_ticket($rcode = null, $vtid = null, $sid = NULL) {
+    public function get_station_sale_ticket($rcode = null, $vtid = null, $StartPoint = NULL) {
         if ($rcode != NULL) {
             $this->db->where('RCode', $rcode);
         }
         if ($vtid != NULL) {
             $this->db->where('VTID', $vtid);
         }
-        if ($sid != NULL) {
-            $this->db->where('SID', $sid);
-        }
 
         $this->db->where('IsSaleTicket', 1);
 
-        $this->db->order_by('Seq', 'asc');
+        if ($StartPoint == 'S') {
+            $this->db->order_by('Seq', 'asc');
+        }
+        if ($StartPoint == 'D') {
+            $this->db->order_by('Seq', 'desc');
+        }
+
+
         $query = $this->db->get('t_stations');
 
         $rs = $query->result_array();
@@ -79,7 +83,7 @@ class m_station extends CI_Model {
             $this->db->where('Seq >', $seq);
         }
         if ($seq != NULL && $start_point == 'D') {
-            $this->db->where('Seq <', $seq);            
+            $this->db->where('Seq <', $seq);
         }
 
         if ($start_point == 'S') {

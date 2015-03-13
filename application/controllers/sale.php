@@ -60,7 +60,7 @@ class sale extends CI_Controller {
 
     public function booking($rid = NULL, $source_id = NULL, $destination_id = NULL, $schedules_id = NULL) {
         $date = $this->m_datetime->getDateToday();
-        
+
         $this->m_ticket->check_ticket($schedules_id);
 
         if ($rid == NULL || $source_id == NULL) {
@@ -91,13 +91,7 @@ class sale extends CI_Controller {
         );
 
 
-        $data_debug = array(
-//            'parameter' => "RID = $rid || Source = $source_id || Destination = $destination_id || TSID = $schedules_id",
-//            'form' => $data['form'],
-//            'routes_seller'=>$data['routes_seller'],
-//            'schedules'=>$data['schedules'],
-//            'schedule_select' => $data['schedule_select'],
-        );
+
 
         if ($this->m_sale->validate_form_sale() && $this->form_validation->run() == TRUE) {
             $tickets = $this->m_sale->get_post_form_booking();
@@ -105,6 +99,14 @@ class sale extends CI_Controller {
             $data_debug['update_resever_ticket'] = $this->m_ticket->update_resever_ticket($tickets);
             redirect("sale/print_ticket/$rid/$source_id/$destination_id/$schedules_id");
         }
+
+        $data_debug = array(
+//            'parameter' => "RID = $rid || Source = $source_id || Destination = $destination_id || TSID = $schedules_id",
+//            'form' => $data['form'],
+//            'routes_seller'=>$data['routes_seller'],
+//            'schedules'=>$data['schedules'],
+//            'schedule_select' => $data['schedule_select'],
+        );
 
         $this->m_template->set_Debug($data_debug);
         $this->m_template->set_Title('ขายตั๋วโดยสาร ');
@@ -178,6 +180,26 @@ class sale extends CI_Controller {
         redirect("sale/booking/$RID/$SourceID/$DestinationID/$TSID");
     }
 
+    public function print_log($RID, $SourceID, $DestinationID, $TSID) {
+
+        $data = array(
+            'page_title' => "พิมพ์ใบล็อก",
+            'page_title_small' => "",
+            'previous_page' => "sale/booking/$RID/$SourceID/$DestinationID/$TSID",
+            'next_page' => '',
+            'data' => $this->m_sale->set_form_print_log($TSID, $SourceID),
+        );
+
+        $data_debug = array(
+//            'data' => $data['data'],
+        );
+
+        $this->m_template->set_Debug($data_debug);
+        $this->m_template->set_Title('พิมพ์ใบล๊อก');
+        $this->m_template->set_Content('sale/frm_print_log', $data);
+        $this->m_template->showSaleTemplate();
+    }
+
     /*
      * for ajax
      */
@@ -192,6 +214,7 @@ class sale extends CI_Controller {
         $destination_name = $this->input->post("DestinationName");
         $price_seat = $this->input->post("PriceSeat");
         $price_dicount = $this->input->post('PriceDicount');
+        $TimeDepart = $this->input->post('TimeDepart');
 
         $this->m_ticket->check_ticket($tsid);
 
@@ -209,6 +232,7 @@ class sale extends CI_Controller {
             'SourceName' => $source_name,
             'DestinationID' => $destination_id,
             'DestinationName' => $destination_name,
+            'TimeDepart' => $TimeDepart,
             'DateSale' => $this->m_datetime->getDateToday(),
             'PriceSeat' => $price_seat,
             'IsDiscount' => $IsDiscount,
@@ -217,16 +241,12 @@ class sale extends CI_Controller {
 
         $check_ticket_id = $this->m_ticket->get_TicketID($tsid, $seat, $source_id);
 
-        if ($check_ticket_id == NULL) {
+        if ($check_ticket_id == NULL && $seat <= 99) {
             $ticket_id = $this->m_ticket->resever_ticket($ticket_data);
-        } else {
-            $ticket_id = NULL;
-        }
-
-
-        if ($ticket_id != NULL) {
             echo json_encode(1);
         } else {
+
+            $ticket_id = NULL;
             echo json_encode(0);
         }
     }
@@ -255,9 +275,6 @@ class sale extends CI_Controller {
     }
 
     public function check_seat_plan() {
-
-
-
         $rs = FALSE;
 
         if ($rs) {

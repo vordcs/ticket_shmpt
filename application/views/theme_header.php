@@ -121,11 +121,11 @@
                         <div class="container text-center" id="mainmenu">
                             <ul class="mainnav ">
                                 <li class="active"><a href="<?= base_url('home/') ?>"><i class="fa fa-home"></i><span>หน้าหลัก</span> </a> </li>
-                                <li id="btnSale"><a href="<?= base_url('sale/') ?>"><i class="fa fa-bullhorn"></i><span>ขายตั๋วโดยสาร</span> </a> </li>
+                                <li id="btnSale"><a href="<?= base_url('sale/') ?>"><i class="fa fa-ticket"></i><span>ขายตั๋วโดยสาร</span> </a> </li>
                                 <li id="btnSchedule"><a href="<?= base_url('schedule/') ?>"><i class="fa fa-list"></i><span>ตารางเดินรถ</span> </a> </li>                                  
-                                <li id="btnCheckIn"><a href="<?= base_url('checkin/') ?>"><i class="fa fa-clock-o"></i><span>ลงเวลา</span></a></li>
+                                <li id="btnCheckIn"><a href="<?= base_url('checkin/') ?>"><i class="fa fa-clock-o"></i><span>ลงเวลาออก</span></a></li>
                                 <li id="btnCost"><a href="<?= base_url('cost/') ?>"><i class="fa fa-pencil-square-o"></i><span>ค่าใช้จ่าย</span></a></li>
-                                <li id="btnReport"><a href="<?= base_url('report/') ?>"><i class="fa fa-calendar-o"></i><span>รายงาน</span> </a> </li>                             
+                                <li id="btnReport"><a href="<?= base_url('report/') ?>"><i class="fa fa-money"></i><span>ส่งเงิน</span> </a> </li>                             
                             </ul>    
                         </div>
                         <!-- /container --> 

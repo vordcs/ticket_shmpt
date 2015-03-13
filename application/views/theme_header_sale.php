@@ -14,23 +14,31 @@
         <link rel="apple-touch-icon-precomposed" sizes="144x144"
               href="<?= asset_url() ?>img/apple-touch-icon-144-precomposed.png<?= '?v=' . $version ?>">
         <link rel="shortcut icon" href="<?= asset_url() ?>img/favicon.ico<?= '?v=' . $version ?>">
+        <!-- font -->
+        <link rel="stylesheet" href="<?= asset_url() ?>fonts/th_chakra_petch.css" />
+        
         <!-- Bootstrap core CSS ans JS -->
         <?php echo css('bootstrap.css?v=' . $version); ?>
         <?php echo css('bootflat.min.css?v=' . $version); ?>
         <?php echo css('theme.css?v=' . $version); ?>
         <?php echo css('animate.css?v=' . $version); ?>
-        <?php echo css('font-awesome.css?v=' . $version); ?>        
+        <?php echo css('font-awesome.css?v=' . $version); ?>  
+        
+        <?php echo css('sale/jquery.fs.selecter.min.css?v=' . $version); ?>
+        <?php echo css('sale/style_sale.css?v=' . $version); ?>
+
+        <?php echo css('sale/navmenu-push.css?v=' . $version); ?>
+        <?php echo css('sale/jasny-bootstrap.min.css?v=' . $version); ?>
+        
         <?php echo js('jquery.js?v=' . $version); ?>
         <?php echo js('bootstrap.js?v=' . $version); ?>
 
         <?php echo js('customJS.js?v=' . $version); ?>
         <?php echo js('jquery.fs.selecter.min.js?v=' . $version); ?>
 
-        <?php echo css('sale/jquery.fs.selecter.min.css?v=' . $version); ?>
-        <?php echo css('sale/style_sale.css?v=' . $version); ?>
-
-        <?php echo css('sale/navmenu-push.css?v=' . $version); ?>
-        <?php echo css('sale/jasny-bootstrap.min.css?v=' . $version); ?>
+        
+        
+        
 
         <style>
             body{

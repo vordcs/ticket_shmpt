@@ -191,12 +191,15 @@ class m_checkin extends CI_Model {
         $CheckIn = $this->get_check_in($date, $TSID, $SID, $EID);
         if (count($CheckIn) <= 0) {
             $this->db->insert('check_in', $data);
+            if($this->db->affected_rows()==1){
+//                $this->update_vehicles_current_stations();
+            }            
             $rs = "INSERT -> $TSID";
         } else {
-//            $data = $this->update_checkin($tsid, $sid, $data);
+            $CheckInID = $CheckIn[0]['CheckInID'];
+            $this->update_checkin($CheckInID, $data);
             $rs = "UPDATE -> $TSID";
-        }
-
+        }  
         return $rs;
     }
 
@@ -274,6 +277,10 @@ class m_checkin extends CI_Model {
             $rs = NULL;
         }
         return $rs;
+    }
+
+    public function update_vehicles_current_stations($VID, $SID, $Seq, $Time) {
+        
     }
 
 }
