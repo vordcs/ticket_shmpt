@@ -5,28 +5,40 @@
 
 </script>
 <style>    
+
+    .test-print{
+        background: white;
+        /*font-family: "Arial";*/        
+        /*font-family: tahoma;*/
+        /*font-family:'Times New Roman';*/
+        /*font-family: sans-serif;*/
+        font-family: 'THNiramitAS','Times New Roman';
+    }
+
     .log-print{    
         background: white;        
-        font-family: 'THChakraPetch','Times New Roman', sans-serif;
+        font-family: 'THNiramitAS','Times New Roman', sans-serif;
     }       
     table .title{      
-        font-size: 5pt;        
+        font-size: 10pt; 
     }
     table .sub-title{         
-        font-size: 4pt;   
-        height: 10px;
+        font-size: 6pt; 
+    }
+    table .title-content{     
+        font-size: 6pt; 
     }
     table .content{     
-        font-size: 4pt;  
-        height: 12px;
+        font-size: 12pt; 
+    }
+    table .content-small{     
+        font-size: 10pt; 
     }
     table .table-header{     
-        font-size: 2pt;  
-        height: 8px;        
+        font-size: 6pt; 
     }
     table .note{     
-        font-size: 2pt;     
-        height: 8px; 
+        font-size: 5pt;  
     }
     /* css ส่วนสำหรับการแบ่งหน้าข้อมูลสำหรับการพิมพ์ */
     @media all
@@ -164,35 +176,31 @@
                     </tr>                   
                     <tr class="title">                        
                         <th colspan="2">
-                            บริษัท สหมิตรภาพ(2512) จำกัด
-                        </th>
-                    </tr>
-                    <tr class="sub-title">
-                        <th colspan="2">
-                            <strong><u><?= $data['VTName'] ?></u></strong>                            
-                        </th>
-                    </tr> 
-                    <tr class="sub-title">
-                        <th colspan="2">                            
-                            <?= $data['RouteName'] ?>
+                            <img src="<?= base_url() . "/assets/img/ticket_logo.png" ?>" class="" width="100%" height="60px" alt="Logo">   
+
                         </th>
                     </tr>                   
-                </thead>
-                <tbody>
                     <tr class="sub-title">
-                        <th colspan="2" class="text-center">
+                        <th colspan="2" style="padding-top: 10px">                            
+                            <strong><?= $data['VTName'] ?></strong>&nbsp;<?= $data['RouteName'] ?>
+                        </th>
+                    </tr>   
+                    <tr class="sub-title">
+                        <th colspan="2" class="text-center" style="padding-top: 2px;padding-bottom: 5px">
                             จุดจอด&nbsp;:&nbsp;<strong><?= $data['SallerStationName'] ?> </strong>               
                         </th>
                     </tr>
-                    <tr class="table-header">
-                        <td class="text-center" style="padding-left: 2%;">เวลาออก</td>                        
-                        <td class="text-center" style="padding-left: 2%;">รถเบอร์</td> 
+                </thead>
+                <tbody>                    
+                    <tr class="title-content">
+                        <td class="text-left" style="padding-left: 2%;">เวลาออก</td>                        
+                        <td class="text-left" style="padding-left: 2%;">รถเบอร์</td> 
                     </tr>
                     <tr class="title">
                         <td class="text-center"><strong><?= $data['TimeDepart'] ?></strong></td>                        
                         <td class="text-center"><strong><?= $data['VCode'] ?></strong></td> 
                     </tr> 
-                    <tr class="content">
+                    <tr class="title-content">
                         <td colspan="2" class="text-center">
                             <?= $data['Date'] ?>
                         </td>
@@ -202,25 +210,16 @@
             <table class="table-bordered">
                 <thead>
                     <tr class="table-header">
-                        <th style="width: 50%">เลขที่นั่ง</th>
-                        <th style="width: 50%">ปลายทาง</th>
+                        <th style="width: 20%">จำนวน</th>
+                        <th style="width: 80%">ปลายทาง</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php
-                    foreach ($data['reports'] as $report) {
-                        $seat = '';
-                        $n = 0;
-                        foreach ($report['SeatNo'] as $seat_no) {
-                            if ($n != 0) {
-                                $seat .= " , ";
-                            }
-                            $seat .= "$seat_no";
-                            $n++;
-                        }
+                    foreach ($data['reports'] as $report) {                      
                         ?>
                         <tr class="content">
-                            <td class="text-center"><strong><?= $seat ?></strong></td>
+                            <td class="text-center"><strong><?= count($report['SeatNo']) ?></strong></td>
                             <td class="text-left" style="padding-left: 2%;"><?= $report['DestinationName'] ?></td>                            
                         </tr>
                         <?php
@@ -239,6 +238,35 @@
                     </tr>
                 </tfoot>
             </table>           
+        </div>
+    </div>
+    <div class="row test-print hidden">
+        <div class="col-md-6 col-md-offset-3 test-print" style="">
+            <table class="table-bordered">
+                <thead>
+                    <tr>
+                        <th style="width: 8%"></th>
+                        <th style="width: 45%"></th>
+                        <th style="width: 45%"></th>
+                    </tr>
+                    <tr>
+                        <th colspan="3">THNiramitAS</th>                        
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php
+                    for ($i = 1; $i <= 16; $i++) {
+                        ?>
+                        <tr>
+                            <td rowspan="2" style="font-size: <?=$i?>pt" class="text-center"><?=$i?></td>
+                            <td colspan="2" style="font-size: <?=$i?>pt">ทดสอบการพิมพ์ตั๋วโดยสาร</td>                            
+                        </tr>
+                        <tr>                            
+                            <td colspan="2" style="font-size: <?=$i?>pt"><strong>ทดสอบการพิมพ์ตัวโดยสาร</strong></td>
+                        </tr>
+                    <?php } ?>
+                </tbody>
+            </table>
         </div>
     </div>
 </div>

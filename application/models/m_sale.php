@@ -537,6 +537,7 @@ class m_sale extends CI_Model {
 
             if ($seller_station_seq == 1) {
                 $start_point = 'S';
+                $IsSold = TRUE;
                 array_pop($detail_in_routes);
             } elseif ($seller_station_seq == $num_station) {
                 $start_point = 'D';
@@ -573,6 +574,15 @@ class m_sale extends CI_Model {
 
         $seller_station_id = $route['SID'];
         $seller_station_seq = $route['Seq'];
+
+        $stations = $this->m_station->get_stations($rcode, $vtid);
+        $num_station = count($stations);
+
+        if ($seller_station_seq == 1 || $seller_station_seq == $num_station) {
+            $IsFirstStation = TRUE;
+        } else {
+            $IsFirstStation = FALSE;
+        }
 
         /*
          * ข้อมูลสถานีปลายทาง
@@ -657,7 +667,6 @@ class m_sale extends CI_Model {
             }
 
 
-
             $Reports = array();
 
             if ($NumberSeatSaleBySeller > 0) {
@@ -681,6 +690,32 @@ class m_sale extends CI_Model {
                 $TimeCheckIn = date('H:i', strtotime($data_checkin[0]['TimeCheckIn']));
             }
 
+            $check_in_on_schedule = $this->m_checkin->get_check_in($date, $TSID_schedule);
+            $data_check_in = array();
+            foreach ($check_in_on_schedule as $checkin) {
+                $station_name = $checkin['StationName'];
+
+                if ($checkin['SellerNote'] != NULL) {
+                    $station_name .= $checkin['SellerNote'];
+                }
+
+                $temp_check_in = array(
+                    'TimeCheckIn' => date('H:i', strtotime($checkin['TimeCheckIn'])),
+                    'StationName' => $station_name,
+                );
+                array_push($data_check_in, $temp_check_in);
+            }
+            /* ข้อมูลการส่งรายงาน */
+            $ReportID = $this->m_report->check_report(NULL, $TSID_schedule, $seller_station_id);
+            /* ตรวจสอบว่าสามารถขายตั๋วได้หรือไม่ */
+            if ($IsFirstStation) {
+                $IsSold = TRUE;
+            } elseif (count($data_check_in) > 0) {
+                $IsSold = TRUE;
+            } else {
+                $IsSold = FALSE;
+            }
+
             $temp_schedule_in_route = array(
                 'RID' => $schedule['RID'],
                 'RouteName' => $route_name,
@@ -689,17 +724,19 @@ class m_sale extends CI_Model {
                 'SourceSeq' => $seller_station_seq,
                 'DestinationID' => $DestinationID,
                 'DestinationSeq' => $DestinationSeq,
+                'IsSold' => $IsSold,
                 'TSID' => $TSID_schedule,
                 'TimeDepart' => $TimeDepart,
                 'Date' => $Date_schedule,
                 'VID' => $schedule['VID'],
                 'VCode' => $schedule['VCode'],
                 'VTID' => $schedule['VTID'],
-                'ScheduleNote'=>$schedule['ScheduleNote'],
-                'ReportID' => $this->m_report->check_report(NULL, $TSID_schedule, $seller_station_id),
+                'ScheduleNote' => $schedule['ScheduleNote'],
+                'ReportID' => $ReportID,
                 'CheckInID' => $CheckInID,
                 'TimeCheckIn' => $TimeCheckIn,
                 'CheckInTime' => $this->m_checkin->check_checkin(NULL, $TSID_schedule, $seller_station_id),
+                'data_check_in' => $data_check_in,
                 'Fare' => $i_Fare,
                 'NumberSeat' => $NumberSeat,
                 'NumberSeatBlank' => $NumberSeatBlank,
@@ -822,8 +859,7 @@ class m_sale extends CI_Model {
                 $time_arrive = '-';
             }
             if ($vtid == '1') {
-                $note = '** รถเต็มออกก่อนเวลา **';
-                $time_depart.='*';
+                $note = '** รถเต็มออกก่อนเวลา **';                
             }
 
             $temp_ticket = array(
@@ -872,7 +908,7 @@ class m_sale extends CI_Model {
 
         $VCode = $schedule['VCode'];
 
-        $route = reset($this->m_route->get_route_by_seller($RCode, $VTID,$RID));
+        $route = reset($this->m_route->get_route_by_seller($RCode, $VTID, $RID));
         $seller_station_name = $route['StationName'];
 
         if ($route['SellerNote'] != NULL) {

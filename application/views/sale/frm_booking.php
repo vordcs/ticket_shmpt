@@ -201,7 +201,6 @@
     }
 
     function booking(seat_no) {
-//        alert(seate_no);      
 
         var seat_info = {
             'TSID': schedules_id,
@@ -256,7 +255,7 @@
     function check_chang() {
         var data = {
             'TSID': '',
-            'NumberSeatTotal': '',
+            'NumberSeatTotal': ''
         };
         $.ajax({
             url: '<?= base_url() . "sale/booking_seat" ?>',
@@ -281,11 +280,15 @@
         var SourceID = document.getElementById("SourceID").value;
         var DestinationID = destination.value;
         var RID = document.getElementById("RID").value; 
-        window.location.href = '<?= base_url() ?>' + 'sale/booking/' + RID + '/' + SourceID + '/' + DestinationID + '/' + schedules_id;
-
+        var num_ticket = $('#ticket_guest tbody tr').length;
+//        if (num_ticket > 0) {
+//            alert(num_ticket+' ticket');
+////            $('#form_sale').submit();
+//        } else {
+//            alert(num_ticket+' ticket');
+////            window.location.href = '<? base_url() ?>' + 'sale/booking/' + RID + '/' + SourceID + '/' + DestinationID + '/' + schedules_id;
+//        }
     }
-
-
 </script>
 <style>  
     body{
@@ -466,6 +469,7 @@ function check_ticket($tickets, $Seat, $EID = NULL, $SeatStatus = NULL) {
         <span class="icon-bar"></span>
     </button>
 </div>
+
 <div id="" class="container-fluid">
     <div class="row-fluid animated fadeInUp">             
         <div class="col-lg-12">
@@ -498,103 +502,141 @@ if (array_key_exists('ReportID', $schedule_select)) {
     <?php echo validation_errors() ?>
     <div class="row-fluid">
         <div id="select_time" class="col-lg-4 col-lg-offset-4">
-            <div id="route_info"  class="col-lg-12" style="padding-bottom: 2%;">
-                <div class="form-group">
-                    <div class="col-md-12">
-                        <label for="">เส้นทาง</label>
-                        <?php echo $form['route_name'] ?>
-                        <?php echo $form['RID'] ?>
-                        <?php echo $form['TSID'] ?>
-                    </div>
-                </div>  
-                <div class="form-group">
-                    <div class="col-md-6">
-                        <label for="">ต้นทาง</label>                                
-                        <?php echo $form['SourceID'] ?>
-                        <?php echo $form['SourceName'] ?>
+            <div class="row" id="data_route">
+                <div id="route_info"  class="col-lg-12" style="padding-bottom: 2%;">
+                    <div class="form-group">
+                        <div class="col-md-12">
+                            <label for="">เส้นทาง</label>
+                            <?php echo $form['route_name'] ?>
+                            <?php echo $form['RID'] ?>
+                            <?php echo $form['TSID'] ?>
+                        </div>
+                    </div>  
+                    <div class="form-group">
+                        <div class="col-md-6">
+                            <label for="">ต้นทาง</label>                                
+                            <?php echo $form['SourceID'] ?>
+                            <?php echo $form['SourceName'] ?>
 
+                        </div>
+                        <div class="col-md-6">
+                            <label for="">ปลายทาง</label>
+                            <?php echo $form['DestinationID'] ?>
+                            <?php echo $form['DestinationName'] ?>
+                            <?php echo $form['StationDestination'] ?>                        
+                        </div>
+                    </div>  
+                    <div class="col-md-12 text-center" style="padding-top: 2%;">
+                        <strong>
+                            <?= $this->m_datetime->getDateThaiString() ?>
+                        </strong>
                     </div>
-                    <div class="col-md-6">
-                        <label for="">ปลายทาง</label>
-                        <?php echo $form['DestinationID'] ?>
-                        <?php echo $form['DestinationName'] ?>
-                        <?php echo $form['StationDestination'] ?>                        
-                    </div>
-                </div>  
-                <div class="col-md-12 text-center" style="padding-top: 2%;">
-                    <strong>
-                        <?= $this->m_datetime->getDateThaiString() ?>
-                    </strong>
                 </div>
             </div>
-            <div class="col-lg-12" style="padding-top: 2%;padding-bottom: 2%;">
-                <span class="text pull-left">เวลาเดินทาง&nbsp;&nbsp; :</span>
-                <span class="badge badge-danger pull-right">&nbsp;เต็ม&nbsp;</span>
-                <span class="badge badge-info pull-right text" style="color:white;"> &nbsp;ว่าง&nbsp;</span> 
-            </div>
-            <div id="time_list" class="col-lg-12">                
-                <div id = "list">                    
-                    <div class = "list-group">
-                        <?php
-                        if (count($schedules) > 0) {
-                            foreach ($schedules as $schedule) {
-                                $rid = $schedule['RID'];
-                                $source_id = $schedule['SourceID'];
-                                $destination_id = $schedule['DestinationID'];
-                                $tsid = $schedule['TSID'];
-                                $checkin_id = $schedule['CheckInID'];
-                                $checkin_time = $schedule['TimeCheckIn'];
-                                $report_id = $schedule['ReportID'];
+            <div class="row" id="scheules_list">
+                <div class="col-lg-12" style="padding-top: 2%;padding-bottom: 2%;">
+                    <span class="text pull-left">เวลาเดินทาง&nbsp;&nbsp; :</span>
+                    <span class="badge badge-danger pull-right">&nbsp;เต็ม&nbsp;</span>
+                    <span class="badge badge-info pull-right text" style="color:white;"> &nbsp;ว่าง&nbsp;</span> 
+                </div>
+                <div id="time_list" class="col-lg-12">                
+                    <div id = "list">                    
+                        <div class = "list-group">
+                            <?php
+                            if (count($schedules) > 0) {
+                                foreach ($schedules as $schedule) {
+                                    $rid = $schedule['RID'];
+                                    $source_id = $schedule['SourceID'];
+                                    $destination_id = $schedule['DestinationID'];
+                                    $tsid = $schedule['TSID'];
+                                    $checkin_id = $schedule['CheckInID'];
+                                    $checkin_time = $schedule['TimeCheckIn'];
+                                    $report_id = $schedule['ReportID'];
 
-                                $num_seat_book = $schedule['NumberSeatBook'];
-                                $num_seat_sale = $schedule['NumberSeatSale'];
+                                    $num_seat_book = $schedule['NumberSeatBook'];
+                                    $num_seat_sale = $schedule['NumberSeatSale'];
 
-                                $seat_blank = $schedule['NumberSeatBlank'];
-                                $class_seat = 'badge-info';
+                                    $seat_blank = $schedule['NumberSeatBlank'];
+                                    $class_seat = 'badge-info';
 
-                                $class_li = '';
-                                $icon = '<i class="fa fa-clock-o fa-2x"style="color:#48CFAD;"></i>';
-                                if ($schedule_select['NumberSeat'] > 0) {
-                                    if ($tsid == $schedule_select['TSID']) {
-                                        $class_li = "active";
+                                    $class_li = '';
+
+                                    if ($schedule_select['NumberSeat'] > 0) {
+                                        if ($tsid == $schedule_select['TSID']) {
+                                            $class_li = "active";
+                                        }
                                     }
-                                }
-                                if ($seat_blank <= 0) {
-                                    $class_seat = 'badge-danger';
-                                    $seat_blank = 'เต็ม';
-                                }
-                                $can_sale = '';
-                                if ($checkin_id != NULL) {
-                                    $can_sale = 'disabled';
-                                    $icon = '<i class="fa fa-user-times fa-2x" style="color:#FC6E51;"></i>';
-                                    $class_seat = 'badge-normal';
+                                    if ($seat_blank <= 0) {
+                                        $class_seat = 'badge-danger';
+                                        $seat_blank = 'เต็ม';
+                                    }
+                                    $can_sale = '';
 
-                                    $num_seat_blank = $schedule['NumberSeatBlank'];
-
-                                    if ($num_seat_blank <= 0) {
-                                        $num_seat_blank = 0;
+                                    if ($schedule['IsSold']) {
+                                        $icon = '<i class="fa fa-clock-o fa-2x"style="color:#48CFAD;"></i>';
+                                    } else {
+                                        $icon = '<i class="fa fa-clock-o fa-2x"style="color:#FC6E51;"></i>';
                                     }
 
-                                    $seat_blank = "ออกเเล้ว <br> ว่าง : $num_seat_blank ";
-                                }
-                                if ($report_id != NULL) {
-                                    $icon = '<i class="fa fa-user-times fa-2x" style="color:#FC6E51;"></i>';
-                                    $class_seat = 'badge-normal';
-                                    $seat_blank = "ส่งเงินเเล้ว";
-                                }
-                                ?>
+                                    if ($checkin_id != NULL) {
+                                        $can_sale = 'disabled';
+                                        $icon = '<i class="fa fa-user-times fa-2x" style="color:#FC6E51;"></i>';
+                                        $class_seat = 'badge-normal';
 
-                                <a class="list-group-item <?= $can_sale ?> <?= $class_li ?>" name="<?= "schedule_$tsid" ?>" href="<?= base_url("sale/booking/$rid/$source_id/$destination_id/$tsid"); ?>">  
-                                    <?= $icon ?> <span class="text" style="font-size: 18pt"> <?= $schedule['TimeDepart'] ?></span>
-                                    <span class="badge <?= $class_seat ?>" style="<?= ($checkin_id != NULL || $report_id != NULL) ? '' : 'font-size: 16pt' ?>" ><?= $seat_blank ?></span>                          
-                                </a>
-                                <?php
+                                        $num_seat_blank = $schedule['NumberSeatBlank'];
+
+                                        if ($num_seat_blank <= 0) {
+                                            $num_seat_blank = 0;
+                                        }
+
+                                        $seat_blank = "ออกเเล้ว <br> ว่าง : $num_seat_blank ";
+                                    }
+                                    if ($report_id != NULL) {
+                                        $icon = '<i class="fa fa-user-times fa-2x" style="color:#FC6E51;"></i>';
+                                        $class_seat = 'badge-normal';
+                                        $seat_blank = "ส่งเงินเเล้ว";
+                                    }
+                                    ?>
+
+                                    <a class="list-group-item <?= $can_sale ?> <?= $class_li ?>" name="<?= "schedule_$tsid" ?>" href="<?= base_url("sale/booking/$rid/$source_id/$destination_id/$tsid"); ?>">  
+                                        <?= $icon ?> <span class="text" style="font-size: 18pt"> <?= $schedule['TimeDepart'] ?></span>
+                                        <span class="badge <?= $class_seat ?>" style="<?= ($checkin_id != NULL || $report_id != NULL) ? '' : 'font-size: 16pt' ?>" ><?= $seat_blank ?></span>                          
+                                    </a>
+                                    <?php
+                                }
                             }
-                        }
-                        ?>
+                            ?>
+                        </div>
                     </div>
                 </div>
-            </div>          
+            </div>         
+            <div class="row" id="data_checkin">
+                <div class="col-lg-8  <?= ((array_key_exists('data_check_in', $schedule_select) && count($schedule_select['data_check_in']) > 0) ? '' : 'hidden' ) ?> ">
+                    <p class="text">ข้อมูลเวลาออก</p>
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th style="width: 30%">เวลา</th>
+                                <th style="width: 70%">ออกจาก</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php
+                            if (array_key_exists('data_check_in', $schedule_select)) {
+                                foreach ($schedule_select['data_check_in'] as $checkin) {
+                                    ?>
+                                    <tr>
+                                        <td class="text-center"><strong><?= $checkin['TimeCheckIn'] ?></strong></td>
+                                        <td class="text-left"><?= $checkin['StationName'] ?></td>
+                                    </tr>
+                                    <?php
+                                }
+                            }
+                            ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>            
         </div>
         <?php $schedule = $schedule_select ?>
         <div id="select_seat" class="hidden">
@@ -718,7 +760,7 @@ if (array_key_exists('ReportID', $schedule_select)) {
                                                         }
                                                     }
 
-                                                    if ($schedule['ReportID'] != NULL || $schedule['CheckInID'] != NULL) {
+                                                    if ($schedule['IsSold'] == FALSE || $schedule['ReportID'] != NULL || $schedule['CheckInID'] != NULL) {
                                                         $click_book = "";
                                                         $click_remove = "";
                                                         $class_seat .='  ';
@@ -742,7 +784,7 @@ if (array_key_exists('ReportID', $schedule_select)) {
                                         }
                                         echo '</tr>';
                                     }
-                                    if ($schedule['NumberSeat'] <= $schedule['NumberSeatSale']) {
+                                    if ($schedule['IsSold'] && $schedule['NumberSeat'] <= $schedule['NumberSeatSale']) {
                                         $click_book = "addSeatExtra()";
                                         $class_add_extra = '';
                                         if ($CheckInID != NULL || $ReportID != NULL) {
@@ -789,7 +831,7 @@ if (array_key_exists('ReportID', $schedule_select)) {
                                         $click_remove = "removeSeatExtra($seat_no)";
                                     }
 
-                                    if ($CheckInID != NULL || $ReportID != NULL) {
+                                    if ($schedule['IsSold'] || $CheckInID != NULL || $ReportID != NULL) {
                                         $click_remove = '';
                                     }
 
@@ -875,7 +917,7 @@ if (array_key_exists('ReportID', $schedule_select)) {
                                                     }
                                                 }
 
-                                                if ($schedule['ReportID'] != NULL || $schedule['CheckInID'] != NULL) {
+                                                if ($schedule['IsSold'] == FALSE || $schedule['ReportID'] != NULL || $schedule['CheckInID'] != NULL) {
                                                     $click_book = "";
                                                     $click_remove = "";
                                                     $class_seat .='  ';
@@ -903,7 +945,7 @@ if (array_key_exists('ReportID', $schedule_select)) {
                                 </tbody>
                                 <tfoot>
                                     <?php
-                                    if ($schedule['NumberSeat'] <= $schedule['NumberSeatSale']) {
+                                    if ($schedule['IsSold'] && $schedule['NumberSeat'] <= $schedule['NumberSeatSale']) {
                                         $click_book = "addSeatExtra()";
                                         $class_add_extra = '';
                                         if ($CheckInID != NULL || $ReportID != NULL) {
@@ -924,7 +966,6 @@ if (array_key_exists('ReportID', $schedule_select)) {
                                 </tfoot>
                             </table>
                         </div>
-
                         <div class="row">
                             <div id="SeatExtra" class="row well" style="width: 85%;margin: 0 auto;">
                                 <?php
@@ -1056,7 +1097,7 @@ if (array_key_exists('ReportID', $schedule_select)) {
 
 
                         $print_log = array(
-                            'class' => 'btn btn-block btn-info ',
+                            'class' => 'btn btn-block btn-info',
                             'type' => "button",
                             'data-id' => "1",
                             'data-title' => "พิมพ์ใบล๊อก รถเบอร์ $vcode_",
@@ -1068,7 +1109,9 @@ if (array_key_exists('ReportID', $schedule_select)) {
                             'data-href' => "sale/print_log/$RID/$SourceID/$DestinationID/$TSID",
                         );
                         echo anchor('#', '<i class="fa fa-check-square-o fa-lg"></i>&nbsp;ลงเวลาออก', $checkin);
-                        echo anchor('#', '<i class="fa fa-print fa-lg"></i>&nbsp;พิมพ์ใบล๊อก', $print_log);
+                        if ($TimeCheckIn != NULL) {
+                            echo anchor('#', '<i class="fa fa-print fa-lg"></i>&nbsp;พิมพ์ใบล๊อก', $print_log);
+                        }
                         ?>                       
                     </div>
                 </div>  

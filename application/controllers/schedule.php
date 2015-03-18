@@ -52,7 +52,7 @@ class schedule extends CI_Controller {
 //            'routes' => $data['routes'],
 //            'stations' => $data['stations'],
 //            'schedules' => $data['schedules'],
-            'routes_seller' => $data['routes_seller'],
+//            'routes_seller' => $data['routes_seller'],
 //            'data' => $data['data'],
         );
         $this->m_template->set_Debug($data_debug);

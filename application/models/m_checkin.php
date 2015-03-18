@@ -7,27 +7,30 @@ class m_checkin extends CI_Model {
 
     public function get_check_in($date = NULL, $TSID = NULL, $SID = NULL, $EID = NULL, $CheckInID = NULL) {
 
+        $this->db->join('sellers','sellers.SID = check_in.SID','left');
+        $this->db->join('t_stations','t_stations.SID = check_in.SID','left');
+        
         if ($date == NULL) {
             $date = $this->m_datetime->getDateToday();
         }
 
         if ($TSID != NULL) {
-            $this->db->where('TSID', $TSID);
+            $this->db->where('check_in.TSID', $TSID);
         }
 
         if ($SID != NULL) {
-            $this->db->where('SID', $SID);
+            $this->db->where('check_in.SID', $SID);
         }
 
         if ($EID != NULL) {
-            $this->db->where('CreateBy', $EID);
+            $this->db->where('check_in.CreateBy', $EID);
         }
 
         if ($CheckInID != NULL) {
-            $this->db->where('CheckInID', $CheckInID);
+            $this->db->where('check_in.CheckInID', $CheckInID);
         }
 
-        $this->db->where('DateCheckIn', $date);
+        $this->db->where('check_in.DateCheckIn', $date);
 
         $query = $this->db->get('check_in');
 

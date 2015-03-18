@@ -90,9 +90,6 @@ class sale extends CI_Controller {
             'schedule_select' => $set_data['schedule_select'],
         );
 
-
-
-
         if ($this->m_sale->validate_form_sale() && $this->form_validation->run() == TRUE) {
             $tickets = $this->m_sale->get_post_form_booking();
 //            $data_debug['data_form_sale'] = $tickets;
@@ -268,9 +265,9 @@ class sale extends CI_Controller {
         $rs = $this->m_ticket->sale_ticket($ticket_id);
 
         if ($rs) {
-            echo json_encode('true');
+            echo json_encode(1);
         } else {
-            echo json_encode('false');
+            echo json_encode(0);
         }
     }
 
