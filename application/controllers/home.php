@@ -71,7 +71,7 @@ class Home extends CI_Controller {
         foreach ($data['seller_detail'] as $row) {
             array_push($data['all_sid'], $row['SID']);
         }
-        $data['timeline'] = $this->m_home->get_timeline(NULL, $data['all_sid']);
+//        $data['timeline'] = $this->m_home->get_timeline(NULL, $data['all_sid']);
         $data_debug = array(
 //            'from_search' => $data['from_search'],
 //    'route'=>$data['route'],
