@@ -23,7 +23,7 @@ class m_schedule extends CI_Model {
             $VTID = $vehicle_type['VTID'];
             $VTName = $vehicle_type['VTDescription'];
 
-            $routes = $this->m_route->get_route(NULL, $VTID);
+            $routes = $this->m_route->get_route_by_seller(NULL, $VTID);
             $num_route = count($routes);
 
             $route_in_type = array();

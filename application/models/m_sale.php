@@ -445,7 +445,7 @@ class m_sale extends CI_Model {
         $dropdown = 'id="StationDestination" onchange="change_destination()" ';
 
         $form_sale_ticket = array(
-            'form' => form_open("sale/booking/$rid/$source_id/$destination_id/$tsid", array('class' => 'form', 'id' => 'form_sale')),
+            'form' => form_open("sale/booking/$rid/$source_id/$destination_id/$tsid", array('class' => 'form', 'id' => 'form_booking','name'=>'form_booking')),
             'route_name' => form_input($i_route_name),
             'RID' => form_input($i_RID),
             'VID' => form_input($i_VID),

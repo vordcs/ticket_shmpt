@@ -265,7 +265,7 @@
                                 </th>
                             </tr>
                             <tr>
-                                <th colspan="2" class="name-route">รถบัส 278 ขอนแก่น - มุกดาหาร</th>
+                                <th colspan="2" class="name-route"><?= $ticket['RouteName'] ?></th>
                             </tr>
                         </thead>
                         <tbody>

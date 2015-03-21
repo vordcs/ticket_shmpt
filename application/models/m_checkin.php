@@ -7,9 +7,9 @@ class m_checkin extends CI_Model {
 
     public function get_check_in($date = NULL, $TSID = NULL, $SID = NULL, $EID = NULL, $CheckInID = NULL) {
 
-        $this->db->join('sellers','sellers.SID = check_in.SID','left');
-        $this->db->join('t_stations','t_stations.SID = check_in.SID','left');
-        
+        $this->db->join('sellers', 'sellers.SID = check_in.SID', 'left');
+        $this->db->join('t_stations', 't_stations.SID = check_in.SID', 'left');
+
         if ($date == NULL) {
             $date = $this->m_datetime->getDateToday();
         }
@@ -194,15 +194,15 @@ class m_checkin extends CI_Model {
         $CheckIn = $this->get_check_in($date, $TSID, $SID, $EID);
         if (count($CheckIn) <= 0) {
             $this->db->insert('check_in', $data);
-            if($this->db->affected_rows()==1){
+            if ($this->db->affected_rows() == 1) {
 //                $this->update_vehicles_current_stations();
-            }            
+            }
             $rs = "INSERT -> $TSID";
         } else {
             $CheckInID = $CheckIn[0]['CheckInID'];
             $this->update_checkin($CheckInID, $data);
             $rs = "UPDATE -> $TSID";
-        }  
+        }
         return $rs;
     }
 
@@ -244,16 +244,21 @@ class m_checkin extends CI_Model {
 
     public function gennerate_checkin_id($SID) {
         $CheckInID = '';
-        $date_ = $this->m_datetime->getDateToday();
-        $checkin = $this->get_check_in($date_, NULL, $SID);
+        $date = $this->m_datetime->getDateToday();
+        $checkin = $this->get_check_in($date, NULL, $SID);
         $num_checkin = count($checkin);
-        //วันที่
-        $date = new DateTime();
-        $CheckInID .=$date->format("Ymd");
-        //สถานี
-        $CheckInID .= str_pad($SID, 3, '0', STR_PAD_LEFT);
-        //run number
-        $CheckInID .= str_pad($num_checkin, 3, '0', STR_PAD_LEFT);
+        if ($num_checkin <= 0) {
+            //วันที่
+            $date_ = new DateTime();
+            $CheckInID .=$date_->format("Ymd");
+            //สถานี
+            $CheckInID .= str_pad($SID, 3, '0', STR_PAD_LEFT);
+            //run number
+            $CheckInID .= str_pad($num_checkin, 3, '0', STR_PAD_LEFT);
+        } else {
+            $check_in = end($checkin);
+            $CheckInID = $check_in['CheckInID'] + 1;
+        }
 
         return $CheckInID;
     }

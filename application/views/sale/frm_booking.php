@@ -280,14 +280,12 @@
         var SourceID = document.getElementById("SourceID").value;
         var DestinationID = destination.value;
         var RID = document.getElementById("RID").value; 
-        var num_ticket = $('#ticket_guest tbody tr').length;
-//        if (num_ticket > 0) {
-//            alert(num_ticket+' ticket');
-////            $('#form_sale').submit();
-//        } else {
-//            alert(num_ticket+' ticket');
-////            window.location.href = '<? base_url() ?>' + 'sale/booking/' + RID + '/' + SourceID + '/' + DestinationID + '/' + schedules_id;
-//        }
+        var num_ticket = $('#ticket_guest tbody tr').length;        
+        if (num_ticket > 0) {          
+            $('#form_booking').submit();
+        } else {
+            window.location.href = '<?= base_url() ?>' + 'sale/booking/' + RID + '/' + SourceID + '/' + DestinationID + '/' + schedules_id;
+        }
     }
 </script>
 <style>  
