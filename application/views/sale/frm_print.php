@@ -261,7 +261,7 @@
                             </tr> 
                             <tr>
                                 <th colspan="2">
-                                    <img src="<?= base_url() . "/assets/img/ticket_logo.png" ?>" class="" width="70%" height="60px" alt="">                                 
+                                    <img src="<?= base_url() . "assets/img/ticket_logo.png" ?>" class="" width="70%" height="60px" alt="">                                 
                                 </th>
                             </tr>
                             <tr>
@@ -406,7 +406,7 @@
                         </tr>
                         <tr>
                             <th colspan="2">
-                                <img src="<?= base_url() . "/assets/img/ticket_logo.png" ?>" class="" width="70%" height="80px" alt="">                                 
+                                <img src="<?= base_url() . "assets/img/ticket_logo.png" ?>" class="" width="70%" height="80px" alt="">                                 
                             </th>
                         </tr>
                         <tr>
