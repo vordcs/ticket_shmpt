@@ -31,12 +31,8 @@ class m_schedule extends CI_Model {
             foreach ($routes as $route) {
 
                 $RCode = $route['RCode'];
-
-
-
                 $detail_in_route = array();
-                $routes_detail = $this->m_route->get_route_detail($RCode, $VTID);
-
+                $routes_detail = $this->m_route->get_route_detail($RCode, $VTID); 
                 foreach ($routes_detail as $rd) {
                     $RID = $rd['RID'];
                     $StartPoint = $rd['StartPoint'];

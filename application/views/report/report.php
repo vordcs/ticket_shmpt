@@ -114,7 +114,7 @@
                                     'data-placement' => "top",
                                     'title' => "ส่งรายงาน $route_name",
                                 );
-                                echo anchor("report/send/$rcode/$VTID/$seller_station_id", '<i class="fa fa-send-o"></i>&nbsp;&nbsp;ส่งเงิน', $send_report);
+                                echo anchor("report/send/$rcode/$VTID/$seller_station_id", '<i class="fa fa-send-o"></i>&nbsp;&nbsp;ส่งเงิน '.$route_name , $send_report);
                                 ?>                                      
                             </div>
                             <div class="col-md-12 <?= (count($route['Reports']) > 0) ? '' : 'hidden' ?>" style="padding-top: 3% ; padding-bottom: 3%;">

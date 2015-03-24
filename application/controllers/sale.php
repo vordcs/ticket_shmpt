@@ -112,8 +112,6 @@ class sale extends CI_Controller {
     }
 
     public function print_ticket($rid = NULL, $source_id = NULL, $destination_id = NULL, $tsid = NULL) {
-        //ตรวจสอบสถานะตั๋ว 
-        $this->m_ticket->check_ticket();
 
         if ($rid == null || $source_id == NULL || $destination_id == NULL || $tsid == NULL) {
             $alert['alert_message'] = "เลือกข้อมูลรอบเวลา";
@@ -122,37 +120,44 @@ class sale extends CI_Controller {
 
             redirect('sale/');
         }
+        //ตรวจสอบสถานะตั๋ว 
+        $num_ticket_delete = $this->m_ticket->check_ticket($tsid);
 
         $date = $this->m_datetime->getDateToday();
         $eid = $this->m_user->get_user_id();
 
         $tickets = $this->m_ticket->get_ticket($date, $tsid, 2, $eid);
 
-
-        if (count($tickets) <= 0) {
+        if (count($tickets) <= 0 && $num_ticket_delete > 0) {
             $alert['alert_message'] = "หมดเวลาทำรายการ";
             $alert['alert_mode'] = "warning";
             $this->session->set_flashdata('alert', $alert);
 
             redirect("sale/booking/$rid/$source_id/$destination_id/$tsid");
         }
+        if (count($tickets) <= 0) {
+            redirect("sale/booking/$rid/$source_id/$destination_id/$tsid");
+        }
 
-        $route = $this->m_route->get_route(NULL, NULL, $rid);
+        $form_data = array();
+        $rs = array();
+        if ($this->m_sale->validate_form_print_ticket() && $this->form_validation->run() == TRUE) {
+            $form_data = $this->m_sale->get_post_form_print_ticket();
+            $rs = $this->m_ticket->sale_tickets($form_data);
+            
+            redirect("sale/booking/$rid/$source_id/$destination_id/$tsid");;
+        }
+
         $data = array(
             'previous_page' => "sale/booking/$rid/$source_id/$destination_id/$tsid",
             'next_page' => '',
-            'rid' => $route[0]['RID'],
-            'source_id' => $source_id,
-            'destination_id' => $destination_id,
-            'tsid' => $tsid,
-            'tickets' => $tickets,
-            'route' => $route[0],
-            'data' => $this->m_sale->set_form_print($date, $rid, $tsid),
+            'data' => $this->m_sale->set_form_print($date, $rid, $source_id, $destination_id, $tsid),
         );
         $data_debug = array(
 //            'tickets' => $data['tickets'],
 //            'route' => $data['route'],
-//            'data_post' => $this->input->post(),
+//            'form_data' => $form_data,
+//            'rs' => $rs,
 //            'data' => $data['data'],
         );
 
@@ -171,9 +176,6 @@ class sale extends CI_Controller {
             $data_checkin_edit = $this->m_checkin->get_post_form_edit();
             $rs = $this->m_checkin->update_checkin($CheckInID, $data_checkin_edit);
         }
-
-
-
         redirect("sale/booking/$RID/$SourceID/$DestinationID/$TSID");
     }
 

@@ -445,7 +445,7 @@ class m_sale extends CI_Model {
         $dropdown = 'id="StationDestination" onchange="change_destination()" ';
 
         $form_sale_ticket = array(
-            'form' => form_open("sale/booking/$rid/$source_id/$destination_id/$tsid", array('class' => 'form', 'id' => 'form_booking','name'=>'form_booking')),
+            'form' => form_open("sale/booking/$rid/$source_id/$destination_id/$tsid", array('class' => 'form', 'id' => 'form_booking', 'name' => 'form_booking')),
             'route_name' => form_input($i_route_name),
             'RID' => form_input($i_RID),
             'VID' => form_input($i_VID),
@@ -819,19 +819,25 @@ class m_sale extends CI_Model {
         return $tickets;
     }
 
-    public function set_form_print($date, $rid, $tsid) {
+    public function get_post_form_print_ticket() {
+        $TicketID = $this->input->post('TicketID');
+        return $TicketID;
+    }
+
+    public function set_form_print($date, $RID, $SourceID, $DestinationID, $TSID) {
         $this->load->model('m_route');
         $this->load->model('m_station');
         $this->load->model('m_schedule');
         $this->load->model('m_fares');
         $this->load->model('m_ticket');
 
-        $rs = array();
-        $eid = $this->m_user->get_user_id();
+        $data_ticket = array();
 
-        $route = $this->m_route->get_route(NULL, NULL, $rid)[0];
+        $EID = $this->m_user->get_user_id();
 
-        $tickets = $this->m_ticket->get_ticket($date, $tsid, 2, $eid);
+        $route = reset($this->m_route->get_route(NULL, NULL, $RID));
+
+        $tickets = $this->m_ticket->get_ticket($date, $TSID, 2, $EID);
 
         $rcode = $route['RCode'];
         $vtid = $route['VTID'];
@@ -841,7 +847,6 @@ class m_sale extends CI_Model {
         $note = '&nbsp;';
 
         foreach ($tickets as $ticket) {
-
             $ticket_id = $ticket['TicketID'];
             $source_name = $ticket['SourceName'];
             $destination_name = $ticket['DestinationName'];
@@ -859,7 +864,7 @@ class m_sale extends CI_Model {
                 $time_arrive = '-';
             }
             if ($vtid == '1') {
-                $note = '** รถเต็มออกก่อนเวลา **';                
+                $note = '** รถเต็มออกก่อนเวลา **';
             }
 
             $temp_ticket = array(
@@ -882,8 +887,12 @@ class m_sale extends CI_Model {
                 'DateSale' => $this->m_datetime->getDatetimeNow(),
                 'SellerName' => $name_seller,
             );
-            array_push($rs, $temp_ticket);
+            array_push($data_ticket, $temp_ticket);
         }
+        $rs = array(
+            'form' => form_open("sale/print_ticket/$RID/$SourceID/$DestinationID/$TSID", array('id' => 'form_print_ticket')),
+            'tickets' => $data_ticket,
+        );
 
         return $rs;
     }
@@ -1009,6 +1018,11 @@ class m_sale extends CI_Model {
         $this->form_validation->set_rules('StationDestination', 'ปลายทาง', 'trim|xss_clean|callback_check_dropdown');
         $this->form_validation->set_rules("Seat[]", "เวลาเดินทาง", 'trim|required|xss_clean');
 
+        return TRUE;
+    }
+
+    public function validate_form_print_ticket() {
+        $this->form_validation->set_rules("TicketID[]", "เลขที่ตั๋วโดยสาร", 'trim|required|xss_clean');
         return TRUE;
     }
 

@@ -257,6 +257,23 @@ class m_ticket extends CI_Model {
      * อัปเดทข้อมูลตั๋วโดยสาร สถานะที่กำลังจอง ให้เป็น ขายเเล้ว
      */
 
+    public function sale_tickets($tickets_id) {
+        $rs = array();
+        foreach ($tickets_id as $ticket_id) {
+            $data = array(
+                'StatusSeat' => 1,
+            );
+            $this->db->where('TicketID', $ticket_id);
+            $this->db->update('ticket_sale', $data);
+            if ($this->db->affected_rows() == 1) {
+                $rs["$ticket_id"] = 'TRUE';
+            } else {
+                $rs["$ticket_id"] = 'FALSE';
+            }
+        }
+        return $rs;
+    }
+
     public function sale_ticket($ticket_id) {
         $data = array(
             'StatusSeat' => 1,
@@ -275,6 +292,7 @@ class m_ticket extends CI_Model {
      */
 
     public function check_ticket($TSID = NULL) {
+        $num_ticket_delete = 0;
         $today = $this->m_datetime->getDateToday();
         $tickets_reseve = $this->get_ticket($today, $TSID, 2);
         foreach ($tickets_reseve as $ticket) {
@@ -286,6 +304,7 @@ class m_ticket extends CI_Model {
             if ((int) $minutes > 2) {
                 $this->db->where('TicketID', $ticket_id);
                 $this->db->delete('ticket_sale');
+                $num_ticket_delete++;
             }
         }
     }

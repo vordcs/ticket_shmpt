@@ -29,10 +29,10 @@
         font-size: 6pt; 
     }
     table .content{     
-        font-size: 12pt; 
+        font-size: 9pt; 
     }
     table .content-small{     
-        font-size: 10pt; 
+        font-size: 7pt; 
     }
     table .table-header{     
         font-size: 6pt; 
@@ -174,10 +174,9 @@
                         <th style="width: 50%"></th>
                         <th style="width: 50%"></th>
                     </tr>                   
-                    <tr class="title">                        
+                    <tr class="title hidden-print">                        
                         <th colspan="2">
-                            <img src="<?= base_url() . "/assets/img/ticket_logo.png" ?>" class="" width="100%" height="60px" alt="Logo">   
-
+                            <!--<img src="<= base_url() . "/assets/img/ticket_logo.png" ?>" class="" width="100%" height="60px" alt="Logo">--> 
                         </th>
                     </tr>                   
                     <tr class="sub-title">
@@ -209,22 +208,29 @@
             </table>
             <table class="table-bordered">
                 <thead>
-                    <tr class="table-header">
-                        <th style="width: 20%">จำนวน</th>
+                    <tr class="table-header">                        
                         <th style="width: 80%">ปลายทาง</th>
+                        <th style="width: 20%">จำนวน</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php
-                    foreach ($data['reports'] as $report) {                      
+                    $sum_num_seat = 0;
+                    foreach ($data['reports'] as $report) {
+                        $num_seat = count($report['SeatNo']);
+                        $sum_num_seat+=$num_seat;
                         ?>
                         <tr class="content">
-                            <td class="text-center"><strong><?= count($report['SeatNo']) ?></strong></td>
-                            <td class="text-left" style="padding-left: 2%;"><?= $report['DestinationName'] ?></td>                            
+                            <td class="text-left" style="padding-left: 2%;"><?= $report['DestinationName'] ?></td>  
+                            <td class="text-center"><strong><?= $num_seat ?></strong></td>                                                      
                         </tr>
                         <?php
                     }
                     ?>
+                    <tr>
+                        <td class="text-center title-content">รวม</td>
+                        <td class="text-center text content"><u><?= $sum_num_seat ?></u></td>
+                    </tr>
                 </tbody>
                 <tfoot>
                     <tr>
@@ -258,11 +264,11 @@
                     for ($i = 1; $i <= 16; $i++) {
                         ?>
                         <tr>
-                            <td rowspan="2" style="font-size: <?=$i?>pt" class="text-center"><?=$i?></td>
-                            <td colspan="2" style="font-size: <?=$i?>pt">ทดสอบการพิมพ์ตั๋วโดยสาร</td>                            
+                            <td rowspan="2" style="font-size: <?= $i ?>pt" class="text-center"><?= $i ?></td>
+                            <td colspan="2" style="font-size: <?= $i ?>pt">ทดสอบการพิมพ์ตั๋วโดยสาร</td>                            
                         </tr>
                         <tr>                            
-                            <td colspan="2" style="font-size: <?=$i?>pt"><strong>ทดสอบการพิมพ์ตัวโดยสาร</strong></td>
+                            <td colspan="2" style="font-size: <?= $i ?>pt"><strong>ทดสอบการพิมพ์ตัวโดยสาร</strong></td>
                         </tr>
                     <?php } ?>
                 </tbody>

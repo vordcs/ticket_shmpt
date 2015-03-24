@@ -2,26 +2,23 @@
     jQuery(document).ready(function () {
         setInterval(function () {
             window.location.reload();
-        }, 2*60000);
+        }, 2 * 60000);
     });
     $(window).load(function () {
         $("ol.progtrckr").each(function () {
             $(this).attr("data-progtrckr-steps",
                     $(this).children("li").length);
         });
-        print_ticket();
+//        print_ticket();
 
     });
     function print_ticket() {
         window.print();
     }
-    function print_sucess() {
-        var url = '<?= base_url() . "sale/booking/$rid/$source_id/$destination_id/$tsid" ?>';
-        $('.print-ticket').each(function () {
-            var ticket_id = $(this).attr('id');
-            ticket_sale(ticket_id);
-        });
-        window.location = url;
+    function print_sucess(ticket_id) {
+        if (ticket_sale(ticket_id)) {
+            window.location.reload();
+        }
     }
 
     function ticket_sale(ticket_id) {
@@ -155,7 +152,7 @@
         text-align: center;
         padding-top: 3px;
         padding-bottom: 2px;
-        font-size: 6pt;
+        font-size: 8pt;
         font-weight: lighter;
 
     }
@@ -170,7 +167,7 @@
         text-align: center;
         padding-top: 3px;
         padding-bottom: 2px;
-        font-size: 6pt;
+        font-size: 8pt;
         font-weight: lighter;
     }
     table .price-info{
@@ -184,7 +181,7 @@
         text-align: center;
         padding-top: 3px;
         padding-bottom: 2px;
-        font-size: 6pt;
+        font-size: 8pt;
         font-weight: bold;
     }
     table .title-info{
@@ -208,6 +205,10 @@
         text-align: center;
         font-size: 12pt;        
     } 
+    table .detail-foot {
+        text-align: center;        
+        font-size: 9pt;  
+    }
     table .note{
         text-align: center;
         padding-top: 2px;
@@ -245,14 +246,127 @@
     }
 
 </style>
+<div class="container hidden-print" style="padding-bottom: 15%;">  
+    <div class="row" style="padding-bottom: 2%;">
+        <div class="col-md-12">
+            <ol class="progtrckr" data-progtrckr-steps="4">
+                <li id="step1" class="progtrckr-done"><span class="lead" >เลือกเส้นทาง</span></li><!--                
+                --><li id="step2" class="progtrckr-done"><span class="lead">เลือกเที่ยวเวลาเดินทาง</span></li><!--                 
+                --><li id="step3" class="progtrckr-done"><span class="lead">เลือกที่นั่งการเดินทาง </span></li><!--                 
+                --><li id="step4" class="progtrckr-done"><span class="lead">พิมพ์บัตรโดยสาร</span></li>
+            </ol>
+        </div>
+    </div>
+    <div class="row">
+        <?php
+        foreach ($data['tickets'] as $ticket) {
+            ?>
+            <div class="col-md-3 well" id="<?= $ticket['TicketID'] ?>">
+                <table width="500px" border="0" align="center" cellpadding="0" cellspacing="0"> 
+                    <thead>
+                        <tr class="hidden-print">
+                            <th style="width: 50%"></th>
+                            <th style="width: 50%"></th>
+                        </tr>
+                         <tr>
+                            <td colspan="2" class="text-right">
+                                <button type="button" class="btn btn-info btn-sm" onclick="print_sucess('<?= $ticket['TicketID'] ?>')"><i class="fa fa-check-square-o"></i>&nbsp;พิมพ์สำเร็จ</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th colspan="2">
+                                <img src="<?= base_url() . "assets/img/ticket_logo.png" ?>" class="" width="70%" height="80px" alt="">                                 
+                            </th>
+                        </tr>
+                        <tr>
+                            <th colspan="2" class="route-name" style="border-bottom: 1px solid gray;padding-bottom: 5px;">
+                                <?= $ticket['RouteName'] ?>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="">
+                        <tr class="title">
+                            <td class="text-left" style="width: 50% ; border-right: 1px solid gray; padding-left:5px;">เบอร์รถ : </td>
+                            <td class="text-left" style="width: 50% ; padding-left: 5px" >เวลาออก : </td>                            
+                        </tr>
+                        <tr>
+                            <td class="text-center vcode" style="width: 50% ;"><strong><?= $ticket['VCode'] ?></strong></td>
+                            <td class="text-center time-depart" style="width: 50%;border-bottom: 1px solid gray;"><strong><?= $ticket['TimeDepart'] ?></strong></td>
+                        </tr>
+                        <tr class="title">
+                            <td class="text-left" style="width: 50% ;border-right: 1px solid gray; padding-left:5px;">เลขที่นั่ง :</td>
+                            <td class="text-left" style="width: 50% ;padding-left:5px;">เวลาถึง :</td>
+                        </tr>
+                        <tr>
+                            <td class="text-center seat" style="width: 50% ;border-bottom: 1px solid gray ;"><strong><?= $ticket['Seat'] ?></strong></td>
+                            <td class="text-center detail" style="width: 50%;border-bottom: 1px solid gray;"><strong><?= $ticket['TimeArrive'] ?></strong></td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" class="text-center date" style="border-bottom: 1px solid gray;"><strong><?= $ticket['Date'] ?></strong></td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" class="text-left title" style="padding-left: 5px;">ต้นทาง :</td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" class="text-center source"><strong><?= $ticket['SourceName'] ?></strong></td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" class="text-left title" style="padding-left: 5px;">ปลายทาง :</td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" class="text-center destination"><strong><?= $ticket['DestinationName'] ?></strong></td>
+                        </tr>
+                        <tr>
+                            <td class="text-center" rowspan="2"><strong><?= $ticket['VTName'] ?></strong></td>
+                            <td class="text-left title" style="padding-left: 5px">ราคา :</td>
+                        </tr>
+                        <tr>                           
+                            <td class="text-center"><strong class="seat-price"><?= $ticket['Price'] ?></strong>&nbsp;&nbsp;<small class="note">บาท</small> </td>
+                        </tr>
+                        <tr>
+                            <td class="text-center" colspan="2" id="barcode">
+                                <img src="<?= $ticket['BarCode'] ?>" class="" width="100%" height="40px" alt=""> 
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="text-center note">
+                                **ขอสงวนสิทธิ์**
+                                <br>
+                                ไม่รับเปลี่ยน
+                                <br>
+                                หรือ
+                                <br>
+                                คืนตั๋วโดยสาร
+                            </td>
+                            <td class="text-center" id="qrcode">
+                                <img src="<?= $ticket['QrCode'] ?>" class="" width="70px" height="70px" alt="QRCode"> 
+                            </td>
+                        </tr>                                               
+                        <tr class="text-center title">
+                            <td colspan="2" style="padding-bottom: 5px;" ><strong><?= $ticket['Note'] ?></strong></td>
+                        </tr>    
+                        <tr class="note">
+                            <td class="text-center" style="padding-bottom: 10px;"><?= $ticket['DateSale'] ?></td>
+                            <td class="text-center" style="padding-bottom: 10px;"><?= $ticket['SellerName'] ?></td>
+                        </tr>                        
+                    </tbody>                     
+                </table>  
+            </div>
+            <?php
+        }
+        ?>
+    </div>  
+</div>
+<?= $data['form'] ?>
 <div class="container">
     <div class="row">
         <?php
         $n = 1;
-        foreach ($data as $ticket) {
+        foreach ($data['tickets'] as $ticket) {
             ?> 
-            <div class="page-break<?= ($n == 1) ? "-no" : "" ?>">
-                <div class="col-md-3 print-ticket" id="<?= $ticket['TicketID'] ?>">
+            <div class="page-break<?= ($n == 1) ? "-no" : "" ?>" id="<?= $ticket['TicketID'] ?>">
+                <div class="col-md-3 print-ticket">
+                    <input type="hidden" name="TicketID[]" value="<?= $ticket['TicketID'] ?>">
                     <table width="500px" border="0" align="center" cellpadding="0" cellspacing="0"> 
                         <thead>
                             <tr class="hidden-print">
@@ -350,18 +464,18 @@
                                 <td class="source-name-small"><?= $ticket['SourceName'] ?></td>
                                 <td class="destination-name-small"><strong><?= $ticket['DestinationName'] ?></strong></td>
                             </tr>
-                            <tr>                        
+                            <tr class="hidden">                      
                                 <td colspan="2">
                                     <img src="<?= $ticket['BarCode'] ?>" width="100%" height="35px" alt="BarCode"> 
                                 </td>
                             </tr>
                             <tr>
-                                <td class="note">
-                                    <strong><?= $ticket['TimeDepart'] ?></strong>
+                                <td class="text-center">
+                                    <strong class="detail-foot"><?= $ticket['TimeDepart'] ?></strong>
                                     <br>
-                                    <?= $ticket['VTName'] ?>&nbsp;:&nbsp;<strong><?= $ticket['VCode'] ?></strong>
+                                    <small class="note"><?= $ticket['VTName'] ?> &nbsp;:&nbsp;</small><strong><?= $ticket['VCode'] ?></strong>
                                     <br>
-                                    ราคา&nbsp;:&nbsp;<strong class="price-small-info"><?= $ticket['Price'] ?></strong>&nbsp;<small>บ.</small>                            
+                                    <small class="note">ราคา&nbsp;:&nbsp;</small><strong class="price-small-info"><?= $ticket['Price'] ?></strong>&nbsp;<small class="note">บ.</small>                            
                                 </td>
                                 <td class="text-center">
                                     <img src="<?= $ticket['QrCode'] ?>" class="" width="50px" height="50px" alt="QRCode">
@@ -382,113 +496,6 @@
         ?>
     </div>    
 </div>
-<div class="container hidden-print" style="padding-bottom: 15%;">  
-    <div class="row" style="padding-bottom: 2%;">
-        <div class="col-md-12">
-            <ol class="progtrckr" data-progtrckr-steps="4">
-                <li id="step1" class="progtrckr-done"><span class="lead" >เลือกเส้นทาง</span></li><!--                
-                --><li id="step2" class="progtrckr-done"><span class="lead">เลือกเที่ยวเวลาเดินทาง</span></li><!--                 
-                --><li id="step3" class="progtrckr-done"><span class="lead">เลือกที่นั่งการเดินทาง </span></li><!--                 
-                --><li id="step4" class="progtrckr-done"><span class="lead">พิมพ์บัตรโดยสาร</span></li>
-            </ol>
-        </div>
-    </div>
-    <div class="row">
-        <?php
-        foreach ($data as $ticket) {
-            ?>
-            <div class="col-md-3 well ">
-                <table width="500px" border="0" align="center" cellpadding="0" cellspacing="0"> 
-                    <thead>
-                        <tr class="hidden-print">
-                            <th style="width: 50%"></th>
-                            <th style="width: 50%"></th>
-                        </tr>
-                        <tr>
-                            <th colspan="2">
-                                <img src="<?= base_url() . "assets/img/ticket_logo.png" ?>" class="" width="70%" height="80px" alt="">                                 
-                            </th>
-                        </tr>
-                        <tr>
-                            <th colspan="2" class="route-name" style="border-bottom: 1px solid gray;padding-bottom: 5px;">
-                                <?= $ticket['RouteName'] ?>
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody class="">
-                        <tr class="title">
-                            <td class="text-left" style="width: 50% ; border-right: 1px solid gray; padding-left:5px;">เบอร์รถ : </td>
-                            <td class="text-left" style="width: 50% ; padding-left: 5px" >เวลาออก : </td>                            
-                        </tr>
-                        <tr>
-                            <td class="text-center vcode" style="width: 50% ;"><strong><?= $ticket['VCode'] ?></strong></td>
-                            <td class="text-center time-depart" style="width: 50%;border-bottom: 1px solid gray;"><strong><?= $ticket['TimeDepart'] ?></strong></td>
-                        </tr>
-                        <tr class="title">
-                            <td class="text-left" style="width: 50% ;border-right: 1px solid gray; padding-left:5px;">เลขที่นั่ง :</td>
-                            <td class="text-left" style="width: 50% ;padding-left:5px;">เวลาถึง :</td>
-                        </tr>
-                        <tr>
-                            <td class="text-center seat" style="width: 50% ;border-bottom: 1px solid gray ;"><strong><?= $ticket['Seat'] ?></strong></td>
-                            <td class="text-center detail" style="width: 50%;border-bottom: 1px solid gray;"><strong><?= $ticket['TimeArrive'] ?></strong></td>
-                        </tr>
-                        <tr>
-                            <td colspan="2" class="text-center date" style="border-bottom: 1px solid gray;"><strong><?= $ticket['Date'] ?></strong></td>
-                        </tr>
-                        <tr>
-                            <td colspan="2" class="text-left title" style="padding-left: 5px;">ต้นทาง :</td>
-                        </tr>
-                        <tr>
-                            <td colspan="2" class="text-center source"><strong><?= $ticket['SourceName'] ?></strong></td>
-                        </tr>
-                        <tr>
-                            <td colspan="2" class="text-left title" style="padding-left: 5px;">ปลายทาง :</td>
-                        </tr>
-                        <tr>
-                            <td colspan="2" class="text-center destination"><strong><?= $ticket['DestinationName'] ?></strong></td>
-                        </tr>
-                        <tr>
-                            <td class="text-center" rowspan="2"><strong><?= $ticket['VTName'] ?></strong></td>
-                            <td class="text-left title" style="padding-left: 5px">ราคา :</td>
-                        </tr>
-                        <tr>                           
-                            <td class="text-center"><strong class="seat-price"><?= $ticket['Price'] ?></strong>&nbsp;&nbsp;<small class="note">บาท</small> </td>
-                        </tr>
-                        <tr>
-                            <td class="text-center" colspan="2" id="barcode">
-                                <img src="<?= $ticket['BarCode'] ?>" class="" width="100%" height="40px" alt=""> 
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="text-center note">
-                                **ขอสงวนสิทธิ์**
-                                <br>
-                                ไม่รับเปลี่ยน
-                                <br>
-                                หรือ
-                                <br>
-                                คืนตั๋วโดยสาร
-                            </td>
-                            <td class="text-center" id="qrcode">
-                                <img src="<?= $ticket['QrCode'] ?>" class="" width="70px" height="70px" alt="QRCode"> 
-                            </td>
-                        </tr>                                               
-                        <tr class="text-center title">
-                            <td colspan="2" style="padding-bottom: 5px;" ><strong><?= $ticket['Note'] ?></strong></td>
-                        </tr>    
-                        <tr class="note">
-                            <td class="text-center" style="padding-bottom: 10px;"><?= $ticket['DateSale'] ?></td>
-                            <td class="text-center" style="padding-bottom: 10px;"><?= $ticket['SellerName'] ?></td>
-                        </tr>                        
-                    </tbody> 
-                </table>  
-            </div>
-            <?php
-        }
-        ?>
-    </div>  
-</div>
-
 <footer class="hidden-print"> 
     <div class="container">
         <div class="row">
@@ -500,9 +507,11 @@
                 );
                 echo anchor(($previous_page == NULL) ? 'sale/' : $previous_page, '<i class="fa fa-plus" ></i>&nbsp;เพิ่มที่นั่ง', $cancle) . '  ';
                 ?>  
-                <button type="button" class="btn btn-lg btn-info"  onclick="print_ticket()"><span class="fa fa-print fa-lg"></span>&nbsp;พิมพ์ตั๋วโดยสาร</button> 
-                <button type="button" class="btn btn-success btn-lg pull-right"  onclick="print_sucess()"><span class="fa fa-check"></span>&nbsp;พิมพ์สำเร็จ</button> 
+                <button type="button" class="btn btn-lg btn-default"  onclick="print_ticket()"><span class="fa fa-print fa-lg"></span>&nbsp;พิมพ์ตั๋วโดยสาร</button> 
+                <button type="submit" class="btn btn-success btn-lg pull-right"><span class="fa fa-check"></span>&nbsp;พิมพ์สำเร็จทั้งหมด</button> 
             </div>
         </div>
     </div>
 </footer>
+<?=
+form_close()?>
