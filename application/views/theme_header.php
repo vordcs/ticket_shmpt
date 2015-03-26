@@ -16,6 +16,9 @@
         <link rel="apple-touch-icon-precomposed" sizes="144x144"
               href="<?= asset_url() ?>img/apple-touch-icon-144-precomposed.png<?= '?v=' . $version ?>">
         <link rel="shortcut icon" href="<?= asset_url() ?>img/favicon.ico<?= '?v=' . $version ?>">
+        <!-- font -->
+        <link rel="stylesheet" href="<?= asset_url() ?>fonts/th_niramit_as.css" />
+
         <!-- Bootstrap core CSS ans JS -->
         <?php echo js('pace.min.js?v=' . $version); ?>
         <?php echo css('bootstrap.css?v=' . $version); ?>

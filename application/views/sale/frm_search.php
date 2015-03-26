@@ -72,6 +72,7 @@
             <div class="col-lg-12">
                 <div class="panel-group" id="accordionRoute" role="tablist" aria-multiselectable="true">
                     <?php
+                    $num_route = count($routes);
                     foreach ($routes as $route) {
                         $rcode = $route['RCode'];
                         $vtid = $route['VTID'];
@@ -98,7 +99,7 @@
                                     </a>
                                 </h4>
                             </div>
-                            <div id="collapse<?= $id ?>" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading<?= $id ?>">
+                            <div id="collapse<?= $id ?>" class="panel-collapse collapse <?=($num_route==1)? 'in':''?>" role="tabpanel" aria-labelledby="heading<?= $id ?>">
                                 <div class="panel-body">
                                     <p class="lead text-center">จุดขึ้นรถ : <strong><?= $seller_station_name ?></strong></p>
                                     <!--<p class="text">ปลายทาง</p>-->
@@ -161,19 +162,23 @@
                                             <div class="col-lg-6 <?= $class ?>">                                                
                                                 <div class="widget">
                                                     <div class="widget-header">                     
-                                                        <span class=""><?= "ไป $destination" ?></span>
+                                                        <span class=""><i>ไป</i>&nbsp;<strong><?= "$destination" ?></strong></span>
                                                     </div>   
-                                                    <div class="list-group" style="border: 1px;">
+                                                    <div class="list-group" style="border: 1px; font-size: 16pt">                                                        
                                                         <?php
-                                                        if (count($stations_in_route) > 0) {
+                                                        $num_station_in_route = count($stations_in_route);
+                                                        if ($num_station_in_route == 1) {
+                                                            $station = reset($stations);
+                                                            $destination_id = $station['SID'];
+                                                            redirect("sale/booking/$rid/$seller_station_id/$destination_id");
+                                                        } elseif ($num_station_in_route > 0) {
                                                             foreach ($stations_in_route as $station) {
                                                                 $destination_id = $station['SID'];
                                                                 $station_name = $station['StationName'];
-
                                                                 $go_to_booking = array(
                                                                     'class' => "list-group-item",
                                                                 );
-                                                                echo anchor("sale/booking/$rid/$seller_station_id/$destination_id/", $station_name, $go_to_booking);
+                                                                echo anchor("sale/booking/$rid/$seller_station_id/$destination_id/", ' <i class="fa fa-mail-forward fa-fw" style="color: #AAB2BD"></i>&nbsp;&nbsp;' . $station_name, $go_to_booking);
                                                             }
                                                         }
                                                         ?>

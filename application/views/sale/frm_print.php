@@ -9,7 +9,7 @@
             $(this).attr("data-progtrckr-steps",
                     $(this).children("li").length);
         });
-//        print_ticket();
+        print_ticket();
 
     });
     function print_ticket() {
@@ -43,7 +43,7 @@
 <style>    
     .ticket-print{    
         background: white;        
-        font-family:'THNiramitAS','Times New Roman',Times,serif;        
+        font-family:'sans-serif';        
         page-break-inside: avoid;        
     }
     table .title{      
@@ -119,10 +119,10 @@
         vertical-align: middle;
         text-align: center;
     }
-    /*-------- style for ticket print---------------*/
+    /*-------- style for ticket print 'THNiramitAS';---------------*/
     .print-ticket{    
         background: white;        
-        font-family:'THNiramitAS','Times New Roman',Times,serif;        
+        font-family:sans-serif;        
         page-break-inside: avoid;
     }
 
@@ -246,6 +246,7 @@
     }
 
 </style>
+<?= $data['form'] ?>
 <div class="container hidden-print" style="padding-bottom: 15%;">  
     <div class="row" style="padding-bottom: 2%;">
         <div class="col-md-12">
@@ -257,20 +258,26 @@
             </ol>
         </div>
     </div>
-    <div class="row">
+    <div class="row">         
         <?php
         foreach ($data['tickets'] as $ticket) {
             ?>
             <div class="col-md-3 well" id="<?= $ticket['TicketID'] ?>">
+
                 <table width="500px" border="0" align="center" cellpadding="0" cellspacing="0"> 
                     <thead>
                         <tr class="hidden-print">
                             <th style="width: 50%"></th>
                             <th style="width: 50%"></th>
                         </tr>
-                         <tr>
+                        <tr>
                             <td colspan="2" class="text-right">
-                                <button type="button" class="btn btn-info btn-sm" onclick="print_sucess('<?= $ticket['TicketID'] ?>')"><i class="fa fa-check-square-o"></i>&nbsp;พิมพ์สำเร็จ</button>
+                                <!--<button type="button" class="btn btn-info btn-sm" onclick="print_sucess('<? $ticket['TicketID'] ?>')"><i class="fa fa-check-square-o"></i>&nbsp;พิมพ์สำเร็จ</button>-->
+                                <div class="checkbox" style="">
+                                    <label>
+                                        <input type="checkbox" checked name="TicketID[]" value="<?= $ticket['TicketID'] ?>">
+                                    </label>
+                                </div>
                             </td>
                         </tr>
                         <tr>
@@ -357,7 +364,6 @@
         ?>
     </div>  
 </div>
-<?= $data['form'] ?>
 <div class="container">
     <div class="row">
         <?php
@@ -365,8 +371,7 @@
         foreach ($data['tickets'] as $ticket) {
             ?> 
             <div class="page-break<?= ($n == 1) ? "-no" : "" ?>" id="<?= $ticket['TicketID'] ?>">
-                <div class="col-md-3 print-ticket">
-                    <input type="hidden" name="TicketID[]" value="<?= $ticket['TicketID'] ?>">
+                <div class="col-md-3 print-ticket">                    
                     <table width="500px" border="0" align="center" cellpadding="0" cellspacing="0"> 
                         <thead>
                             <tr class="hidden-print">
@@ -478,8 +483,11 @@
                                     <small class="note">ราคา&nbsp;:&nbsp;</small><strong class="price-small-info"><?= $ticket['Price'] ?></strong>&nbsp;<small class="note">บ.</small>                            
                                 </td>
                                 <td class="text-center">
-                                    <img src="<?= $ticket['QrCode'] ?>" class="" width="50px" height="50px" alt="QRCode">
+                                    <img src="<?= $ticket['QrCode'] ?>" class="" width="50px" height="50px" alt="QRCode">  
                                 </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2" class="note-footer"><?= $ticket['TicketID'] ?></td>
                             </tr>
                             <tr>
                                 <td class="note-footer"><?= $ticket['DateSale'] ?></td>
@@ -508,7 +516,7 @@
                 echo anchor(($previous_page == NULL) ? 'sale/' : $previous_page, '<i class="fa fa-plus" ></i>&nbsp;เพิ่มที่นั่ง', $cancle) . '  ';
                 ?>  
                 <button type="button" class="btn btn-lg btn-default"  onclick="print_ticket()"><span class="fa fa-print fa-lg"></span>&nbsp;พิมพ์ตั๋วโดยสาร</button> 
-                <button type="submit" class="btn btn-success btn-lg pull-right"><span class="fa fa-check"></span>&nbsp;พิมพ์สำเร็จทั้งหมด</button> 
+                <button type="submit" class="btn btn-success btn-lg pull-right"><span class="fa fa-check"></span>&nbsp;พิมพ์สำเร็จ</button> 
             </div>
         </div>
     </div>

@@ -69,8 +69,6 @@ class report extends CI_Controller {
             redirect('home/');
         }
 
-        $vehicle_types = $this->m_route->get_vehicle_types();
-
         $routes = $this->m_route->get_route_by_seller($rcode, $vtid);
         $routes_detail = $this->m_route->get_route_detail_by_seller($rcode, $vtid);
 
@@ -84,11 +82,7 @@ class report extends CI_Controller {
             redirect('home/');
         }
 
-        $cost_type = $this->m_cost->get_cost_type();
-        $costs = $this->m_cost->get_cost();
 
-        $rcode = $routes[0]['RCode'];
-        $vtid = $routes[0]['VTID'];
         $vt_name = $routes[0]['VTDescription'];
         $source = $routes[0]['RSource'];
         $detination = $routes[0]['RDestination'];
@@ -112,14 +106,14 @@ class report extends CI_Controller {
             $this->session->set_flashdata('RCode', $rcode);
             $this->session->set_flashdata('VTID', $vtid);
 
-            redirect("report/print_report/$ReportID/$rcode/$vtid/$sid");
-        } 
+            redirect("report/print_report/$rcode/$vtid/$sid/$ReportID");
+        }
 
         $data = array(
             'page_title' => "ส่งรายงาน : $route_name",
             'page_title_small' => "วันที่ $date_th",
             'previous_page' => "",
-            'next_page' => "",            
+            'next_page' => "",
             'data' => $this->m_report->set_form_send($rcode, $vtid, $sid),
         );
 
@@ -135,36 +129,24 @@ class report extends CI_Controller {
         $this->m_template->showTemplate();
     }
 
-    public function print_report($ReportID, $RCode = NULL, $VTID = NULL, $SID = NULL) {
+    public function print_report($RCode, $VTID, $SID, $ReportID = NULL) {
 
         if ($RCode == NULL || $VTID == NULL || $SID == NULL) {
             redirect('report/');
         }
-
-
-
-        $routes = $this->m_route->get_route_by_seller($RCode, $VTID);
-        $rcode = $routes[0]['RCode'];
-        $vt_name = $routes[0]['VTDescription'];
-        $source = $routes[0]['RSource'];
-        $detination = $routes[0]['RDestination'];
-        $route_name = " $vt_name  $rcode $source - $detination";
-
-        $this->session->set_flashdata('RCode', $RCode);
-        $this->session->set_flashdata('VTID', $VTID);
-
-        $reports = $this->m_report->set_form_print($ReportID, $RCode, $VTID, $SID);
-
         $data = array(
-            'page_title' => 'พิมพ์รายงาน',
+            'page_title' => "พิมพ์รายงานส่งเงิน",
             'page_title_small' => "",
             'previous_page' => "",
             'next_page' => "",
-            'reports' => $reports,
+            'data_reports' => $this->m_report->set_data_print($RCode, $VTID, $ReportID),
         );
         $data_debug = array(
-//            'reports' => $reports,
+//            'data_reports' => $data['data_reports'],
         );
+
+        $this->session->set_flashdata('RCode', $RCode);
+        $this->session->set_flashdata('VTID', $VTID);
 
         $this->m_template->set_Debug($data_debug);
         $this->m_template->set_Title('พิมพ์ใบส่งเงิน');

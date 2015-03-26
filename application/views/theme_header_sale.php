@@ -34,12 +34,8 @@
         <?php echo js('bootstrap.js?v=' . $version); ?>
 
         <?php echo js('customJS.js?v=' . $version); ?>
-        <?php echo js('jquery.fs.selecter.min.js?v=' . $version); ?>
-
-        
-        
-        
-
+        <?php echo js('site.min.js?v=' . $version); ?>
+        <!--<? js('jquery.fs.selecter.min.js?v=' . $version); ?>-->   
         <style>
             body{
                 padding-top: 1%;

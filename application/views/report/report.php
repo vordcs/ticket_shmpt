@@ -114,12 +114,12 @@
                                     'data-placement' => "top",
                                     'title' => "ส่งรายงาน $route_name",
                                 );
-                                echo anchor("report/send/$rcode/$VTID/$seller_station_id", '<i class="fa fa-send-o"></i>&nbsp;&nbsp;ส่งเงิน '.$route_name , $send_report);
+                                echo anchor("report/send/$rcode/$VTID/$seller_station_id", '<i class="fa fa-send-o"></i>&nbsp;&nbsp;ส่งเงิน ' . $route_name, $send_report);
                                 ?>                                      
                             </div>
                             <div class="col-md-12 <?= (count($route['Reports']) > 0) ? '' : 'hidden' ?>" style="padding-top: 3% ; padding-bottom: 3%;">
                                 <?php if (count($route['Reports']) > 0) { ?>
-                                    <table class="table table-hover table-condensed table-bordered">
+                                    <table class="table table-hover table-striped table-bordered">
                                         <thead>
                                             <tr>
                                                 <th style="width: 15%">เวลาที่ส่ง</th>
@@ -157,10 +157,10 @@
                                                     <td class="text-center"><?= $ReportTime ?></td>
                                                     <td class="text-center"><?= number_format($Total) ?></td>
                                                     <td class="text-center"><?= number_format($Vage) ?></td>
-                                                    <td class="text-center"> <strong><?= number_format($Net) ?></strong></td>
+                                                    <td class="text-right"> <strong><?= number_format($Net) ?></strong></td>
                                                     <td class="text-center"><i class="fa fa-check fa-lg" style="color: #37BC9B" data-toggle="tooltip" data-placement="left" title="ส่งเเล้ว"></</td>
                                                     <td class="text-center">
-                                                        <?= anchor("report/print_report/$ReportID/$rcode/$vtid/$seller_station_id", '<i class="fa fa-print fa-lg"></i> พิมพ์รายงาน', $print_report) ?>
+                                                        <?= anchor("report/print_report/$rcode/$vtid/$seller_station_id/$ReportID", '<i class="fa fa-print fa-lg"></i> พิมพ์รายงาน', $print_report) ?>
                                                     </td>
                                                 </tr>
                                             <?php } ?>
@@ -170,7 +170,10 @@
                                                 <td class=" text text-center">รวม</td>
                                                 <td class="text-right"><strong><?= number_format($total) ?></strong></td>
                                                 <td class="text-right"><strong><?= number_format($total_vage) ?></strong></td>
-                                                <td class="text-right"><h5><?= number_format($total_net) ?></h5></td>
+                                                <td class="text-right text"><?= number_format($total_net) ?></td>
+                                                <td class="text-center" colspan="2">
+                                                    <?= anchor("report/print_report/$rcode/$vtid/$seller_station_id/$ReportID", '<i class="fa fa-print fa-lg"></i> พิมพ์รายงานทั้งหมด', $print_report) ?>
+                                                </td>
                                             </tr>
                                         </tfoot>
                                     </table>

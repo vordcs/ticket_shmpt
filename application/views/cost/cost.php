@@ -27,10 +27,15 @@
                 $num_route++;
             }
         }
-        if ($num_route > 0) {            
+        if ($num_route > 0) {
             ?> 
-            <div class="row-fluid">
-                <div role="tabpanel">
+            <div class="row-fluid">   
+                <div class="col-md-12">
+                    <legend><?= $vt_name ?></legend>
+                </div>                
+            </div> 
+            <div class="row">
+                <div class="col-md-12">
                     <!-- Nav tabs -->
                     <ul class="nav nav-tabs nav-justified" role="tablist" id="TabRoute<?= $vtid ?>">
                         <?php
@@ -223,7 +228,7 @@
                                                         if ($schedule['ReportID'] != NULL) {
                                                             $IsReport = 'disabled';
                                                         }
-                                                        $add = array(                                                            
+                                                        $add = array(
                                                             'class' => "btn btn-info btn-sm $IsReport",
                                                             'data-toggle' => "tooltip",
                                                             'data-placement' => "top",
@@ -258,11 +263,12 @@
                             }
                         }
                         ?>  
-                    </div>
+                    </div>    
                 </div>
             </div>
             <?php
         }
     }
     ?>
+
 </div>

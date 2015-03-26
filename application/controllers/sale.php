@@ -117,7 +117,6 @@ class sale extends CI_Controller {
             $alert['alert_message'] = "เลือกข้อมูลรอบเวลา";
             $alert['alert_mode'] = "danger";
             $this->session->set_flashdata('alert', $alert);
-
             redirect('sale/');
         }
         //ตรวจสอบสถานะตั๋ว 
@@ -144,8 +143,11 @@ class sale extends CI_Controller {
         if ($this->m_sale->validate_form_print_ticket() && $this->form_validation->run() == TRUE) {
             $form_data = $this->m_sale->get_post_form_print_ticket();
             $rs = $this->m_ticket->sale_tickets($form_data);
-            
-            redirect("sale/booking/$rid/$source_id/$destination_id/$tsid");;
+            if (count($tickets) <= 0) {
+                redirect("sale/booking/$rid/$source_id/$destination_id/$tsid");
+            }  else {
+                redirect("sale/print_ticket/$rid/$source_id/$destination_id/$tsid");
+            }
         }
 
         $data = array(
