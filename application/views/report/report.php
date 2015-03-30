@@ -172,7 +172,7 @@
                                                 <td class="text-right"><strong><?= number_format($total_vage) ?></strong></td>
                                                 <td class="text-right text"><?= number_format($total_net) ?></td>
                                                 <td class="text-center" colspan="2">
-                                                    <?= anchor("report/print_report/$rcode/$vtid/$seller_station_id/$ReportID", '<i class="fa fa-print fa-lg"></i> พิมพ์รายงานทั้งหมด', $print_report) ?>
+                                                    <?= anchor("report/print_report/$rcode/$vtid/$seller_station_id/", '<i class="fa fa-print fa-lg"></i> พิมพ์รายงานทั้งหมด', $print_report) ?>
                                                 </td>
                                             </tr>
                                         </tfoot>

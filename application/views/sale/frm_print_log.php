@@ -17,7 +17,7 @@
 
     .log-print{    
         background: white;        
-        font-family: 'THNiramitAS','Times New Roman', sans-serif;
+        font-family: 'sans-serif';
     }       
     table .title{      
         font-size: 10pt; 

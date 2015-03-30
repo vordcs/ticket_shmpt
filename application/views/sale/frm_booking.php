@@ -34,30 +34,7 @@
         NumberSeat = parseInt('<?= $schedule_select['NumberSeat'] + $schedule_select['NumberTicketsExtra'] ?>');
     }
     function addSeat(seat_no, vtid) {
-        var tb_ticket_body = $('#ticket_guest tbody');
-        var seat_info = $('#seat_info_' + seat_no);
-        var num = $('#tb_ticket_sale tbody tr').length;
-        var price = $('#Price').val();
-        var price_dis = $('#PriceDicount').val();
-        var fare = '<select id="FareType" name="PriceSeat[]" class="form-control fare" onchange="calTotalFare()" >';
-        fare += '<option value="' + price + '" selected="" >' + price + ' (เต็ม)</option>';
-        fare += '<option value="' + price_dis + '">' + price_dis + ' (ลด)</option>';
-        fare += '</select>';
-        var row = '<tr id ="row_' + seat_no + '">';
-        row += '<td class="text-center" id ="' + seat_no + '" >' + seat_no;
-        row += '<input type="hidden" name="Seat[]" value="' + seat_no + '">';
-        row += '</td>';
-        row += '<td class="text-center">' + fare + '</td>';
-        row += '<td class="text-center">';
-        row += '<button type="button" class="btn btn-sm btn-danger" onclick="removeSeat(\'' + seat_no + '\')">';
-        row += '<i class="fa fa-times"></i>';
-        row += '</button>';
-        row += '</td>';
-        row += '</tr>';
-
         var book = booking(seat_no);
-//        alert(book);
-
         if (document.getElementById(seat_no) !== null) {
             document.getElementById("user_action").innerHTML = 'ที่นั่ง ' + seat_no + ' ถูกเลือกเเล้ว';
             document.getElementById("debug").style.background = '#FFCE54';
@@ -68,6 +45,29 @@
         }
 
         if (document.getElementById(seat_no) === null && book) {
+
+
+            var tb_ticket_body = $('#ticket_guest tbody');
+            var seat_info = $('#seat_info_' + seat_no);
+            var num = $('#tb_ticket_sale tbody tr').length;
+
+            var fare = book['Price'];
+            var ticket_id = book['TicketID'];
+            var row = '<tr id ="row_' + seat_no + '">';
+            row += '<td class="text-center" id ="' + seat_no + '" >' + seat_no;
+            row += ticket_id;
+            row += book['Source'];
+            row += book['Destination'];
+            row += '</td>';
+            row += '<td class="text-center">' + fare + '</td>';
+            row += '<td class="text-center">';
+            row += '<button type="button" class="btn btn-sm btn-danger" onclick="removeSeat(\'' + seat_no + '\')">';
+            row += '<i class="fa fa-times"></i>';
+            row += '</button>';
+            row += '</td>';
+            row += '</tr>';
+
+
             document.getElementById("user_action").innerHTML = 'เลือกที่นั่ง : ' + seat_no;
             document.getElementById("debug").style.background = '#37BC9B';
 
@@ -77,15 +77,18 @@
             var seat_id = $('#seat_' + seat_no);
             seat_id.removeClass('bg-blank');
             seat_id.addClass('bg-reserve');
+
             tb_ticket_body.append(row);
+
             var info = '<i class="fa fa-user fa-2x"></i><br>';
             if (parseInt(vtid) === 2) {
                 info = '<i class="fa fa-user fa-lg"></i><br>';
             }
             info += '<span class="badge badge-warning" style="font-size: 8pt;">';
-            info += $('#DestinationName').val();
+            info += book['DestinationName'];
             info += '</span>';
             seat_info.html(info);
+
             calTotalFare();
         }
         return true;
@@ -93,26 +96,8 @@
     function addSeatExtra() {
         var tb_ticket_body = $('#ticket_guest tbody');
         var seat_no = NumberSeat + 1;
-        var row = '<tr id ="row_' + seat_no + '">';
-        var num = $('#tb_ticket_sale tbody tr').length;
-        var price = $('#Price').val();
-        var price_dis = $('#PriceDicount').val();
-        var fare = '<select id="FareType' + num + '" name="PriceSeat[]" class="form-control fare" onchange="calTotalFare()" >';
-        fare += '<option value="' + price + '" selected="" >' + price + ' (เต็ม)</option>';
-        fare += '<option value="' + price_dis + '">' + price_dis + ' (ลด)</option>';
-        fare += '</select>';
-
-        row += '<td class="text-center" id ="' + seat_no + '" >' + seat_no;
-        row += '<input type="hidden" name="Seat[]" value="' + seat_no + '">';
-        row += '</td>';
-        row += '<td class="text-center">' + fare + '</td>';
-        row += '<td class="text-center">';
-        row += '<button type="button" class="btn btn-sm btn-danger" onclick="removeSeatExtra(\'' + seat_no + '\')">';
-        row += '<i class="fa fa-times"></i>';
-        row += '</button>';
-        row += '</td>';
-        row += '</tr>';
-        if (document.getElementById(seat_no) === null && booking(seat_no)) {
+        var ticket = booking(seat_no);
+        if (document.getElementById(seat_no) === null && ticket !== false) {
 
             document.getElementById("user_action").innerHTML = 'เพิ่มที่นั่งเสริม : ' + seat_no;
             document.getElementById("debug").style.background = 'gray';
@@ -120,13 +105,29 @@
             $('#guest_info').removeAttr('class');
             $('#guest_info').addClass('col-lg-12 animated zoomIn');
 
+            var fare = ticket['Price'];
+            var ticket_id = ticket['TicketID'];
+            var row = '<tr id ="row_' + seat_no + '">';
+            row += '<td class="text-center" id ="' + seat_no + '" >' + seat_no;
+            row += ticket_id;
+            row += ticket['Source'];
+            row += ticket['Destination'];
+            row += '</td>';
+            row += '<td class="text-center">' + fare + '</td>';
+            row += '<td class="text-center">';
+            row += '<button type="button" class="btn btn-sm btn-danger" onclick="removeSeatExtra(\'' + seat_no + '\')">';
+            row += '<i class="fa fa-times"></i>';
+            row += '</button>';
+            row += '</td>';
+            row += '</tr>';
+
             tb_ticket_body.append(row);
             var seat = '<div id="seat_' + seat_no + '"  class="col-xs-3 seat-extra">';
             seat += '       <div onclick="" ondblclick="removeSeatExtra(\'' + seat_no + '\')" class="seat bg-reserve">';
             seat += '           <span class="seat-info" id="seat_info_' + seat_no + '"> ';
             seat += '               <i class="fa fa-user"></i><br>';
             seat += '               <span class="badge badge-warning" style="font-size: 8pt;">';
-            seat += $('#DestinationName').val();
+            seat += ticket['DestinationName'];
             seat += '               </span> ';
             seat += '           </span>';
             seat += '       </div>';
@@ -154,6 +155,7 @@
             info += seat_no;
             info += '</span>';
             seat_info.html(info);
+
             calTotalFare();
         }
 
@@ -162,23 +164,22 @@
     function removeSeatExtra(seat_no) {
         var no = $('#ticket_guest tr:last').attr('id').toString().split('_');
         seat_no = no[1];
+        if (cancel(seat_no)) {
+            document.getElementById("user_action").innerHTML = 'ยกเลิกที่นั่ง ' + seat_no;
+            document.getElementById("debug").style.background = '#F6BB42';
 
+            var row_id = 'row_' + seat_no;
+            var row = document.getElementById(row_id);
+            row.parentNode.removeChild(row);
 
-        document.getElementById("user_action").innerHTML = 'ยกเลิกที่นั่ง ' + seat_no;
-        document.getElementById("debug").style.background = '#F6BB42';
+            var seat_id = 'seat_' + seat_no;
+            var seat = document.getElementById(seat_id);
+            seat.parentNode.removeChild(seat);
 
-        var row_id = 'row_' + seat_no;
-        var row = document.getElementById(row_id);
-        row.parentNode.removeChild(row);
+            NumberSeat = NumberSeat - 1;
 
-        var seat_id = 'seat_' + seat_no;
-        var seat = document.getElementById(seat_id);
-        seat.parentNode.removeChild(seat);
-
-        NumberSeat = NumberSeat - 1;
-
-        cancel(seat_no);
-        calTotalFare();
+            calTotalFare();
+        }
 
     }
     function calTotalFare() {
@@ -201,17 +202,13 @@
     }
 
     function booking(seat_no) {
-
         var seat_info = {
             'TSID': schedules_id,
             'Seat': seat_no,
-            'VCode': document.getElementById("VCode").value,
             'SourceID': document.getElementById("SourceID").value,
-            'SourceName': document.getElementById("SourceName").value,
             'DestinationID': document.getElementById("DestinationID").value,
-            'DestinationName': document.getElementById("DestinationName").value,
-            'PriceSeat': parseInt($('#Price').val()),
             'TimeDepart': document.getElementById('TimeDepart').value,
+            'TimeArrive': document.getElementById('TimeArrive').value,
         };
 
         var result = $.ajax({
@@ -221,11 +218,12 @@
             data: seat_info,
             async: false
         }).responseText;
-
-        if (parseInt(result) === 1) {
-            return true;
-        } else {
+        if (parseInt(result) === 0) {
             return false;
+        } else {
+            var data = JSON.parse(result);
+            return data;
+
         }
 
     }
@@ -276,12 +274,11 @@
     }
 
     function change_destination() {
-        var destination = document.getElementById("StationDestination");
+        var DestinationID = document.getElementById("DestinationID").value;
         var SourceID = document.getElementById("SourceID").value;
-        var DestinationID = destination.value;
         var RID = document.getElementById("RID").value; 
-        var num_ticket = $('#ticket_guest tbody tr').length;        
-        if (num_ticket > 0) {          
+        var num_ticket = $('#ticket_guest tbody tr').length;
+        if (num_ticket > 0) {
             $('#form_booking').submit();
         } else {
             window.location.href = '<?= base_url() ?>' + 'sale/booking/' + RID + '/' + SourceID + '/' + DestinationID + '/' + schedules_id;
@@ -383,9 +380,9 @@
 </style>
 <?php
 
-function search_tickets($array, $Seat, $eid = NULL, $SeatStatus = NULL) {
+function search_tickets($tickes, $Seat, $eid = NULL, $SeatStatus = NULL) {
     $rs = NULL;
-    foreach ($array as $val) {
+    foreach ($tickes as $val) {
         if ($SeatStatus != NULL && $val['StatusSeat'] = $SeatStatus && $eid != NULL && $val['Seller'] == $eid && (int) $val['Seat'] === (int) $Seat) {
             $rs = $val;
         } elseif ($eid != NULL && $val['Seller'] == $eid && (int) $val['Seat'] === (int) $Seat) {
@@ -421,8 +418,7 @@ function check_ticket($tickets, $Seat, $EID = NULL, $SeatStatus = NULL) {
         <li id="btnCheckIn"><a href="<?= base_url('checkin/') ?>"><i class="fa fa-clock-o fa-lg"></i>&nbsp;&nbsp;<span>ลงเวลา</span></a></li>
         <li id="btnCost"><a href="<?= base_url('cost/') ?>"><i class="fa fa-pencil-square-o fa-lg" ></i>&nbsp;&nbsp;<span>ค่าใช้จ่าย</span></a></li>
         <li id="btnReport"><a href="<?= base_url('report/') ?>"><i class="fa fa-money fa-lg"></i>&nbsp;&nbsp;<span>ส่งเงิน</span> </a> </li> 
-        <li class=""><a>&nbsp;&nbsp;<strong>เส้นทางเดินรถ</strong></a></li>
-
+        <li class=""><a>&nbsp;&nbsp;<strong>เส้นทางเดินรถ</strong></a></li>      
         <?php
         if (count($routes_seller) > 0) {
             foreach ($routes_seller as $route) {
@@ -495,9 +491,7 @@ if (array_key_exists('ReportID', $schedule_select)) {
     $ReportID = $schedule_select['ReportID'];
 }
 ?>
-<div id="" class="container-fluid" style="padding-bottom: 5%;">
-    <?php echo $form['form']; ?>
-    <?php echo validation_errors() ?>
+<div id="" class="container-fluid" style="padding-bottom: 5%;">    
     <div class="row-fluid">
         <div id="select_time" class="col-lg-4 col-lg-offset-4">
             <div class="row" id="data_route">
@@ -505,9 +499,7 @@ if (array_key_exists('ReportID', $schedule_select)) {
                     <div class="form-group">
                         <div class="col-md-12">
                             <label for="">เส้นทาง</label>
-                            <?php echo $form['route_name'] ?>
-                            <?php echo $form['RID'] ?>
-                            <?php echo $form['TSID'] ?>
+                            <?php echo $form['route_name'] ?>                            
                         </div>
                     </div>  
                     <div class="form-group">
@@ -518,10 +510,8 @@ if (array_key_exists('ReportID', $schedule_select)) {
 
                         </div>
                         <div class="col-md-6">
-                            <label for="">ปลายทาง</label>
-                            <?php echo $form['DestinationID'] ?>
-                            <?php echo $form['DestinationName'] ?>
-                            <?php echo $form['StationDestination'] ?>                        
+                            <label for="">ปลายทาง</label>                                                     
+                            <?php echo $form['DestinationID'] ?>                        
                         </div>
                     </div>  
                     <div class="col-md-12 text-center" style="padding-top: 2%;">
@@ -609,9 +599,9 @@ if (array_key_exists('ReportID', $schedule_select)) {
                 </div>
             </div>         
             <div class="row" id="data_checkin">
-                <div class="col-lg-8  <?= ((array_key_exists('data_check_in', $schedule_select) && count($schedule_select['data_check_in']) > 0) ? '' : 'hidden' ) ?> ">
-                    <p class="text">ข้อมูลเวลาออก</p>
-                    <table class="table table-hover">
+                <div class="col-lg-8  <?= ((array_key_exists('ScheduleCheckIn', $schedule_select) && count($schedule_select['ScheduleCheckIn']) > 0) ? '' : 'hidden' ) ?> ">
+                    <p class=" lead text">ข้อมูลเวลาออก</p>
+                    <table class="table table-hover table-striped">
                         <thead>
                             <tr>
                                 <th style="width: 30%">เวลา</th>
@@ -620,12 +610,14 @@ if (array_key_exists('ReportID', $schedule_select)) {
                         </thead>
                         <tbody>
                             <?php
-                            if (array_key_exists('data_check_in', $schedule_select)) {
-                                foreach ($schedule_select['data_check_in'] as $checkin) {
+                            if (array_key_exists('ScheduleCheckIn', $schedule_select)) {
+                                foreach ($schedule_select['ScheduleCheckIn'] as $checkin) {
+                                    $TimeCheckIn = $checkin['TimeCheckIn'];
+                                    $StationName = $checkin['StationName'];
                                     ?>
                                     <tr>
-                                        <td class="text-center"><strong><?= $checkin['TimeCheckIn'] ?></strong></td>
-                                        <td class="text-left"><?= $checkin['StationName'] ?></td>
+                                        <td class="text-center"><strong><?= $TimeCheckIn ?></strong></td>
+                                        <td class="text-left"><?= $StationName ?></td>
                                     </tr>
                                     <?php
                                 }
@@ -651,14 +643,11 @@ if (array_key_exists('ReportID', $schedule_select)) {
                 </div>
                 <div class="form-group"> 
                     <div class="col-md-8">
-                        <label for="">วันที่เดินทาง</label>
-                        <?php echo $form['Date'] ?>
+                        <label for="">วันที่เดินทาง</label>                        
                         <?php echo $form['DateTH'] ?>
                     </div> 
                     <div class="col-md-4">
-                        <label for="">เบอร์รถ</label>  
-                        <?php echo $form['VID'] ?>
-                        <?php echo $form['VTID'] ?>
+                        <label for="">เบอร์รถ</label> 
                         <?php echo $form['VCode'] ?>
                     </div>
                 </div>  
@@ -723,41 +712,41 @@ if (array_key_exists('ReportID', $schedule_select)) {
                                                     $class_seat = '';
                                                 } else {
                                                     $class_seat = " bg-blank";
-                                                    $class_info = 'badge-info';
+                                                    $class_seat_info = 'badge-info';
                                                     $seat_info = $seat_no;
 
                                                     $click_book = "addSeat($seat_no,$VTID)";
                                                     $click_remove = "removeSeat($seat_no)";
 
+                                                    $eid = $this->m_user->get_user_id();
+                                                    $ticket_booking = check_ticket($schedule['TicketsBook'], $seat_no);
+                                                    $ticket_sale = check_ticket($schedule['TicketsSale'], $seat_no);
 
-                                                    $ticket_ = search_tickets($schedule['Tickets'], $seat_no);
-                                                    if ($ticket_ != NULL) {
-                                                        $eid = $this->m_user->get_user_id();
-                                                        $destination_name = $ticket_['DestinationName'];
-                                                        $seller_id = $ticket_['Seller'];
+                                                    if ($ticket_sale != NULL) {
+                                                        $class_seat = " bg-busy ";
+                                                        $class_seat_info = "badge-danger";
+
                                                         $user = '<i class="fa fa-user fa-2x"></i><br>';
-                                                        $seat_info = $destination_name;
-                                                        $seat_status = $ticket_['StatusSeat'];
-                                                        if ($seat_status == 2) {
-                                                            $class_seat = " bg-reserve ";
-                                                            $class_info = "badge-warning";
+                                                        $seat_info = iconv_substr($ticket_sale['DestinationName'], 0, 10, "UTF-8");
 
-                                                            if ($eid == $seller_id) {
-                                                                $click_book = "addSeat($seat_no,$VTID)";
-                                                                $click_remove = "removeSeat($seat_no)";
-                                                            } else {
-                                                                $click_book = "";
-                                                                $click_remove = "";
-                                                            }
-                                                        } elseif ($seat_status == 1) {
-                                                            $class_seat = " bg-busy ";
-                                                            $class_info = "badge-danger";
+                                                        $click_book = "";
+                                                        $click_remove = "";
+                                                    } elseif ($ticket_booking != NULL) {
+                                                        $class_seat = " bg-reserve ";
+                                                        $class_seat_info = "badge-warning";
 
+                                                        $user = '<i class="fa fa-user fa-2x"></i><br>';
+                                                        $seat_info = iconv_substr($ticket_booking['DestinationName'], 0, 10, "UTF-8");
+
+                                                        $ticket_booking_by_seller = check_ticket($schedule['TicketsBook'], $seat_no, $eid);
+                                                        if ($ticket_booking_by_seller != NULL) {
+                                                            $click_book = "addSeat($seat_no,$VTID)";
+                                                            $click_remove = "removeSeat($seat_no)";
+                                                        } else {
                                                             $click_book = "";
                                                             $click_remove = "";
                                                         }
                                                     }
-
                                                     if ($schedule['IsSold'] == FALSE || $schedule['ReportID'] != NULL || $schedule['CheckInID'] != NULL) {
                                                         $click_book = "";
                                                         $click_remove = "";
@@ -770,7 +759,7 @@ if (array_key_exists('ReportID', $schedule_select)) {
                                                 <div id="<?= $id_seat ?>" onclick="<?= $click_book ?>" ondblclick="<?= $click_remove ?>" class="col-xs-12 seat <?php echo $class_seat; ?>">
                                                     <span class="seat-info" id="<?= $id_seat_info ?>" >  
                                                         <?= $user ?>
-                                                        <span class="badge <?= $class_info ?>" style="font-size: 8pt;">
+                                                        <span class="badge <?= $class_seat_info ?>" style="font-size: 8pt;">
                                                             <?= $seat_info ?>
                                                         </span>                                                                                                     
                                                     </span>
@@ -1130,6 +1119,9 @@ if (array_key_exists('ReportID', $schedule_select)) {
                 </div>                      
             </div> 
             <div id="guest_info" class="<?= (($schedule_select['NumberSeatBookBySeller'] > 0) ? 'animated zoomIn' : 'hidden') ?>">
+                <?php echo $form['form']; ?>
+                <?php echo $form['RID'] ?>
+                <?php echo $form['TSID'] ?>
                 <div class="col-lg-12 " style="max-height: 300px; overflow-y: scroll;">
                     <table id="ticket_guest" class="table table-condensed table-hover">
                         <thead>                           
@@ -1143,9 +1135,9 @@ if (array_key_exists('ReportID', $schedule_select)) {
                             <?php
                             $total = 0;
                             if ($schedule_select['NumberSeatBookBySeller'] > 0) {
-                                foreach ($schedule_select['TicketsBook'] as $ticket) {
+                                foreach ($schedule_select['SeatBookBySeller'] as $ticket) {
+                                    $TicketID = $ticket['TicketID'];
                                     $seat_no = $ticket['Seat'];
-                                    $drop_down = "id = \"FareType \" " . 'class="form-control fare" onchange="calTotalFare()"';
                                     $total +=$ticket['PriceSeat'];
                                     if ($seat_no > $schedule_select['NumberSeat']) {
                                         $click_remove = "removeSeatExtra($seat_no)";
@@ -1156,10 +1148,12 @@ if (array_key_exists('ReportID', $schedule_select)) {
                                     <tr id="row_<?= $seat_no ?>"> 
                                         <td class="text-center" id ="<?= $seat_no ?>">
                                             <span class="text"> <?= $seat_no ?></span>
-                                            <input type="hidden" name="Seat[]" value="<?= $seat_no ?>">
+                                            <?= $TicketID ?>
+                                            <?= $ticket['Source'] ?>
+                                            <?= $ticket['Destination'] ?>
                                         </td>
                                         <td>
-                                            <?= form_dropdown("PriceSeat[]", $schedule_select['Fare'], $ticket['PriceSeat'], $drop_down) ?> 
+                                            <?= $ticket['fares'] ?> 
                                         </td>
                                         <td>
                                             <button type="button" class="btn btn-sm btn-danger" onclick="<?= $click_remove ?>"><i class="fa fa-times"></i></button>
@@ -1171,7 +1165,6 @@ if (array_key_exists('ReportID', $schedule_select)) {
                             ?>
                         </tbody>
                     </table>
-
                 </div>
                 <div class="col-lg-12" style="margin-top: 0%;">
                     <div class="col-sm-6 text-right">
@@ -1180,11 +1173,12 @@ if (array_key_exists('ReportID', $schedule_select)) {
                     <div class="col-sm-6">
                         <input type="text" class="text-right" id="txt_total" placeholder="" value="<?= $total ?>"> 
                     </div>                            
+                </div>                
+                <div class="col-lg-12 col-sm-12 text-center" style="margin-top: 5%;">  
+                    <p class="text-danger">*พิมพ์ตั๋วโดยสารเเล้วจะไม่สามารถแก้ไขข้อมูลได้*</p>
+                    <button type="submit" class="btn btn-block btn-lg"><i class="fa fa-print fa-lg"></i>&nbsp;&nbsp;พิมพ์ตั๋วโดยสาร</button>
                 </div>
-                <div class="col-lg-12 col-sm-12 text-center" style="margin-top: 5%;">                            
-                    <button type="submit" class="btn btn-block btn-lg"><i class="fa fa-print fa-lg"></i>&nbsp;&nbsp;พิมพ์บัตรโดยสาร</button>
-                </div>
-
+                <?php echo form_close(); ?>
             </div>
             <div id="TicketSaleData" class="col-lg-12 <?= (array_key_exists('ScheduleReport', $schedule_select)) ? '' : 'hidden' ?>" style="padding-top: 2%;">              
                 <p class="text">
@@ -1208,12 +1202,20 @@ if (array_key_exists('ReportID', $schedule_select)) {
                             foreach ($schedule_select['ScheduleReport'] as $sr) {
                                 $net+=$sr['Total'];
                                 $num+=$sr['NumberTicket'];
+
+                                $NumberTicket = $sr['NumberTicket'];
+                                $NumberPriceFull = $sr['NumberPriceFull'];
+                                $NumberPriceDiscount = $sr['NumberPriceDiscount'];
+                                $DestinationName = $sr['DestinationName'];
+                                if ($NumberTicket != $NumberPriceFull) {
+                                    $NumberTicket = "$NumberPriceFull/$NumberPriceDiscount";
+                                }
                                 ?>
                                 <tr>
                                     <td class="text"><?= $sr['DestinationName'] ?></td>
                                     <td class="text-center"><?= $sr['PriceSeat'] ?></td>
-                                    <td class="text-center"><?= $sr['NumberTicket'] ?></td>
-                                    <td class="text-right"><?= $sr['Total'] ?></td>
+                                    <td class="text-center"><?= $NumberTicket ?></td>
+                                    <td class="text-right"><?= number_format($sr['Total']) ?></td>
                                 </tr>
                                 <?php
                             }
@@ -1224,14 +1226,14 @@ if (array_key_exists('ReportID', $schedule_select)) {
                         <tr class="active">
                             <td class="text-center" colspan="2">รวม</td>
                             <td class="text text-center"><?= $num ?></td>
-                            <td class="text text-right"><strong><?= $net ?></strong></td>
+                            <td class="text text-right"><strong><?= number_format($net) ?></strong></td>
                         </tr>
                     </tfoot>
                 </table>
             </div>
         </div>
     </div>  
-    <?php echo form_close(); ?>
+
 </div>
 
 

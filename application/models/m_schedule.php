@@ -10,7 +10,6 @@ class m_schedule extends CI_Model {
 
         $this->load->model('m_route');
         $this->load->model('m_station');
-        $this->load->model('m_schedule');
         $this->load->model('m_ticket');
 
         $date = $this->m_datetime->getDateToday();
@@ -32,7 +31,7 @@ class m_schedule extends CI_Model {
 
                 $RCode = $route['RCode'];
                 $detail_in_route = array();
-                $routes_detail = $this->m_route->get_route_detail($RCode, $VTID); 
+                $routes_detail = $this->m_route->get_route_detail($RCode, $VTID);
                 foreach ($routes_detail as $rd) {
                     $RID = $rd['RID'];
                     $StartPoint = $rd['StartPoint'];
@@ -265,6 +264,50 @@ class m_schedule extends CI_Model {
             }
         }
         return $TimeDepart;
+    }
+
+    public function time_arrive($RID, $TSID, $SourceID, $DestinationID) {
+        $this->load->model('m_route');
+        $this->load->model('m_station');
+
+        $this->load->model('m_ticket');
+        $route = reset($this->m_route->get_route(NULL, NULL, $RID));
+        $RCode = $route['RCode'];
+        $VTID = $route['VTID'];
+
+        $stations = $this->m_station->get_stations($RCode, $VTID);
+        $num_station = count($stations);
+
+        $s_station = reset($this->m_station->get_stations(NULL, NULL, $SourceID));
+
+        $source_id = $s_station['SID'];
+        $source_name = $s_station['StationName'];
+        $source_seq = $s_station['Seq'];
+        $source_travel_time = $s_station['TravelTime'];
+
+        $d_stations = $this->m_station->get_stations($RCode, $VTID, $DestinationID);
+
+        $destination_id = '';
+        $destination_name = '';
+        $destination_seq = '';
+        $destination_travel_time = '';
+
+        if (count($d_stations) > 0 && $DestinationID != NULL) {
+            $d_station = reset($d_stations);
+            $destination_id = $d_station['SID'];
+            $destination_name = $d_station['StationName'];
+            $destination_seq = $d_station['Seq'];
+            $destination_travel_time = $d_station['TravelTime'];
+        }
+        $time_arrive = "-";
+        $schedule = reset($this->get_schedule(NULL, NULL, NULL, $RID, $TSID));
+        //            เวลาเริ่มต้นของการเดินทาง
+        $start_time = $schedule["TimeDepart"];
+        if (($source_seq != '1' || $source_seq != $num_station)) {
+            if ($destination_travel_time != '0') {
+                $time_arrive = date('H:i', strtotime("+$destination_travel_time minutes", strtotime($start_time)));
+            }
+        }
     }
 
     public function get_time_depart($date, $rid, $tsid = NULL, $sid = NULL) {

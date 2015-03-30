@@ -39,7 +39,7 @@
 <div class="th-footer-bottom hidden hidden-print">COPYRIGHT &copy; 2014</div>
 
 <?php echo js('jasny-bootstrap.min.js?v=' . $version); ?>
-<?php echo js('foundation.offcanvas.js?v=' . $version); ?>
+<?php  js('foundation.offcanvas.js?v=' . $version); ?>
 
 <script>
     jQuery(document).ready(function ($) {

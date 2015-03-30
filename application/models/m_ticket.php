@@ -5,8 +5,8 @@ if (!defined('BASEPATH'))
 
 class m_ticket extends CI_Model {
 
-    public function get_ticket($date, $tsid = null, $status_seat = NULL, $eid = NULL) {
-//        $this->check_ticket();
+    public function get_ticket($date, $tsid = null, $status_seat = NULL, $eid = NULL, $NumberPrint = NULL) {
+
         $this->db->where('DateSale', $date);
         if ($tsid != NULL) {
             $this->db->where('TSID', $tsid);
@@ -15,8 +15,10 @@ class m_ticket extends CI_Model {
             $this->db->where('StatusSeat', $status_seat);
         }
         if ($eid != NULL) {
-//            $eid = $this->m_user->get_user_id();
             $this->db->where('Seller', $eid);
+        }
+        if ($NumberPrint != NULL) {
+            $this->db->where('NumberPrint', $NumberPrint);
         }
         $this->db->order_by('Seat');
         $query = $this->db->get('ticket_sale');
@@ -35,8 +37,7 @@ class m_ticket extends CI_Model {
     }
 
     public function get_ticket_by_station($sid, $tsid = NULL) {
-        $this->check_ticket();
-
+        $this->check_ticket($tsid);
 
         $this->db->where('SourceID', $sid);
         if ($tsid != NULL) {
@@ -168,6 +169,21 @@ class m_ticket extends CI_Model {
         return $TicketID;
     }
 
+    public function update_price_tickes($data_tickets) {
+        $rs = array();
+        foreach ($data_tickets as $ticket) {
+            $TicketID = $ticket['TicketID'];
+            $this->db->where('TicketID', $TicketID);
+            $this->db->update('ticket_sale', $ticket);
+            if ($this->db->affected_rows() == 1) {
+                $rs["$TicketID"] = 'TRUE';
+            } else {
+                $rs["$TicketID"] = 'FALSE';
+            }
+        }
+        return $rs;
+    }
+
     public function update_resever_ticket($data) {
         $TicketID = array();
         if (count($data) > 0) {
@@ -233,21 +249,26 @@ class m_ticket extends CI_Model {
         return $this->get_TicketID($tsid, $seat);
     }
 
-    public function delete_ticket($tsid, $seat, $SourceID = NULL) {
+    public function delete_ticket($tsid, $seat = NULL, $SourceID = NULL, $TicketID = NULL) {
         $EID = $this->session->userdata('EID');
-
+        
         $ticket_id = $this->get_TicketID($tsid, $seat, $SourceID, $EID);
+
         if ($ticket_id == NULL) {
             return FALSE;
         }
+        
+        $this->db->where('TicketID', $ticket_id);
 
-        $this->db->where('TSID', $tsid);
-        $this->db->where('Seat', $seat);
+        if ($seat != NULL) {
+            $this->db->where('Seat', $seat);
+        }
         if ($SourceID != NULL) {
             $this->db->where('SourceID', $SourceID);
         }
         $this->db->where('Seller', $EID);
         $this->db->delete('ticket_sale');
+
 
 
         return TRUE;
@@ -281,10 +302,29 @@ class m_ticket extends CI_Model {
         $this->db->where('TicketID', $ticket_id);
         $this->db->update('ticket_sale', $data);
         if ($this->db->affected_rows() == 1) {
-            return TRUE;
+            return "TRUE";
         } else {
-            return FALSE;
+            return "FALSE";
         }
+    }
+
+    /*
+     * เพิ่มจำนวนครั้งที่พิมพ์ 
+     */
+
+    public function print_tickets($tickets) {
+        $rs = array();
+        foreach ($tickets as $ticket) {
+            $ticket_id = $ticket['TicketID'];
+            $this->db->where('TicketID', $ticket_id);
+            $this->db->update('ticket_sale', $ticket);
+            if ($this->db->affected_rows() == 1) {
+                $rs["$ticket_id"] = 'TRUE';
+            } else {
+                $rs["$ticket_id"] = 'FALSE';
+            }
+        }
+        return $rs;
     }
 
     /*

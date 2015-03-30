@@ -16,26 +16,26 @@
         <link rel="shortcut icon" href="<?= asset_url() ?>img/favicon.ico<?= '?v=' . $version ?>">
         <!-- font -->
         <link rel="stylesheet" href="<?= asset_url() ?>fonts/th_niramit_as.css" />
-        
+
         <!-- Bootstrap core CSS ans JS -->
         <?php echo css('bootstrap.css?v=' . $version); ?>
         <?php echo css('bootflat.min.css?v=' . $version); ?>
         <?php echo css('theme.css?v=' . $version); ?>
         <?php echo css('animate.css?v=' . $version); ?>
         <?php echo css('font-awesome.css?v=' . $version); ?>  
-        
+
         <?php echo css('sale/jquery.fs.selecter.min.css?v=' . $version); ?>
         <?php echo css('sale/style_sale.css?v=' . $version); ?>
 
         <?php echo css('sale/navmenu-push.css?v=' . $version); ?>
         <?php echo css('sale/jasny-bootstrap.min.css?v=' . $version); ?>
-        
+
         <?php echo js('jquery.js?v=' . $version); ?>
         <?php echo js('bootstrap.js?v=' . $version); ?>
 
         <?php echo js('customJS.js?v=' . $version); ?>
-        <?php echo js('site.min.js?v=' . $version); ?>
-        <!--<? js('jquery.fs.selecter.min.js?v=' . $version); ?>-->   
+        <?php js('site.min.js?v=' . $version); ?>
+        <?php echo js('jquery.fs.selecter.min.js?v=' . $version); ?>   
         <style>
             body{
                 padding-top: 1%;
@@ -43,7 +43,7 @@
             table tbody tr td{               
                 color: #333333;
             }
-           
+
             .selecter.custom { max-width: 600px; margin: 0 0 auto;padding: 0 0 auto}
             .selecter.custom .selecter-selected { border-width: 1px; }
             .selecter.custom .selecter-options { border-width: 0 2px 2px; padding: 1%; }

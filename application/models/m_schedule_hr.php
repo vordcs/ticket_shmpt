@@ -260,7 +260,7 @@ class m_schedule_hr extends CI_Model {
         $temp_time = date('H:i', strtotime("+0 minutes", $time_start));
         $temp = 0;
         $i_TimeDepart[0] = "เลือกเวลา";
-        while($temp_time<$time_end){
+        while ($temp_time < $time_end) {
             $t = date('H:i', strtotime("+$temp minutes", $time_start));
             $i_TimeDepart[$t] = $t;
             $temp +=5;
@@ -595,6 +595,9 @@ class m_schedule_hr extends CI_Model {
             $this->db->insert('vehicles_has_schedules', array('TSID' => $data['TSID'], 'VID' => $data['VID'], 'RID' => '0'));
             $flag_vhs = TRUE;
         } else {
+
+            $this->update_vehicles_in_ticket_sale($data['TSID'], $data['VID']);
+
             $this->db->where('TSID', $data['TSID']);
             if ($this->db->update('vehicles_has_schedules', $pre_vhs))
                 $flag_vhs = TRUE;
@@ -612,6 +615,20 @@ class m_schedule_hr extends CI_Model {
             return TRUE;
         else
             return FALSE;
+    }
+
+    public function update_vehicles_in_ticket_sale($TSID, $VID) {
+        $this->db->select('VCode');
+        $this->db->where('VID', $VID);
+        $query = $this->db->get('vehicles');
+        $vehicle = $query->row_array();
+        $VCode = $vehicle['VCode'];
+        $data = array(
+            'VID' => $VID,
+            'VCode' => $VCode,
+        );
+        $this->db->where('TSID', $TSID);
+        $this->db->update('ticket_sale', $data);
     }
 
 }

@@ -99,7 +99,7 @@
                                     </a>
                                 </h4>
                             </div>
-                            <div id="collapse<?= $id ?>" class="panel-collapse collapse <?=($num_route==1)? 'in':''?>" role="tabpanel" aria-labelledby="heading<?= $id ?>">
+                            <div id="collapse<?= $id ?>" class="panel-collapse collapse <?= ($num_route == 1) ? 'in' : '' ?>" role="tabpanel" aria-labelledby="heading<?= $id ?>">
                                 <div class="panel-body">
                                     <p class="lead text-center">จุดขึ้นรถ : <strong><?= $seller_station_name ?></strong></p>
                                     <!--<p class="text">ปลายทาง</p>-->
@@ -167,11 +167,7 @@
                                                     <div class="list-group" style="border: 1px; font-size: 16pt">                                                        
                                                         <?php
                                                         $num_station_in_route = count($stations_in_route);
-                                                        if ($num_station_in_route == 1) {
-                                                            $station = reset($stations);
-                                                            $destination_id = $station['SID'];
-                                                            redirect("sale/booking/$rid/$seller_station_id/$destination_id");
-                                                        } elseif ($num_station_in_route > 0) {
+                                                        if ($num_station_in_route > 0) {
                                                             foreach ($stations_in_route as $station) {
                                                                 $destination_id = $station['SID'];
                                                                 $station_name = $station['StationName'];

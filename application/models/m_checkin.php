@@ -5,9 +5,16 @@ if (!defined('BASEPATH'))
 
 class m_checkin extends CI_Model {
 
+    public function get_seller($EID, $SID, $SellerID = NULL) {
+        $this->db->where('EID', $EID);
+        $this->db->where('SID', $SID);
+        $query = $this->db->get('sellers');
+        return $query->row_array();
+    }
+
     public function get_check_in($date = NULL, $TSID = NULL, $SID = NULL, $EID = NULL, $CheckInID = NULL) {
 
-        $this->db->join('sellers', 'sellers.SID = check_in.SID', 'left');
+        $this->db->select('*,check_in.CreateBy as CreateBy');
         $this->db->join('t_stations', 't_stations.SID = check_in.SID', 'left');
 
         if ($date == NULL) {
@@ -31,7 +38,7 @@ class m_checkin extends CI_Model {
         }
 
         $this->db->where('check_in.DateCheckIn', $date);
-
+        $this->db->order_by('TimeCheckIn','desc');
         $query = $this->db->get('check_in');
 
         return $query->result_array();

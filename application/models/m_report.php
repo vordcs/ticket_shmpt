@@ -745,6 +745,9 @@ class m_report extends CI_Model {
         $this->db->where('cost.SID', $SID);
         $this->db->where('t_schedules_day_has_cost.TSID', $TSID);
 
+        
+        $this->db->where('cost.CreateBy', $this->m_user->get_user_id());
+        
         $this->db->group_by('cost.CostDetailID');
 
         $query = $this->db->get('t_schedules_day_has_cost');

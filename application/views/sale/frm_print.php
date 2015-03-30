@@ -117,7 +117,7 @@
         width: 100%;
         padding-top: 1%;
         vertical-align: middle;
-        text-align: center;
+        /*text-align: center;*/
     }
     /*-------- style for ticket print 'THNiramitAS';---------------*/
     .print-ticket{    
@@ -233,6 +233,16 @@
         padding-bottom: 30px;
         border-top: 1px dotted;
     }
+
+    input[type=checkbox] {
+        /* All browsers except webkit*/
+        transform: scale(2.0);
+
+        /* Webkit browsers*/
+        -webkit-transform: scale(2.0);
+    }
+
+
     /* css ส่วนสำหรับการแบ่งหน้าข้อมูลสำหรับการพิมพ์ */
     @media all
     {        
@@ -270,12 +280,12 @@
                             <th style="width: 50%"></th>
                             <th style="width: 50%"></th>
                         </tr>
-                        <tr>
+                        <tr class="info">
                             <td colspan="2" class="text-right">
                                 <!--<button type="button" class="btn btn-info btn-sm" onclick="print_sucess('<? $ticket['TicketID'] ?>')"><i class="fa fa-check-square-o"></i>&nbsp;พิมพ์สำเร็จ</button>-->
                                 <div class="checkbox" style="">
                                     <label>
-                                        <input type="checkbox" checked name="TicketID[]" value="<?= $ticket['TicketID'] ?>">
+                                        <input type="checkbox" checked name="TicketID[]" value="<?= $ticket['TicketID'] ?>">                                        
                                     </label>
                                 </div>
                             </td>
@@ -507,15 +517,22 @@
 <footer class="hidden-print"> 
     <div class="container">
         <div class="row">
-            <div class="col-md-10 col-md-offset-1">
-                <?php
-                $cancle = array(
-                    'type' => "button",
-                    'class' => "btn btn-warning btn-lg pull-left",
-                );
-                echo anchor(($previous_page == NULL) ? 'sale/' : $previous_page, '<i class="fa fa-plus" ></i>&nbsp;เพิ่มที่นั่ง', $cancle) . '  ';
-                ?>  
-                <button type="button" class="btn btn-lg btn-default"  onclick="print_ticket()"><span class="fa fa-print fa-lg"></span>&nbsp;พิมพ์ตั๋วโดยสาร</button> 
+            <div class="col-md-4">                           
+                <div class="checkbox disabled">
+                    <label>
+                        <input type="checkbox" checked="" disabled="">&nbsp;<span class="text-success">พิมพ์สำเร็จ</span>
+                    </label>
+                </div>
+                <div class="checkbox disabled">
+                    <label>
+                        <input type="checkbox" disabled="">&nbsp;<span class="text-danger">พิมพ์ไม่สำเร็จ</span>
+                    </label>
+                </div>
+            </div>
+            <div class="col-md-4 text-center">
+                <button type="button" class="btn btn-lg btn-default"  onclick="print_ticket()"><span class="fa fa-print fa-lg"></span>&nbsp;พิมพ์ตั๋วโดยสาร</button>
+            </div>
+            <div class="col-md-4">
                 <button type="submit" class="btn btn-success btn-lg pull-right"><span class="fa fa-check"></span>&nbsp;พิมพ์สำเร็จ</button> 
             </div>
         </div>

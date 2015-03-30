@@ -89,20 +89,23 @@ class sale extends CI_Controller {
             'schedules' => $set_data['schedules'],
             'schedule_select' => $set_data['schedule_select'],
         );
-
+        $form_data = array();
+        $rs = array();
         if ($this->m_sale->validate_form_sale() && $this->form_validation->run() == TRUE) {
-            $tickets = $this->m_sale->get_post_form_booking();
-//            $data_debug['data_form_sale'] = $tickets;
-            $data_debug['update_resever_ticket'] = $this->m_ticket->update_resever_ticket($tickets);
+            $form_data = $this->m_sale->get_post_booking();
+            $rs = $this->m_ticket->update_price_tickes($form_data);
             redirect("sale/print_ticket/$rid/$source_id/$destination_id/$schedules_id");
         }
 
         $data_debug = array(
 //            'parameter' => "RID = $rid || Source = $source_id || Destination = $destination_id || TSID = $schedules_id",
+//            'form_data' => $form_data,
+//            'rs' => $rs,
+//            'all_post' => $this->input->post(),
 //            'form' => $data['form'],
 //            'routes_seller'=>$data['routes_seller'],
 //            'schedules'=>$data['schedules'],
-//            'schedule_select' => $data['schedule_select'],
+//            'schedule_select' => $data['schedule_select']['ScheduleCheckIn'],
         );
 
         $this->m_template->set_Debug($data_debug);
@@ -125,27 +128,46 @@ class sale extends CI_Controller {
         $date = $this->m_datetime->getDateToday();
         $eid = $this->m_user->get_user_id();
 
-        $tickets = $this->m_ticket->get_ticket($date, $tsid, 2, $eid);
+        $tickets_booking = $this->m_ticket->get_ticket($date, $tsid, 2, $eid);
+        $rs = array();
+        foreach ($tickets_booking as $ticket) {
+            $TicketID = $ticket['TicketID'];
+            $result = $this->m_ticket->sale_ticket($TicketID);
+            $rs[$TicketID] = $result;
+        }
+        $tickets_sale_no_print = $this->m_ticket->get_ticket($date, $tsid, 1, $eid, '0');
+        $tickets = array();
+        if (count($tickets_sale_no_print) > 0) {
+            $tickets = $tickets_sale_no_print;
+        }
 
         if (count($tickets) <= 0 && $num_ticket_delete > 0) {
             $alert['alert_message'] = "หมดเวลาทำรายการ";
             $alert['alert_mode'] = "warning";
             $this->session->set_flashdata('alert', $alert);
-
             redirect("sale/booking/$rid/$source_id/$destination_id/$tsid");
         }
         if (count($tickets) <= 0) {
+            $alert['alert_message'] = "หมดเวลาทำรายการ กรุณาเลือกที่นั่ง อีกครั้ง";
+            $alert['alert_mode'] = "warning";
+            $this->session->set_flashdata('alert', $alert);
+
             redirect("sale/booking/$rid/$source_id/$destination_id/$tsid");
         }
 
         $form_data = array();
-        $rs = array();
+
         if ($this->m_sale->validate_form_print_ticket() && $this->form_validation->run() == TRUE) {
             $form_data = $this->m_sale->get_post_form_print_ticket();
-            $rs = $this->m_ticket->sale_tickets($form_data);
-            if (count($tickets) <= 0) {
+            $rs = $this->m_ticket->print_tickets($form_data);
+
+            if (count($tickets) == count($form_data)) {
+
+                $alert['alert_message'] = "พิมพ์ตั๋วโดยสารสำเร็จ";
+                $alert['alert_mode'] = "success";
+
                 redirect("sale/booking/$rid/$source_id/$destination_id/$tsid");
-            }  else {
+            } else {
                 redirect("sale/print_ticket/$rid/$source_id/$destination_id/$tsid");
             }
         }
@@ -153,13 +175,15 @@ class sale extends CI_Controller {
         $data = array(
             'previous_page' => "sale/booking/$rid/$source_id/$destination_id/$tsid",
             'next_page' => '',
-            'data' => $this->m_sale->set_form_print($date, $rid, $source_id, $destination_id, $tsid),
+            'data' => $this->m_sale->set_form_print($date, $rid, $source_id, $destination_id, $tsid, $tickets),
         );
         $data_debug = array(
-//            'tickets' => $data['tickets'],
-//            'route' => $data['route'],
+//            'tickets' => $tickets,
+//            'route' => $data['route'],            
 //            'form_data' => $form_data,
 //            'rs' => $rs,
+//            'num_form_data' => count($form_data),
+//            'num_ticket' => count($tickets),
 //            'data' => $data['data'],
         );
 
@@ -208,32 +232,46 @@ class sale extends CI_Controller {
     public function booking_seat() {
         $tsid = $this->input->post('TSID');
         $seat = $this->input->post("Seat");
-        $vcode = $this->input->post("VCode");
         $source_id = $this->input->post("SourceID");
-        $source_name = $this->input->post("SourceName");
         $destination_id = $this->input->post("DestinationID");
-        $destination_name = $this->input->post("DestinationName");
-        $price_seat = $this->input->post("PriceSeat");
-        $price_dicount = $this->input->post('PriceDicount');
         $TimeDepart = $this->input->post('TimeDepart');
+        $TimeArrive = $this->input->post('TimeArrive');
 
-        $this->m_ticket->check_ticket($tsid);
+        /* data station source */
+        $station_source = reset($this->m_station->get_stations(NULL, NULL, $source_id));
+        $SourceName = $station_source['StationName'];
 
-        if ($price_seat == $price_dicount) {
-            $IsDiscount = 1;
-        } else {
-            $IsDiscount = 0;
-        }
+        /* data station destination */
+        $station_destination = reset($this->m_station->get_stations(NULL, NULL, $destination_id));
+        $DestinationName = $station_destination['StationName'];
+
+        /* data schedule */
+        $schedule = reset($this->m_schedule->get_schedule(NULL, NULL, NULL, NULL, $tsid));
+        $RCode = $schedule['RCode'];
+        $VTID = $schedule['VTID'];
+        $RID = $schedule['RID'];
+        $VID = $schedule['VID'];
+        $VCode = $schedule['VCode'];
+
+        /* data fares */
+        $fares = reset($this->m_fares->get_fares($RCode, $VTID, $source_id, $destination_id));
+        $Price = $fares['Price'];
+        $PriceDicount = $fares['PriceDicount'];
+        $price_seat = $fares['Price'];
+        $IsDiscount = 0;
 
         $ticket_data = array(
+            'RID' => $RID,
             'TSID' => $tsid,
             'Seat' => $seat,
-            'VCode' => $vcode,
+            'VID' => $VID,
+            'VCode' => $VCode,
             'SourceID' => $source_id,
-            'SourceName' => $source_name,
+            'SourceName' => $SourceName,
             'DestinationID' => $destination_id,
-            'DestinationName' => $destination_name,
+            'DestinationName' => $DestinationName,
             'TimeDepart' => $TimeDepart,
+            'TimeArrive' => $TimeArrive,
             'DateSale' => $this->m_datetime->getDateToday(),
             'PriceSeat' => $price_seat,
             'IsDiscount' => $IsDiscount,
@@ -244,10 +282,39 @@ class sale extends CI_Controller {
 
         if ($check_ticket_id == NULL && $seat <= 99) {
             $ticket_id = $this->m_ticket->resever_ticket($ticket_data);
-            echo json_encode(1);
-        } else {
+            $dropdown = "id = \"FareType \" " . 'class="form-control fare" onchange="calTotalFare()"';
+            if ($Price == $PriceDicount) {
+                $i_fares[$Price] = "$Price (เต็ม)";
+            } else {
+                $i_fares[$Price] = "$Price (เต็ม)";
+                $i_fares[$PriceDicount] = "$PriceDicount (ลด)";
+            }
 
-            $ticket_id = NULL;
+            $i_ticket_id = array(
+                'type' => 'hidden',
+                'name' => 'TicketID[]',
+                'value' => $ticket_id
+            );
+            $i_source_id = array(
+                'type' => 'hidden',
+                'name' => 'SourceID[]',
+                'value' => $source_id
+            );
+            $i_destination_id = array(
+                'type' => 'hidden',
+                'name' => 'DestinationID[]',
+                'value' => $destination_id
+            );
+
+            $rs = array(
+                'TicketID' => form_input($i_ticket_id),
+                'DestinationName' => $DestinationName,
+                'Price' => form_dropdown('PriceSeat[]', $i_fares, set_value("PriceSeat[]"), $dropdown),
+                'Source' => form_input($i_source_id),
+                'Destination' => form_input($i_destination_id),
+            );
+            echo json_encode($rs);
+        } else {            
             echo json_encode(0);
         }
     }
@@ -256,6 +323,7 @@ class sale extends CI_Controller {
         $tsid = $this->input->post('TSID');
         $seat = $this->input->post("Seat");
         $source_id = $this->input->post("SourceID");
+
         $rs = $this->m_ticket->delete_ticket($tsid, $seat, $source_id);
         if ($rs) {
             echo json_encode(1);

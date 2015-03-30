@@ -252,7 +252,7 @@ class m_sale extends CI_Model {
          * ตารางเวลาเดินรถ
          */
         if ($tsid != NULL) {
-            $schedule = $this->get_schedule($tsid)[0];
+            $schedule = reset($this->get_schedule($tsid));
         } else {
             $schedule = array();
         }
@@ -288,11 +288,7 @@ class m_sale extends CI_Model {
             $vcode = $schedule['VCode'];
 //            เวลาเริ่มต้นของการเดินทาง
             $start_time = $schedule["TimeDepart"];
-            if (($source_seq == '1' || $source_seq == $num_station)) {
-                $time_depart = date('H:i', strtotime($schedule["TimeDepart"]));
-            } else {
-                $time_depart = date('H:i', strtotime("+$source_travel_time minutes", strtotime($start_time)));
-            }
+            $time_depart = $this->m_schedule->time_depart($rid, $tsid, $seller_station_id);
             if (($source_seq != '1' || $source_seq != $num_station)) {
                 if ($destination_travel_time != '0') {
                     $time_arrive = date('H:i', strtotime("+$destination_travel_time minutes", strtotime($start_time)));
@@ -319,22 +315,6 @@ class m_sale extends CI_Model {
             'readonly' => "TRUE",
             'value' => $rid,
         );
-        $i_VID = array(
-            'type' => "hidden",
-            'name' => "VID",
-            'id' => "VID ",
-            'class' => "from-control",
-            'readonly' => "TRUE",
-            'value' => $vid,
-        );
-        $i_VTID = array(
-            'type' => "hidden",
-            'name' => "VTID",
-            'id' => "VTID",
-            'class' => "from-control",
-            'readonly' => "TRUE",
-            'value' => $vtid,
-        );
         $i_TSID = array(
             'type' => "hidden",
             'name' => "TSID",
@@ -359,22 +339,7 @@ class m_sale extends CI_Model {
             'readonly' => "TRUE",
             'value' => $source_name,
         );
-        $i_DestinationID = array(
-            'type' => "hidden",
-            'name' => "DestinationID",
-            'id' => "DestinationID",
-            'class' => "form-control text-center",
-            'readonly' => "",
-            'value' => $destination_id,
-        );
-        $i_DestinationName = array(
-            'type' => "hidden",
-            'name' => "DestinationName",
-            'id' => "DestinationName",
-            'class' => "form-control text-center",
-            'readonly' => "",
-            'value' => $destination_name,
-        );
+
 
         $i_TimeDepart = array(
             'type' => "text",
@@ -392,14 +357,7 @@ class m_sale extends CI_Model {
             'readonly' => "",
             'value' => $time_arrive,
         );
-        $i_Date = array(
-            'type' => "hidden",
-            'name' => "Date",
-            'id' => "Date",
-            'class' => "form-control text-center",
-            'readonly' => "",
-            'value' => $date,
-        );
+
         $i_DateTH = array(
             'type' => "text",
             'name' => "DateTH",
@@ -434,31 +392,23 @@ class m_sale extends CI_Model {
         );
 
         $stations_ = $this->m_station->get_stations_by_start_point($start_point, $rcode, $vtid, $seller_station_seq);
-        if (count($stations_) > 1) {
-//            $i_stations[0] = 'เลือกปลายทาง';
-        }
 
         foreach ($stations_ as $station) {
             $i_stations[$station['SID']] = $station['StationName'];
         }
 
-        $dropdown = 'id="StationDestination" onchange="change_destination()" ';
+        $dropdown = 'id="DestinationID" onchange="change_destination()" ';
 
         $form_sale_ticket = array(
             'form' => form_open("sale/booking/$rid/$source_id/$destination_id/$tsid", array('class' => 'form', 'id' => 'form_booking', 'name' => 'form_booking')),
             'route_name' => form_input($i_route_name),
             'RID' => form_input($i_RID),
-            'VID' => form_input($i_VID),
-            'VTID' => form_input($i_VTID),
             'TSID' => form_input($i_TSID),
             'SourceID' => form_input($i_SourceID),
-            'SourceName' => form_input($i_SourceName),
-            'DestinationID' => form_input($i_DestinationID),
-            'DestinationName' => form_input($i_DestinationName),
-            'StationDestination' => form_dropdown('StationDestination', $i_stations, (set_value("StationDestination") == NULL) ? $destination_id : set_value("StationDestination"), $dropdown),
+            'SourceName' => form_input($i_SourceName), //         
+            'DestinationID' => form_dropdown('DestinationID', $i_stations, (set_value("DestinationID") == NULL) ? $destination_id : set_value("DestinationID"), $dropdown),
             'TimeDepart' => form_input($i_TimeDepart),
             'TimeArrive' => form_input($i_TimeArrive),
-            'Date' => form_input($i_Date),
             'DateTH' => form_input($i_DateTH),
             'Price' => form_input($i_Price),
             'PriceDicount' => form_input($i_PriceDicount),
@@ -562,7 +512,7 @@ class m_sale extends CI_Model {
         /*
          * ข้อมูลเสนทาง
          */
-        $route = $this->m_route->get_route_by_seller(NULL, NULL, $RID)[0];
+        $route = reset($this->m_route->get_route_by_seller(NULL, NULL, $RID));
 
         $rcode = $route['RCode'];
         $vtid = $route['VTID'];
@@ -606,15 +556,15 @@ class m_sale extends CI_Model {
             $Date_schedule = $schedule['Date'];
             $TimeDepart = $this->m_schedule->get_time_depart($Date_schedule, $RID_schedule, $TSID_schedule, $SourceID)[0]['TimeDepart'];
 
-            $ticket_book = $this->get_ticket($start_point, $TSID_schedule, 2, $seller_station_seq, $DestinationSeq);
-            $ticket_book_seller = $this->get_ticket($start_point, $TSID_schedule, 2, $seller_station_seq, $DestinationSeq, $EID);
-
-            $ticket_sale = $this->get_ticket($start_point, $TSID_schedule, 1, $seller_station_seq, $DestinationSeq);
-            $ticket_sale_seller = $this->get_ticket($start_point, $TSID_schedule, 1, $seller_station_seq, $DestinationSeq, $EID);
+//            $tickets_book = $this->get_ticket($start_point, $TSID_schedule, 2, $seller_station_seq, $DestinationSeq);
+//            $ticket_book_seller = $this->get_ticket($start_point, $TSID_schedule, 2, $seller_station_seq, $DestinationSeq, $EID);
+//
+//            $ticket_sale = $this->get_ticket($start_point, $TSID_schedule, 1, $seller_station_seq, $DestinationSeq);
+//            $ticket_sale_seller = $this->get_ticket($start_point, $TSID_schedule, 1, $seller_station_seq, $DestinationSeq, $EID);
 
             $NumberSeat = $schedule['VSeat'];
-            $NumberSeatBook = count($ticket_book);
-            $NumberSeatSale = count($ticket_sale);
+            $NumberSeatBook = $this->count_ticket($start_point, $TSID_schedule, 2, $seller_station_seq, $DestinationSeq)['Number'];
+            $NumberSeatSale = $this->count_ticket($start_point, $TSID_schedule, 1, $seller_station_seq, $DestinationSeq)['Number'];
 
             /* จำนวนที่นั่งที่ว่าง */
             if ($NumberSeatBook > 0 && $NumberSeatSale > 0) {
@@ -628,51 +578,15 @@ class m_sale extends CI_Model {
             }
 
 
-            $NumberSeatBookBySeller = count($ticket_book_seller);
-            $NumberSeatSaleBySeller = count($ticket_sale_seller);
+            $NumberSeatBookBySeller = $this->count_ticket($start_point, $TSID_schedule, 2, $seller_station_seq, $DestinationSeq, $EID)['Number'];
+            $NumberSeatSaleBySeller = $this->count_ticket($start_point, $TSID_schedule, 1, $seller_station_seq, $DestinationSeq, $EID)['Number'];
 
 
-
-            $TicketsExtra = $this->get_ticket($start_point, $TSID_schedule, NULL, $seller_station_seq, $DestinationSeq, NULL, $NumberSeat);
 
             $NumberTicketsExtra = 0;
             if ($NumberSeat <= $NumberSeatSale) {
-                $NumberTicketsExtra = count($TicketsExtra);
+                $NumberTicketsExtra = $this->count_ticket($start_point, $TSID_schedule, NULL, $seller_station_seq, $DestinationSeq, NULL, $NumberSeat)['Number'];
             }
-
-
-            $Tickets = $this->get_ticket($start_point, $TSID_schedule, NULL, $seller_station_seq);
-
-            /*
-             * ค่าโดยสาร
-             */
-            $price = 0;
-            $price_dis = 0;
-
-            $i_Fare = array(
-                $price => $price,
-                $price_dis => $price_dis,
-            );
-
-            if ($DestinationID != NULL) {
-                $fare = $this->m_fares->get_fares($rcode, $vtid, $seller_station_id, $DestinationID);
-                if (count($fare) > 0 && $fare != NULL) {
-                    $price = $fare[0]['Price'];
-                    $price_dis = $fare[0]['PriceDicount'];
-                    $i_Fare = array(
-                        $price_dis => $price_dis . ' (ลด) ',
-                        $price => $price . ' (เต็ม) ',
-                    );
-                }
-            }
-
-
-            $Reports = array();
-
-            if ($NumberSeatSaleBySeller > 0) {
-                $Reports = $this->get_report_by_seller($TSID_schedule, $seller_station_id);
-            }
-
             $NumberSeatTotal = array(
                 'type' => "text",
                 'name' => "NumberSeatTotal",
@@ -693,15 +607,17 @@ class m_sale extends CI_Model {
             $check_in_on_schedule = $this->m_checkin->get_check_in($date, $TSID_schedule);
             $data_check_in = array();
             foreach ($check_in_on_schedule as $checkin) {
+                $SID_checkin = $checkin['SID'];
+                $create_by = $checkin['CreateBy'];
+                $seller = $this->m_checkin->get_seller($create_by, $SID_checkin);
                 $station_name = $checkin['StationName'];
-
-                if ($checkin['SellerNote'] != NULL) {
-                    $station_name .= $checkin['SellerNote'];
+                if ($seller['SellerNote'] != NULL) {
+                    $station_name .= " (".$seller['SellerNote'].") ";
                 }
 
                 $temp_check_in = array(
                     'TimeCheckIn' => date('H:i', strtotime($checkin['TimeCheckIn'])),
-                    'StationName' => $station_name,
+                    'StationName' => $station_name,                    
                 );
                 array_push($data_check_in, $temp_check_in);
             }
@@ -736,8 +652,7 @@ class m_sale extends CI_Model {
                 'CheckInID' => $CheckInID,
                 'TimeCheckIn' => $TimeCheckIn,
                 'CheckInTime' => $this->m_checkin->check_checkin(NULL, $TSID_schedule, $seller_station_id),
-                'data_check_in' => $data_check_in,
-                'Fare' => $i_Fare,
+                'ScheduleCheckIn' => $data_check_in,
                 'NumberSeat' => $NumberSeat,
                 'NumberSeatBlank' => $NumberSeatBlank,
                 'NumberSeatBook' => $NumberSeatBook,
@@ -746,13 +661,80 @@ class m_sale extends CI_Model {
                 'NumberSeatBookBySeller' => $NumberSeatBookBySeller,
                 'NumberSeatSaleBySeller' => $NumberSeatSaleBySeller,
                 'NumberSeatTotal' => form_input($NumberSeatTotal),
-                'TicketsBook' => $ticket_book_seller,
-                'TicketsSale' => $ticket_sale,
-                'TicketsExtra' => $TicketsExtra,
-                'ScheduleReport' => $Reports,
-                'Tickets' => $Tickets,
             );
             if ($TSID != NULL && $TSID == $TSID_schedule) {
+
+                $ticket_book_seller = $this->get_ticket($start_point, $TSID_schedule, 2, $seller_station_seq, $DestinationSeq, $EID); //
+                $ticket_sale = $this->get_ticket($start_point, $TSID_schedule, 1, $seller_station_seq, $DestinationSeq);
+                $TicketsExtra = $this->get_ticket($start_point, $TSID_schedule, NULL, $seller_station_seq, $DestinationSeq, NULL, $NumberSeat);
+
+                /*
+                 * ค่าโดยสาร
+                 */
+                $price = 0;
+                $price_dis = 0;
+
+                $i_Fare = array(
+                    $price => $price,
+                    $price_dis => $price_dis,
+                );
+
+                if ($DestinationID != NULL) {
+                    $fare = $this->m_fares->get_fares($rcode, $vtid, $seller_station_id, $DestinationID);
+                    if (count($fare) > 0 && $fare != NULL) {
+                        $price = $fare[0]['Price'];
+                        $price_dis = $fare[0]['PriceDicount'];
+                        $i_Fare = array(
+                            $price_dis => $price_dis . ' (ลด) ',
+                            $price => $price . ' (เต็ม) ',
+                        );
+                    }
+                }
+
+                $SeatBookBySeller = array();
+                foreach ($ticket_book_seller as $ticket) {
+                    $TicketID = $ticket['TicketID'];
+                    $Seat = $ticket['Seat'];
+                    $PriceSeat = $ticket['PriceSeat'];
+
+                    $i_TicketID = array(
+                        'type' => 'hidden',
+                        'name' => 'TicketID[]',
+                        'value' => $TicketID,
+                    );
+                    $i_SourceID = array(
+                        'type' => 'hidden',
+                        'name' => 'SourceID[]',
+                        'value' => $ticket['SourceID']
+                    );
+                    $i_DestinationID = array(
+                        'type' => 'hidden',
+                        'name' => 'DestinationID[]',
+                        'value' => $ticket['DestinationID'],
+                    );
+                    $dropdown = "id = \"FareType \" " . 'class="form-control fare" onchange="calTotalFare()"';
+                    $temp_ticket_book = array(
+                        'Seat' => $Seat,
+                        'txtTicketID' => $TicketID,
+                        'TicketID' => form_input($i_TicketID),
+                        'PriceSeat' => $PriceSeat,
+                        'fares' => form_dropdown("PriceSeat[]", $i_Fare, $PriceSeat, $dropdown),
+                        'Source' => form_input($i_SourceID),
+                        'Destination' => form_input($i_DestinationID),
+                    );
+                    array_push($SeatBookBySeller, $temp_ticket_book);
+                }
+                $Reports = array();
+
+                if ($NumberSeatSaleBySeller > 0) {
+                    $Reports = $this->get_report_by_seller($TSID_schedule, $seller_station_id);
+                }
+
+                $temp_schedule_in_route['TicketsBook'] = $ticket_book_seller;
+                $temp_schedule_in_route['TicketsSale'] = $ticket_sale;
+                $temp_schedule_in_route['TicketsExtra'] = $TicketsExtra;
+                $temp_schedule_in_route['SeatBookBySeller'] = $SeatBookBySeller;
+                $temp_schedule_in_route['ScheduleReport'] = $Reports;
                 $schedule_select = $temp_schedule_in_route;
             }
             array_push($schedules_in_route, $temp_schedule_in_route);
@@ -765,79 +747,66 @@ class m_sale extends CI_Model {
         return $rs;
     }
 
-    public function get_post_form_booking() {
+    public function get_post_form_print_ticket() {
+        $TicketIDs = $this->input->post('TicketID');
+        $data_tickets = array();
+        foreach ($TicketIDs as $TicketID) {
+            $this->db->select('NumberPrint');
+            $this->db->where('TicketID', $TicketID);
+            $query = $this->db->get('ticket_sale');
+//            $NumberPrint = $query->row_array()['NumberPrint'];
+            $temp_ticket = array(
+                'TicketID' => $TicketID,
+                'NumberPrint' => 1,
+            );
+            array_push($data_tickets, $temp_ticket);
+        }
+        return $data_tickets;
+    }
 
-        $route_name = $this->input->post('route_name');
-        $RID = $this->input->post('RID');
-        $VID = $this->input->post('VID');
-        $VCode = $this->input->post('VCode');
+    public function get_post_booking() {
+
         $TSID = $this->input->post('TSID');
         $SourceID = $this->input->post('SourceID');
-        $SourceName = $this->input->post('SourceName');
         $DestinationID = $this->input->post('DestinationID');
-        $DestinationName = $this->input->post('DestinationName');
-        $TimeDepart = $this->input->post('TimeDepart');
-        $TimeArrive = $this->input->post('TimeArrive');
-
-        $Date = $this->m_datetime->getDateToday(); //$this->$this->input->post('Date');
-        $Price = $this->input->post('Price');
-        $PriceDicount = $this->input->post('PriceDicount');
-
-        $Seat = $this->input->post('Seat');
-        $PriceSeat = $this->input->post('PriceSeat');
-        $IsDiscount = array();
-//        0=ราคาเต็ม ,1 =ราคาลด
-        for ($i = 0; $i < count($PriceSeat); $i++) {
-            if ($PriceSeat[$i] == $Price) {
-                $IsDiscount[$i] = 0;
-            } else {
-                $IsDiscount[$i] = 1;
-            }
-        }
-        $tickets = array();
-        for ($i = 0; $i < count($Seat); $i++) {
-            $temp_ticket = array(
-                'TSID' => $TSID,
-                'RID' => $RID,
-                'VID' => $VID,
-                'VCode' => $VCode,
-                'SourceID' => $SourceID,
-                'SourceName' => $SourceName,
-                'DestinationID' => $DestinationID,
-                'DestinationName' => $DestinationName,
-                'TimeDepart' => $TimeDepart,
-                'TimeArrive' => $TimeArrive,
-                'DateSale' => $Date,
-                'Seat' => $Seat[$i],
-                'PriceSeat' => $PriceSeat[$i],
-                'IsDiscount' => $IsDiscount[$i],
-                'Seller' => $this->session->userdata('EID'),
-            );
-            array_push($tickets, $temp_ticket);
-        }
-
-        return $tickets;
-    }
-
-    public function get_post_form_print_ticket() {
         $TicketID = $this->input->post('TicketID');
-        return $TicketID;
+        $PriceSeat = $this->input->post('PriceSeat');
+
+        /* data schedule */
+        $schedule = reset($this->m_schedule->get_schedule(NULL, NULL, NULL, NULL, $TSID));
+        $RCode = $schedule['RCode'];
+        $VTID = $schedule['VTID'];
+
+        $rs = array();
+
+        for ($i = 0; $i < count($TicketID); $i++) {
+            /* data fares */
+            $fares = reset($this->m_fares->get_fares($RCode, $VTID, $SourceID[$i], $DestinationID[$i]));
+            $Price = $fares['Price'];
+            $PriceDicount = $fares['PriceDicount'];
+
+            $IsDiscount = 0;
+            if ($Price == $PriceDicount) {
+                $IsDiscount = 0;
+            } elseif ($PriceDicount == $PriceSeat[$i]) {
+                $IsDiscount = 1;
+            }
+            $temp_ticket = array(
+                'TicketID' => $TicketID[$i],
+                'PriceSeat' => $PriceSeat[$i],
+                'IsDiscount' => $IsDiscount,
+            );
+            array_push($rs, $temp_ticket);
+        }
+        return $rs;
     }
 
-    public function set_form_print($date, $RID, $SourceID, $DestinationID, $TSID) {
+    public function set_form_print($date, $RID, $SourceID, $DestinationID, $TSID, $tickets) {
         $this->load->model('m_route');
-        $this->load->model('m_station');
-        $this->load->model('m_schedule');
-        $this->load->model('m_fares');
-        $this->load->model('m_ticket');
 
         $data_ticket = array();
 
-        $EID = $this->m_user->get_user_id();
-
         $route = reset($this->m_route->get_route(NULL, NULL, $RID));
-
-        $tickets = $this->m_ticket->get_ticket($date, $TSID, 2, $EID);
 
         $rcode = $route['RCode'];
         $vtid = $route['VTID'];
@@ -961,7 +930,7 @@ class m_sale extends CI_Model {
 
     public function get_ticket($StartPoint, $TSID, $StatusSeat = NULL, $SourceSeq = NULL, $DestinationSeq = NULL, $EID = NULL, $Seat = NULL) {
 
-        $this->db->select('TSID,TicketID,Seat,StatusSeat,SourceName,DestinationName,PriceSeat,Seller,t_stations.Seq as DestinationSeq,IsDiscount');
+        $this->db->select('TSID,TicketID,Seat,StatusSeat,SourceID,SourceName,DestinationID,DestinationName,PriceSeat,Seller,t_stations.Seq as DestinationSeq,IsDiscount');
         $this->db->join('t_stations', 't_stations.SID = ticket_sale.DestinationID', 'left');
         $this->db->where('TSID', $TSID);
 
@@ -973,15 +942,6 @@ class m_sale extends CI_Model {
         }
         if ($StartPoint == 'D' && $SourceSeq != NULL) {
             $this->db->where('t_stations.Seq <', $SourceSeq);
-        }
-
-
-        if ($StartPoint == 'S' && $DestinationSeq != NULL) {
-//            $this->db->where('t_stations.Seq >', $DestinationSeq);
-        }
-
-        if ($StartPoint == 'D' && $DestinationSeq != NULL) {
-//            $this->db->where('t_stations.Seq <=', $DestinationSeq);
         }
 
         if ($EID != NULL) {
@@ -997,26 +957,91 @@ class m_sale extends CI_Model {
         return $query->result_array();
     }
 
-    public function get_report_by_seller($TSID, $SourceID) {
-        $this->db->select('TSID,SourceID,SourceName,DestinationID,DestinationName,PriceSeat,COUNT(TicketID) as NumberTicket,SUM(PriceSeat) as Total');
-        $this->db->where('SourceID', $SourceID);
+    public function count_ticket($StartPoint, $TSID, $StatusSeat = NULL, $SourceSeq = NULL, $DestinationSeq = NULL, $EID = NULL, $Seat = NULL) {
+
+        $this->db->select('COUNT(TicketID) as Number');
+        $this->db->join('t_stations', 't_stations.SID = ticket_sale.DestinationID', 'left');
         $this->db->where('TSID', $TSID);
-        $this->db->where('StatusSeat', 1);
-        $this->db->where('Seller', $this->m_user->get_user_id());
-        $this->db->group_by('SourceID,DestinationID');
+
+        if ($StatusSeat != NULL) {
+            $this->db->where('StatusSeat', $StatusSeat);
+        }
+        if ($StartPoint == 'S' && $SourceSeq != NULL) {
+            $this->db->where('t_stations.Seq >', $SourceSeq);
+        }
+        if ($StartPoint == 'D' && $SourceSeq != NULL) {
+            $this->db->where('t_stations.Seq <', $SourceSeq);
+        }
+
+        if ($EID != NULL) {
+            $this->db->where('Seller', $EID);
+        }
+
+        if ($Seat != NULL) {
+            $this->db->where('Seat >', $Seat);
+        }
+
         $query = $this->db->get('ticket_sale');
-        return $query->result_array();
+
+        return $query->row_array();
+    }
+
+    public function get_data_check_in() {
+        $this->load->model('m_checkin');
+//        $this->m_checkin->get_check_in($date, $TSID_schedule);
+    }
+
+    public function get_report_by_seller($TSID, $SourceID) {
+        $this->load->model('m_report');
+        $this->load->model('m_fares');
+        $this->load->model('m_schedule');
+
+        $schedule = reset($this->m_schedule->get_schedule(NULL, NULL, NULL, NULL, $TSID));
+        $RCode = $schedule['RCode'];
+        $VTID = $schedule['VTID'];
+
+        $tickets = $this->m_report->get_ticket_by_seller($TSID, $SourceID);
+        $ticket_in_schedule = array();
+
+        foreach ($tickets as $ticket) {
+            $NumberTicket = $ticket['NumberTicket'];
+            $DestinationID = $ticket['DestinationID'];
+            $DestinationName = $ticket['DestinationName'];
+            $Total = $ticket['Total'];
+            $num_ticket_discount = reset($this->m_report->get_ticket_by_seller($TSID, $SourceID, $DestinationID, 1))['NumberTicket'];
+            $num_ticket_full = $NumberTicket - $num_ticket_discount;
+            $fare = reset($this->m_fares->get_fares($RCode, $VTID, $SourceID, $DestinationID));
+            $price = $fare['Price'];
+            $price_dis = $fare['PriceDicount'];
+            if ($price != $price_dis && $num_ticket_discount > 0) {
+                $PriceSeat = "$price/$price_dis";
+            } else {
+                $PriceSeat = $price;
+            }
+
+            $temp_ticket = array(
+                'SourceID'=>$SourceID,
+                'DestinationID'=>$DestinationID,
+                'PriceSeat' => $PriceSeat,
+                'NumberTicket' => $NumberTicket,
+                'NumberPriceFull' => $num_ticket_full,
+                'NumberPriceDiscount' => $num_ticket_discount,
+                'DestinationName' => $DestinationName,
+                'Total' => $Total,
+            );
+            array_push($ticket_in_schedule, $temp_ticket);
+        }
+        return $ticket_in_schedule;
     }
 
     public function validate_form_sale() {
-
-        $Seat = $this->input->post('Seat');
+        $Seat = $this->input->post('TicketID');
         if (count($Seat) <= 0 || $Seat == NULL) {
             return FALSE;
         }
+        $this->form_validation->set_rules("SourceID[]", "ต้นทาง", 'trim|required|xss_clean');
+        $this->form_validation->set_rules('DestinationID[]', 'ปลายทาง', 'trim|xss_clean|callback_check_dropdown');
 
-        $this->form_validation->set_rules('StationDestination', 'ปลายทาง', 'trim|xss_clean|callback_check_dropdown');
-        $this->form_validation->set_rules("Seat[]", "เวลาเดินทาง", 'trim|required|xss_clean');
 
         return TRUE;
     }
