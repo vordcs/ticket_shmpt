@@ -5,10 +5,10 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="keywords"
-              content="thaihubhosting, hosting, host, high perfomance">
+              content="">
         <meta name="description"
-              content="เว็บโฮสติ้งคุณภาพสูง ที่ได้รับการออกแบบติดตั้งและผู้แลจากผู้เชี่ยวชาญตลอด 24 ชั่วโมง">
-        <meta name="author" content="CBNUKE">
+              content="">
+        <meta name="author" content="VoRDcsCBNUKE">
 
 
         <title><?php echo $title; ?></title>

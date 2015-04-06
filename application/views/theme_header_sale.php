@@ -6,7 +6,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">        
         <meta name="description"
               content="ระบบขายตั๋วโดยสาร">
-        <meta name="author" content="VoRDCSCBNUKE">
+        <meta name="author" content="VoRDcsCBNUKE">
 
 
         <title><?php echo $title; ?></title>

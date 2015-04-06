@@ -252,8 +252,16 @@ class m_checkin extends CI_Model {
     public function gennerate_checkin_id($SID) {
         $CheckInID = '';
         $date = $this->m_datetime->getDateToday();
-        $checkin = $this->get_check_in($date, NULL, $SID);
-        $num_checkin = count($checkin);
+        
+        $this->db->where('check_in.SID', $SID);
+        $this->db->where('check_in.DateCheckIn', $date);
+;
+        $query = $this->db->get('check_in');
+        
+        $num_checkin = $query->num_rows();
+        
+        $checkin = $query->result_array();
+        
         if ($num_checkin <= 0) {
             //วันที่
             $date_ = new DateTime();
