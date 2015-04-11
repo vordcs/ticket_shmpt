@@ -347,8 +347,7 @@ class m_report extends CI_Model {
 
         $sum = 0;
 
-        foreach ($routes as $route) {
-
+        foreach ($routes as $route) {            
             $rcode = $route['RCode'];
             $vtid = $route['VTID'];
             $vt_name = $route['VTDescription'];
