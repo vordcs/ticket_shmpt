@@ -1236,4 +1236,4 @@ if (array_key_exists('ReportID', $schedule_select)) {
 
 </div>
 
-
+<div style="position: absolute;bottom: 0;right: 0;"><strong>{elapsed_time}</strong> seconds</div>
