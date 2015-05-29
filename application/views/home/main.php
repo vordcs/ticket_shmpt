@@ -93,6 +93,16 @@
             </div>
         </div>
     </div>
+
+    <div class="row">      
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">                      
+                    <span class="fa fa-clock-o">&nbsp;เวลาเข้างานวันที่ <strong><?= $clock_in_date ?></strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;เวลาเข้างาน <strong><?= $clock_in_time ?></strong></span>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 <?php echo js('docs.min.js?v=' . $version); ?>  
 

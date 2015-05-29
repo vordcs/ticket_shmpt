@@ -13,6 +13,7 @@ class Home extends CI_Controller {
         $this->load->model('m_schedule');
         $this->load->model('m_ticket');
         $this->load->model('m_home');
+        $this->load->model('m_log_clocking');
         $this->load->library('form_validation');
 
         //Initial language
@@ -71,7 +72,14 @@ class Home extends CI_Controller {
         foreach ($data['seller_detail'] as $row) {
             array_push($data['all_sid'], $row['SID']);
         }
+
+        $temp = explode(' ', $this->m_log_clocking->check_log_clocking_today($this->m_home->get_user_id())[0]['clock_in_date']);
+        $data['clock_in_date'] = $this->m_datetime->getDateThaiString($temp[0]);
+        $date = new DateTime($temp[0] . ' ' . $temp[1]);
+        $data['clock_in_time'] = $date->format('H:i');
 //        $data['timeline'] = $this->m_home->get_timeline(NULL, $data['all_sid']);
+
+
         $data_debug = array(
 //            'from_search' => $data['from_search'],
 //    'route'=>$data['route'],

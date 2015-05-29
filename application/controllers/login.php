@@ -9,6 +9,7 @@ class login extends CI_Controller {
         parent::__construct();
         $this->load->model('m_template');
         $this->load->model('m_login');
+        $this->load->model('m_log_clocking');
         $this->load->library('form_validation');
         $this->load->helper('form');
 
@@ -20,7 +21,12 @@ class login extends CI_Controller {
 
         if ($this->m_login->set_validation() && $this->form_validation->run()) {
             $temp = $this->m_login->get_post();
-            if($this->m_login->login($temp)){
+            if ($this->m_login->login($temp)) {
+                if (count($this->m_log_clocking->check_log_clocking_today($temp['user'])) == 0) {
+                    if ($this->m_log_clocking->insert_clock_in($temp['user']) == FALSE) {
+                        redirect('logout');
+                    }
+                }
                 redirect('home');
             }
         }
