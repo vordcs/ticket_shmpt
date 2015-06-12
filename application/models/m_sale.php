@@ -424,7 +424,9 @@ class m_sale extends CI_Model {
             'routes_seller' => $data['routes_seller'],
             'schedules' => $data['schedules'],
             'schedule_select' => $data['schedule_select'],
+            'data_parcel_post' => $data['data_parcel_post'],
         );
+
         return $rs;
     }
 
@@ -611,13 +613,13 @@ class m_sale extends CI_Model {
                 $create_by = $checkin['CreateBy'];
                 $seller = $this->m_checkin->get_seller($create_by, $SID_checkin);
                 $station_name = $checkin['StationName'];
-                if ($seller['SellerNote'] != NULL) {
-                    $station_name .= " (".$seller['SellerNote'].") ";
+                if (isset($seller['SellerNote'])) {
+                    $station_name .= " (" . $seller['SellerNote'] . ") ";
                 }
 
                 $temp_check_in = array(
                     'TimeCheckIn' => date('H:i', strtotime($checkin['TimeCheckIn'])),
-                    'StationName' => $station_name,                    
+                    'StationName' => $station_name,
                 );
                 array_push($data_check_in, $temp_check_in);
             }
@@ -743,8 +745,39 @@ class m_sale extends CI_Model {
             'routes_seller' => $data_routes_seller,
             'schedules' => $schedules_in_route,
             'schedule_select' => $schedule_select,
+            'data_parcel_post' => $this->get_parcel_post_report($SourceID, $TSID),
         );
         return $rs;
+    }
+
+    public function get_parcel_post_report($SourceID, $TSID = NULL) {
+        $this->db->select(''
+                . 'SUM(cost.CostValue) AS Total,'
+                . 'SUM(parcel_post.Number) AS Number,'
+                . 't_stations.StationName AS DestinationName,'
+                . 'cost.CreateBy AS CreateBy,'
+                . 'cost.CreateDate AS CreateDate,'
+        );
+        $this->db->join('cost_type', 'cost_type.CostTypeID = cost.CostTypeID');
+        $this->db->join('cost_detail', 'cost_detail.CostDetailID = cost.CostDetailID', 'left');
+        $this->db->join('t_schedules_day_has_cost', 't_schedules_day_has_cost.CostID = cost.CostID');
+        $this->db->join('parcel_post', 'parcel_post.CostID = cost.CostID', 'left');
+        $this->db->join('t_stations', 't_stations.SID = parcel_post.DestinationID', 'left');
+
+        $date = $this->m_datetime->getDateToday();
+        if ($TSID != NULL) {
+            $this->db->where('t_schedules_day_has_cost.TSID', $TSID);
+        }
+        $this->db->group_by('parcel_post.DestinationID');
+        $this->db->where('cost.CostDate', $date);
+        $this->db->where('cost.SID', $SourceID);
+        $this->db->where('cost.CostDetailID', '6');
+        $this->db->where('cost.CreateBy', $this->m_user->get_user_id());
+        $query = $this->db->get('cost');
+        if ($TSID == NULL) {
+            return array();
+        }
+        return $query->result_array();
     }
 
     public function get_post_form_print_ticket() {
@@ -866,6 +899,10 @@ class m_sale extends CI_Model {
         return $rs;
     }
 
+    /*
+     * log seat
+     */
+
     public function set_form_print_log($TSID, $SourceID) {
 
         $this->load->model('m_route');
@@ -926,6 +963,51 @@ class m_sale extends CI_Model {
             'reports' => $reports_in_schedule,
         );
         return $rs;
+    }
+
+    /*
+     * recept parcel
+     */
+
+    public function set_form_print_parcel($RID, $TSID, $CostID) {
+        $this->load->model('m_route');
+        $this->load->model('m_cost');
+        $this->load->model('m_station');
+        $this->load->model('m_schedule');
+
+        $route = reset($this->m_route->get_route(NULL, NULL, $RID));
+
+        $RCode = $route['RCode'];
+        $VTName = $route['VTDescription'];
+        $RSource = $route['RSource'];
+        $RDestination = $route['RDestination'];
+
+
+        $RouteName = $RCode . ' ' . ' ' . $RSource . ' - ' . $RDestination;
+
+        $data_parcel = reset($this->m_cost->get_parcel_post(NULL, $CostID, $TSID));
+
+        $source = reset($this->m_station->get_stations(NULL, NULL, $data_parcel['SourceID']));
+        $destination = reset($this->m_station->get_stations(NULL, NULL, $data_parcel['DestinationID']));
+
+        $TimeDepart = $this->m_schedule->time_depart($RID, $TSID, $data_parcel['SourceID']);
+        $TimeArrive = $this->m_schedule->time_arrive($RID, $TSID, $data_parcel['SourceID'], $data_parcel['DestinationID']);
+
+        $data = array();
+
+        $data['VTName'] = $VTName;
+        $data['RouteName'] = $RouteName;
+        $data['SourceName'] = $source['StationName'];
+        $data['DestinationName'] = $destination['StationName'];
+        $data['TimeDepart'] = $TimeDepart;
+        $data['TimeArrive'] = $TimeArrive;
+        $data['Date'] = $this->m_datetime->getDateThaiStringShort($data_parcel['CostDate']);
+        $data += $data_parcel;
+        $data['debug'] = $this->m_cost->get_parcel_post(NULL, $CostID, $TSID);
+
+
+
+        return $data;
     }
 
     public function get_ticket($StartPoint, $TSID, $StatusSeat = NULL, $SourceSeq = NULL, $DestinationSeq = NULL, $EID = NULL, $Seat = NULL) {
@@ -1020,8 +1102,8 @@ class m_sale extends CI_Model {
             }
 
             $temp_ticket = array(
-                'SourceID'=>$SourceID,
-                'DestinationID'=>$DestinationID,
+                'SourceID' => $SourceID,
+                'DestinationID' => $DestinationID,
                 'PriceSeat' => $PriceSeat,
                 'NumberTicket' => $NumberTicket,
                 'NumberPriceFull' => $num_ticket_full,

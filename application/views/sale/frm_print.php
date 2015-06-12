@@ -488,7 +488,7 @@
                                 <td class="text-center">
                                     <strong class="detail-foot"><?= $ticket['TimeDepart'] ?></strong>
                                     <br>
-                                    <small class="note"><?= $ticket['VTName'] ?> &nbsp;:&nbsp;</small><strong><?= $ticket['VCode'] ?></strong>
+                                    <strong><?= $ticket['VCode'] ?></strong>
                                     <br>
                                     <small class="note">ราคา&nbsp;:&nbsp;</small><strong class="price-small-info"><?= $ticket['Price'] ?></strong>&nbsp;<small class="note">บ.</small>                            
                                 </td>

@@ -270,7 +270,7 @@ class m_schedule extends CI_Model {
         $this->load->model('m_route');
         $this->load->model('m_station');
 
-        $this->load->model('m_ticket');
+        
         $route = reset($this->m_route->get_route(NULL, NULL, $RID));
         $RCode = $route['RCode'];
         $VTID = $route['VTID'];
@@ -308,6 +308,7 @@ class m_schedule extends CI_Model {
                 $time_arrive = date('H:i', strtotime("+$destination_travel_time minutes", strtotime($start_time)));
             }
         }
+        return $time_arrive;
     }
 
     public function get_time_depart($date, $rid, $tsid = NULL, $sid = NULL) {
@@ -395,9 +396,7 @@ class m_schedule extends CI_Model {
         return $TimeDepart;
     }
 
-    public function get_time_arrive($param) {
-        
-    }
+   
 
     public function get_stations($rcode = null, $vtid = null, $sid = NULL) {
         if ($rcode != NULL) {

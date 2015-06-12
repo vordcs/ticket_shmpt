@@ -33,7 +33,7 @@
     if (schedules_id !== '') {
         NumberSeat = parseInt('<?= $schedule_select['NumberSeat'] + $schedule_select['NumberTicketsExtra'] ?>');
     }
-    function addSeat(seat_no, vtid) {
+    function addSeat(seat_no) {
         var book = booking(seat_no);
         if (document.getElementById(seat_no) !== null) {
             document.getElementById("user_action").innerHTML = 'ที่นั่ง ' + seat_no + ' ถูกเลือกเเล้ว';
@@ -46,10 +46,8 @@
 
         if (document.getElementById(seat_no) === null && book) {
 
-
             var tb_ticket_body = $('#ticket_guest tbody');
             var seat_info = $('#seat_info_' + seat_no);
-            var num = $('#tb_ticket_sale tbody tr').length;
 
             var fare = book['Price'];
             var ticket_id = book['TicketID'];
@@ -80,10 +78,8 @@
 
             tb_ticket_body.append(row);
 
-            var info = '<i class="fa fa-user fa-2x"></i><br>';
-            if (parseInt(vtid) === 2) {
-                info = '<i class="fa fa-user fa-lg"></i><br>';
-            }
+            var info = '<i class="fa fa-user fa-lg"></i><br>';
+
             info += '<span class="badge badge-warning" style="font-size: 8pt;">';
             info += book['DestinationName'];
             info += '</span>';
@@ -200,7 +196,6 @@
 
         return true;
     }
-
     function booking(seat_no) {
         var seat_info = {
             'TSID': schedules_id,
@@ -210,7 +205,6 @@
             'TimeDepart': document.getElementById('TimeDepart').value,
             'TimeArrive': document.getElementById('TimeArrive').value,
         };
-
         var result = $.ajax({
             url: '<?= base_url() . "sale/booking_seat" ?>',
             type: 'POST',
@@ -223,7 +217,6 @@
         } else {
             var data = JSON.parse(result);
             return data;
-
         }
 
     }
@@ -249,7 +242,6 @@
             return false;
         }
     }
-
     function check_chang() {
         var data = {
             'TSID': '',
@@ -272,7 +264,6 @@
             }
         });
     }
-
     function change_destination() {
         var DestinationID = document.getElementById("DestinationID").value;
         var SourceID = document.getElementById("SourceID").value;
@@ -302,14 +293,7 @@
         margin-top: 2%;
     }
 
-    .bg-van{
-        padding-top: 2%; 
-        background-image: url(<?= base_url() . 'assets/img/bg_van.jpg' ?>);
-        background-size: 100% 100%;
-        background-repeat:no-repeat;
-    }
-    .bg-bus{
-    }
+
     .bg-blank{
 
         background-image: url(<?= base_url() . 'assets/img/seat_blank.png' ?>);
@@ -375,11 +359,9 @@
         box-shadow: 0 0 10px #ccc;
     }
 
-
-
 </style>
-<?php
 
+<?php
 function search_tickets($tickes, $Seat, $eid = NULL, $SeatStatus = NULL) {
     $rs = NULL;
     foreach ($tickes as $val) {
@@ -668,9 +650,73 @@ if (array_key_exists('ReportID', $schedule_select)) {
                     <span class="badge badge-danger">&nbsp;ขาย&nbsp;:&nbsp;<span class="NumberSeatSale" style="font-size: 14pt;"><?= $schedule['NumberSeatSaleBySeller'] ?></span></span>  
                 </span>
             </div>
+            <?php
 
+            function check_seat($schedule, $eid, $seat_no) {
+                $seat = '---';
+
+                $seat_info = $seat_no;
+                $class_seat_info = "badge-info";
+                $user = "";
+
+                $class_seat = "bg-blank";
+
+                $click_book = "addSeat($seat_no)";
+                $click_remove = "removeSeat($seat_no)";
+
+                $ticket_booking = check_ticket($schedule['TicketsBook'], $seat_no);
+                $ticket_sale = check_ticket($schedule['TicketsSale'], $seat_no);
+
+                if ($ticket_sale != NULL) {
+                    $class_seat = " bg-busy ";
+                    $class_seat_info = "badge-danger";
+
+                    $user = '<i class="fa fa-user fa-lg"></i><br>';
+                    $seat_info = iconv_substr($ticket_sale['DestinationName'], 0, 10, "UTF-8");
+
+                    $click_book = "";
+                    $click_remove = "";
+                } elseif ($ticket_booking != NULL) {
+                    $class_seat = " bg-reserve ";
+                    $class_seat_info = "badge-warning";
+
+                    $user = '<i class="fa fa-user fa-lg"></i><br>';
+                    $seat_info = iconv_substr($ticket_booking['DestinationName'], 0, 10, "UTF-8");
+
+                    $ticket_booking_by_seller = check_ticket($schedule['TicketsBook'], $seat_no, $eid);
+                    if ($ticket_booking_by_seller != NULL) {
+                        $click_book = "addSeat($seat_no)";
+                        $click_remove = "removeSeat($seat_no)";
+                    } else {
+                        $click_book = "";
+                        $click_remove = "";
+                    }
+
+                    if ($schedule['IsSold'] == FALSE || $schedule['ReportID'] != NULL || $schedule['CheckInID'] != NULL) {
+                        $click_book = "";
+                        $click_remove = "";
+                        $class_seat .='  ';
+                    }
+                }
+                $id_seat = "seat_$seat_no";
+                $id_seat_info = "seat_info_$seat_no";
+
+                $seat = "<div id=\"$id_seat\" "
+                        . "onclick=\"$click_book\" "
+                        . "ondblclick=\"$click_remove\" "
+                        . "class=\"col-xs-12 seat $class_seat \">"
+                        . "<span class=\"seat-info\" id=\"$id_seat_info\" >"
+                        . "$user"
+                        . "<span class=\"badge $class_seat_info\" style=\"font-size: 8pt;\">"
+                        . "$seat_info"
+                        . "</span>"
+                        . "</span>"
+                        . "</div>";
+
+                return $seat;
+            }
+            ?>
             <div id="seat_list" class="col-lg-12" style="padding-top: 2%;padding-bottom: 5%;">
-
                 <?php
                 if (count($schedule) > 0) {
                     $num_seat = $schedule['NumberSeat'];
@@ -678,258 +724,47 @@ if (array_key_exists('ReportID', $schedule_select)) {
                     $SourceID = $schedule['SourceID'];
                     $DestinationID = $schedule['DestinationID'];
                     $VTID = $schedule['VTID'];
-                    if ($VTID == 1) {
-                        $num_row = 5;
-                        $num_col = 4;
-                        ?>                        
-                        <div class="bg-van">
-                            <br>
-                            <div class="row">
-                                <table id="SeatingPlanVan" class="" border="0"  style="width:75%;padding-top: 5% ; margin: 0 auto;">
-                                    <tbody>
-                                        <?php
-                                        $width = 100 / $num_col;
-                                        $seat_no = 1;
+                    $num_row = 12;
+                    $num_col = 5;
 
-                                        for ($row = 1; $row <= $num_row; $row++) {
-                                            echo '<tr>';
-                                            for ($col = 1; $col <= $num_col; $col++) {
+                    $width = 100 / $num_col;
+                    $seat_no = 1;
+                    $id_seat = "";
+                    $id_seat_info = '';
 
-                                                $seat_info = "";
-                                                $class_info = "";
+                    $eid = $this->m_user->get_user_id();
 
-                                                $user = '';
-
-                                                $click_book = '';
-                                                $click_remove = '';
-
-                                                echo "<td style=\"width: $width%;height: 70px;padding:1%;\">";
-                                                if ($row == 1 && ($col == 3 || $col == 4)) {
-                                                    $class_seat = '';
-                                                } elseif ($row == 2 && ($col == 1)) {
-                                                    $class_seat = '';
-                                                } elseif (($row == 3 || $row == 4) && ($col == 2)) {
-                                                    $class_seat = '';
-                                                } else {
-                                                    $class_seat = " bg-blank";
-                                                    $class_seat_info = 'badge-info';
-                                                    $seat_info = $seat_no;
-
-                                                    $click_book = "addSeat($seat_no,$VTID)";
-                                                    $click_remove = "removeSeat($seat_no)";
-
-                                                    $eid = $this->m_user->get_user_id();
-                                                    $ticket_booking = check_ticket($schedule['TicketsBook'], $seat_no);
-                                                    $ticket_sale = check_ticket($schedule['TicketsSale'], $seat_no);
-
-                                                    if ($ticket_sale != NULL) {
-                                                        $class_seat = " bg-busy ";
-                                                        $class_seat_info = "badge-danger";
-
-                                                        $user = '<i class="fa fa-user fa-2x"></i><br>';
-                                                        $seat_info = iconv_substr($ticket_sale['DestinationName'], 0, 10, "UTF-8");
-
-                                                        $click_book = "";
-                                                        $click_remove = "";
-                                                    } elseif ($ticket_booking != NULL) {
-                                                        $class_seat = " bg-reserve ";
-                                                        $class_seat_info = "badge-warning";
-
-                                                        $user = '<i class="fa fa-user fa-2x"></i><br>';
-                                                        $seat_info = iconv_substr($ticket_booking['DestinationName'], 0, 10, "UTF-8");
-
-                                                        $ticket_booking_by_seller = check_ticket($schedule['TicketsBook'], $seat_no, $eid);
-                                                        if ($ticket_booking_by_seller != NULL) {
-                                                            $click_book = "addSeat($seat_no,$VTID)";
-                                                            $click_remove = "removeSeat($seat_no)";
-                                                        } else {
-                                                            $click_book = "";
-                                                            $click_remove = "";
-                                                        }
-                                                    }
-                                                    if ($schedule['IsSold'] == FALSE || $schedule['ReportID'] != NULL || $schedule['CheckInID'] != NULL) {
-                                                        $click_book = "";
-                                                        $click_remove = "";
-                                                        $class_seat .='  ';
-                                                    }
-
-                                                    $id_seat = "seat_$seat_no";
-                                                    $id_seat_info = "seat_info_$seat_no";
-                                                    ?>
-                                                <div id="<?= $id_seat ?>" onclick="<?= $click_book ?>" ondblclick="<?= $click_remove ?>" class="col-xs-12 seat <?php echo $class_seat; ?>">
-                                                    <span class="seat-info" id="<?= $id_seat_info ?>" >  
-                                                        <?= $user ?>
-                                                        <span class="badge <?= $class_seat_info ?>" style="font-size: 8pt;">
-                                                            <?= $seat_info ?>
-                                                        </span>                                                                                                     
-                                                    </span>
-                                                </div>
-                                                <?php
-                                                $seat_no++;
-                                            }
-                                            echo "</td>";
-                                        }
-                                        echo '</tr>';
-                                    }
-                                    if ($schedule['IsSold'] && $schedule['NumberSeat'] <= $schedule['NumberSeatSale']) {
-                                        $click_book = "addSeatExtra()";
-                                        $class_add_extra = '';
-                                        if ($CheckInID != NULL || $ReportID != NULL) {
-                                            $click_book = "";
-                                            $class_add_extra = 'hidden';
-                                        }
-                                        echo '<tr>';
-                                        ?>                              
-                                        <td colspan="4" class="text-center <?= $class_add_extra ?>"> 
-                                            <button type="button"class="btn btn-info " onclick="<?= $click_book ?>">
-                                                <i class="fa fa-user-plus fa-lg"></i>&nbsp;เพิ่มที่นั่งเสริม
-                                            </button>
-                                        </td>
-                                        <?php
-                                        echo '</tr>';
-                                    }
-                                    ?>
-                                    </tbody>
-                                </table>
-                            </div>
-                            <div class="row">
-
-                            </div>
-                            <br>
-                        </div>
-                        <div id="SeatExtra" class="row well" style="width: 85%;margin: 0 auto;">
-                            <?php
-                            if ($schedule_select['NumberTicketsExtra'] > 0 || ($schedule['NumberSeat'] <= $schedule['NumberSeatSale'])) {
-                                foreach ($schedule_select['TicketsExtra'] as $ticket) {
-                                    $seat_no = $ticket['Seat'];
-                                    $status_seat = $ticket['StatusSeat'];
-
-                                    $user = '<i class="fa fa-user fa-lg"></i><br>';
-
-                                    $DestinationName = $ticket['DestinationName'];
-
-                                    if ($status_seat == 1) {
-                                        $class_seat = " bg-busy ";
-                                        $class_info = "badge-danger";
-                                        $click_remove = "";
-                                    } else {
-                                        $class_seat = " bg-reserve ";
-                                        $class_info = "badge-warning";
-                                        $click_remove = "removeSeatExtra($seat_no)";
-                                    }
-
-                                    if ($schedule['IsSold'] || $CheckInID != NULL || $ReportID != NULL) {
-                                        $click_remove = '';
-                                    }
-
-                                    $id_seat = "seat_$seat_no";
-                                    $id_seat_info = "seat_info_$seat_no";
-                                    ?>
-                                    <div id="<?= $id_seat ?>" class="col-xs-3 seat-extra">
-                                        <div  onclick="" ondblclick="<?= $click_remove ?>" class="seat <?= $class_seat ?>">
-                                            <span class="seat-info" id="<?= $id_seat_info ?>"> 
-                                                <?= $user ?>                                                
-                                                <span class="badge <?= $class_info ?>" style="font-size: 8pt;">
-                                                    <?= $DestinationName ?>
-                                                </span>                                                                                                     
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <?php
-                                }
-                            }
-                            ?>                                                                    
-                        </div>
-                        <?php
-                    } elseif ($VTID == 2) {
-                        $num_row = 12;
-                        $num_col = 5;
+                    if ($VTID == 2) {
+                        /*
+                         * รถบัส ป.2
+                         */
                         ?>
                         <div class="row">
                             <table id="SeatingPlanBus" class="" border="1"  style="width:90%;padding-top: 5% ; margin: 0 auto;">
+
                                 <tbody>
+                                    <tr>
+                                        <td colspan="2" class="text-center">ทางขึ้น</td>
+                                        <td rowspan="12"></td>
+                                        <td colspan="2" class="text-center" >พนักงานขับรถ</td>
+                                    </tr>
                                     <?php
-                                    $width = 100 / $num_col;
-                                    $seat_no = 1;
-                                    $id_seat = "";
-                                    $id_seat_info = '';
                                     for ($row = 1; $row <= $num_row; $row++) {
                                         echo '<tr>';
                                         for ($col = 1; $col <= $num_col; $col++) {
-
-                                            $seat_info = $seat_no;
-                                            $class_seat_info = "badge-info";
-                                            $user = "";
-
-                                            $click_book = '';
-                                            $click_remove = '';
-
-                                            echo "<td style=\"width: $width%;height: 50px;padding:1%;\">";
                                             if ($row != $num_row && $col == 3) {
-                                                $class_seat = "";
+                                                
                                             } else {
-                                                $class_seat = "bg-blank";
-
-                                                $click_book = "addSeat($seat_no,$VTID)";
-                                                $click_remove = "removeSeat($seat_no)";
-
-                                                $eid = $this->m_user->get_user_id();
-                                                $ticket_booking = check_ticket($schedule['TicketsBook'], $seat_no);
-                                                $ticket_sale = check_ticket($schedule['TicketsSale'], $seat_no);
-
-                                                if ($ticket_sale != NULL) {
-                                                    $class_seat = " bg-busy ";
-                                                    $class_seat_info = "badge-danger";
-
-                                                    $user = '<i class="fa fa-user fa-lg"></i><br>';
-                                                    $seat_info = iconv_substr($ticket_sale['DestinationName'], 0, 10, "UTF-8");
-
-                                                    $click_book = "";
-                                                    $click_remove = "";
-                                                } elseif ($ticket_booking != NULL) {
-
-                                                    $class_seat = " bg-reserve ";
-                                                    $class_seat_info = "badge-warning";
-
-                                                    $user = '<i class="fa fa-user fa-lg"></i><br>';
-                                                    $seat_info = iconv_substr($ticket_booking['DestinationName'], 0, 10, "UTF-8");
-
-                                                    $ticket_booking_by_seller = check_ticket($schedule['TicketsBook'], $seat_no, $eid);
-                                                    if ($ticket_booking_by_seller != NULL) {
-                                                        $click_book = "addSeat($seat_no,$VTID)";
-                                                        $click_remove = "removeSeat($seat_no)";
-                                                    } else {
-                                                        $click_book = "";
-                                                        $click_remove = "";
-                                                    }
-                                                }
-
-                                                if ($schedule['IsSold'] == FALSE || $schedule['ReportID'] != NULL || $schedule['CheckInID'] != NULL) {
-                                                    $click_book = "";
-                                                    $click_remove = "";
-                                                    $class_seat .='  ';
-                                                }
-
-                                                $id_seat = "seat_$seat_no";
-                                                $id_seat_info = "seat_info_$seat_no";
-                                                ?>
-                                            <div id="<?= $id_seat ?>" onclick="<?= $click_book ?>" ondblclick="<?= $click_remove ?>" class="col-xs-12 seat <?php echo $class_seat; ?>">
-                                                <span class="seat-info" id="<?= $id_seat_info ?>" >  
-                                                    <?= $user ?>
-                                                    <span class="badge <?= $class_seat_info ?>" style="font-size: 8pt;">
-                                                        <?= $seat_info ?>
-                                                    </span>                                                                                                     
-                                                </span>
-                                            </div>
-                                            <?php
-                                            $seat_no++;
+                                                echo "<td style=\"width: $width%;height: 50px;padding:1%;\">";
+                                                echo check_seat($schedule, $eid, $seat_no);
+                                                $seat_no++;
+                                                echo '</td>';
+                                            }
                                         }
-                                        echo "</td>";
+                                        echo '</tr>';
                                     }
-                                    echo '</tr>';
-                                }
-                                ?>
-                                </tbody>
+                                    ?>                                  
+                                </tbody>  
                                 <tfoot>
                                     <?php
                                     if ($schedule['IsSold'] && $schedule['NumberSeat'] <= $schedule['NumberSeatSale']) {
@@ -953,155 +788,303 @@ if (array_key_exists('ReportID', $schedule_select)) {
                                 </tfoot>
                             </table>
                         </div>
+                        <?php
+                    } else {
+                        /*
+                         * รถบัส ป.1
+                         */
+                        ?>
                         <div class="row">
-                            <div id="SeatExtra" class="row well" style="width: 85%;margin: 0 auto;">
-                                <?php
-                                if ($schedule_select['NumberTicketsExtra'] > 0 || ($schedule['NumberSeat'] <= $schedule['NumberSeatSale'])) {
-                                    foreach ($schedule_select['TicketsExtra'] as $ticket) {
-                                        $seat_no = $ticket['Seat'];
-                                        $status_seat = $ticket['StatusSeat'];
-
-                                        $user = '<i class="fa fa-user fa-lg"></i><br>';
-
-                                        $DestinationName = $ticket['DestinationName'];
-
-                                        if ($status_seat == 1) {
-                                            $class_seat = " bg-busy ";
-                                            $class_info = "badge-danger";
-                                            $click_remove = "";
+                            <h5> <span class="label label-primary" style="font-size: 12pt">ชั้น&nbsp;<strong>บน</strong></span></h5>                            
+                            <table id="SeatingPlanBusVIP_Top" class="" border="1"  style="width:90%;padding-bottom: 3% ; margin: 0 auto;">
+                                <tbody>
+                                    <tr>
+                                        <td colspan="2" class="text-center">ทางขึ้น</td>
+                                        <td rowspan="12"></td>
+                                        <td colspan="2" class="text-center" >พนักงานขับรถ</td>
+                                    </tr>
+                                    <?php
+                                    for ($row = 1; $row <= $num_row; $row++) {
+                                        echo '<tr>';
+                                        for ($col = 1; $col <= $num_col; $col++) {
+                                            if ($row == 1 && $col == 3) {
+                                                
+                                            } elseif (($row == 6 && $col == 1)) {
+                                                ?>
+                                            <td class="text-center" colspan="2" rowspan="2">ทางขึ้น</td>
+                                            <?php
+                                        } elseif (($row == 6 && $col == 2)) {
+                                            
+                                        } elseif (($row == 7 && $col == 1) || ($row == 7 && $col == 2)) {
+                                            
+                                        } elseif ($row != $num_row && $col == 3) {
+                                            
                                         } else {
-                                            $class_seat = " bg-reserve ";
-                                            $class_info = "badge-warning";
-                                            $click_remove = "removeSeatExtra($seat_no)";
+                                            echo "<td style=\"width: $width%;height: 50px;padding:1%;\">";
+                                            echo check_seat($schedule, $eid, $seat_no);
+                                            $seat_no++;
+                                            echo '</td>';
                                         }
-
-                                        if ($CheckInID != NULL || $ReportID != NULL) {
-                                            $click_remove = '';
-                                        }
-
-                                        $id_seat = "seat_$seat_no";
-                                        $id_seat_info = "seat_info_$seat_no";
-                                        ?>
-                                        <div id="<?= $id_seat ?>" class="col-xs-3 seat-extra">
-                                            <div  onclick="" ondblclick="<?= $click_remove ?>" class="seat <?= $class_seat ?>">
-                                                <span class="seat-info" id="<?= $id_seat_info ?>"> 
-                                                    <?= $user ?>                                                
-                                                    <span class="badge <?= $class_info ?>" style="font-size: 8pt;">
-                                                        <?= $DestinationName ?>
-                                                    </span>                                                                                                     
-                                                </span>
-                                            </div>
-                                        </div>
+                                    }
+                                    echo '</tr>';
+                                }
+                                ?>                                
+                                </tbody>
+                            </table>
+                            <h5>
+                                <span class="label label-primary" style="font-size: 12pt">ชั้น&nbsp;<strong>ล่าง</strong></span>
+                            </h5>                            
+                            <table id="SeatingPlanBusVIP_Below" border="1"  style="width:90%; margin: 0 auto;">
+                                <tbody>
+                                    <?php
+                                    $num_row = 3;
+                                    $num_col = 5;
+                                    for ($row = 1; $row <= $num_row; $row++) {
+                                        if ($row == 1) {
+                                            ?>
+                                            <tr>
+                                                <td style="width: <?= $width ?>% ;height: 50px;padding:1%;" > 
+                                                    <?php
+                                                    echo check_seat($schedule, $eid, $seat_no);
+                                                    $seat_no++;
+                                                    ?>
+                                                </td>
+                                                <td style="width: <?= $width ?>% ;height: 50px;padding:1%;" >
+                                                    <?php
+                                                    echo check_seat($schedule, $eid, $seat_no);
+                                                    $seat_no++;
+                                                    ?>
+                                                </td>
+                                                <td rowspan="3" style="width: <?= $width ?>% ;height: 50px;padding:1%;" > </td>
+                                                <td style="width: <?= $width ?>% ;height: 50px;padding:1%;" > 
+                                                    <?php
+                                                    echo check_seat($schedule, $eid, $seat_no);
+                                                    $seat_no++;
+                                                    ?>
+                                                </td>
+                                                <td style="width: <?= $width ?>% ;height: 50px;padding:1%;" > 
+                                                    <?php
+                                                    echo check_seat($schedule, $eid, $seat_no);
+                                                    $seat_no++;
+                                                    ?>
+                                                </td>
+                                            </tr>
+                                            <?php
+                                        } elseif ($row == $num_row) {
+                                            ?>
+                                        <td colspan="2" class="text-center" style="width: <?= $width ?>% ;height: 50px;padding:1%;">ทางขึ้น</td>
+                                        <td style="width: <?= $width ?>% ;height: 50px;padding:1%;" >
+                                            <?php
+                                            echo check_seat($schedule, $eid, $seat_no);
+                                            $seat_no++;
+                                            ?>
+                                        </td>
+                                        <td style="width: <?= $width ?>% ;height: 50px;padding:1%;" >
+                                            <?php
+                                            echo check_seat($schedule, $eid, $seat_no);
+                                            $seat_no++;
+                                            ?>
+                                        </td>
                                         <?php
+                                    } else {
+                                        echo '<tr>';
+                                        for ($col = 1; $col <= $num_col; $col++) {
+                                            if ($col != 3) {
+                                                echo "<td style=\"width: $width%;height: 50px;padding:1%;\">";
+                                                echo check_seat($schedule, $eid, $seat_no);
+                                                $seat_no++;
+                                                echo '</td>';
+                                            }
+                                        }
+                                        echo '<tr>';
                                     }
                                 }
-                                ?>                                                                    
+                                ?>           
+                                </tbody>                        
+                            </table>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 col-md-offset-3">                                 
+                                <?php
+                                $click_book = '';
+                                $class_add_extra = 'hidden';
+                                if ($schedule['IsSold'] && $schedule['NumberSeat'] <= $schedule['NumberSeatSale']) {
+                                    $click_book = "addSeatExtra()";
+                                    $class_add_extra = '';
+                                    if ($CheckInID != NULL || $ReportID != NULL) {
+                                        $click_book = "";
+                                        $class_add_extra = 'hidden';
+                                    }
+                                }
+                                ?>
+                                <button type="button"class="btn btn-info btn-block <?= $class_add_extra ?> " onclick="<?= $click_book ?>">
+                                    <i class="fa fa-user-plus fa-lg"></i>&nbsp;เพิ่มที่นั่งเสริม
+                                </button>
                             </div>
                         </div>
                         <?php
                     }
+                    ?>
+
+                    <div class="row">
+                        <div id="SeatExtra" class="row well" style="width: 85%;margin: 0 auto;">
+                            <?php
+                            if ($schedule_select['NumberTicketsExtra'] > 0 || ($schedule['NumberSeat'] <= $schedule['NumberSeatSale'])) {
+                                foreach ($schedule_select['TicketsExtra'] as $ticket) {
+                                    $seat_no = $ticket['Seat'];
+                                    $status_seat = $ticket['StatusSeat'];
+                                    $user = '<i class="fa fa-user fa-lg"></i><br>';
+
+                                    $DestinationName = $ticket['DestinationName'];
+
+                                    if ($status_seat == 1) {
+                                        $class_seat = " bg-busy ";
+                                        $class_info = "badge-danger";
+                                        $click_remove = "";
+                                    } else {
+                                        $class_seat = " bg-reserve ";
+                                        $class_info = "badge-warning";
+                                        $click_remove = "removeSeatExtra($seat_no)";
+                                    }
+
+                                    if ($CheckInID != NULL || $ReportID != NULL) {
+                                        $click_remove = '';
+                                    }
+
+                                    $id_seat = "seat_$seat_no";
+                                    $id_seat_info = "seat_info_$seat_no";
+                                    ?>
+                                    <div id="<?= $id_seat ?>" class="col-xs-3 seat-extra">
+                                        <div  onclick="" ondblclick="<?= $click_remove ?>" class="seat <?= $class_seat ?>">
+                                            <span class="seat-info" id="<?= $id_seat_info ?>"> 
+                                                <?= $user ?>                                                
+                                                <span class="badge <?= $class_info ?>" style="font-size: 8pt;">
+                                                    <?= $DestinationName ?>
+                                                </span>                                                                                                     
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <?php
+                                }
+                            }
+                            ?>                                                                    
+                        </div>
+                    </div>                      
+                    <?php
                 }
                 ?>
             </div>         
         </div>
         <div id='ticket_info' class="hidden">
-            <div id="fare_info" class="col-lg-12">
+            <div id="fare_info">
                 <div class="row">
-                    <div class="col-md-6">
-                        <label for="">ราคาเต็ม</label>   
-                        <?php echo $form['Price'] ?>
-                    </div>
-                    <div class="col-md-6">
-                        <label for="">ราคาลด</label>                                
-                        <?php echo $form['PriceDicount'] ?>
-                    </div>
-                </div>
-                <br>
-                <div class="row">
+                    <?php
+                    $time_depart_ = '';
+                    $vcode_ = '';
+                    if (array_key_exists('VCode', $schedule_select)) {
+                        $vcode_ = $schedule_select['VCode'];
+                    }
+                    if (array_key_exists('TimeDepart', $schedule_select)) {
+                        $time_depart_ = $schedule_select['TimeDepart'];
+                    }
 
-                    <div class="col-md-6">
-                        <label class="">เวลาออก</label> 
-                        <div class="well text-center">  
-                            <span class="clock  <?= ( $TimeCheckIn != NULL) ? 'hidden' : '' ?>" id="clock">                                
-                                <ul id="time">
-                                    <li id="hours"> </li>
-                                    <li id="point">:</li>
-                                    <li id="min"> </li>                                    
-                                </ul>
-                            </span>
-                            <span class="time-checkin <?= ( $TimeCheckIn != NULL) ? '' : 'hidden' ?>">
-                                <?= date('H:i', strtotime($TimeCheckIn)) ?>
-                            </span>
-                        </div>
-                    </div>
-                    <div class="col-md-6 text-center">
+                    $class_checkin = '';
 
-                        <?php
-                        $time_depart_ = '';
-                        $vcode_ = '';
-                        if (array_key_exists('VCode', $schedule_select)) {
-                            $vcode_ = $schedule_select['VCode'];
-                        }
-                        if (array_key_exists('TimeDepart', $schedule_select)) {
-                            $time_depart_ = $schedule_select['TimeDepart'];
-                        }
-
-                        $class_checkin = '';
-
-                        if ($ReportID != NULL) {
-                            $class_checkin = 'disabled';
-                        }
-
-
-                        if ($CheckInID == NULL) {
-                            $checkin = array(
-                                'class' => "btn btn-block  btn-success $class_checkin",
-                                'type' => "button",
-                                'data-id' => "1",
-                                'data-title' => "ลงเวลาออก รถเบอร์ $vcode_",
-                                'data-sub_title' => "รอบเวลา ",
-                                'data-info' => "$time_depart_",
-                                'data-content' => "",
-                                'data-toggle' => "modal",
-                                'data-target' => "#confirm",
-                                'data-href' => "sale/checkin/$RID/$SourceID/$DestinationID/$TSID",
-                            );
-                        } else {
-                            $checkin = array(
-                                'class' => "btn btn-block btn-warning $class_checkin",
-                                'type' => "button",
-                                'data-id' => "1",
-                                'data-title' => "แก้ไขเวลาออก รถเบอร์ $vcode_",
-                                'data-sub_title' => "รอบเวลา ",
-                                'data-info' => "$time_depart_",
-                                'data-content' => "",
-                                'data-toggle' => "modal",
-                                'data-target' => "#confirm",
-                                'data-href' => "sale/checkin/$RID/$SourceID/$DestinationID/$TSID/$CheckInID",
-                            );
-                        }
-
-
-
-                        $print_log = array(
-                            'class' => 'btn btn-block btn-info',
+                    if ($ReportID != NULL) {
+                        $class_checkin = 'disabled';
+                    }
+                    if ($CheckInID == NULL) {
+                        $checkin = array(
+                            'class' => "btn btn-block  btn-success $class_checkin",
                             'type' => "button",
                             'data-id' => "1",
-                            'data-title' => "พิมพ์ใบล๊อก รถเบอร์ $vcode_",
+                            'data-title' => "ลงเวลาออก รถเบอร์ $vcode_",
                             'data-sub_title' => "รอบเวลา ",
                             'data-info' => "$time_depart_",
                             'data-content' => "",
                             'data-toggle' => "modal",
                             'data-target' => "#confirm",
-                            'data-href' => "sale/print_log/$RID/$SourceID/$DestinationID/$TSID",
+                            'data-href' => "sale/checkin/$RID/$SourceID/$DestinationID/$TSID",
                         );
-                        echo anchor('#', '<i class="fa fa-check-square-o fa-lg"></i>&nbsp;ลงเวลาออก', $checkin);
-                        if ($TimeCheckIn != NULL) {
-                            echo anchor('#', '<i class="fa fa-print fa-lg"></i>&nbsp;พิมพ์ใบล๊อก', $print_log);
-                        }
-                        ?>                       
+                    } else {
+                        $checkin = array(
+                            'class' => "btn btn-block btn-warning $class_checkin",
+                            'type' => "button",
+                            'data-id' => "1",
+                            'data-title' => "แก้ไขเวลาออก รถเบอร์ $vcode_",
+                            'data-sub_title' => "รอบเวลา ",
+                            'data-info' => "$time_depart_",
+                            'data-content' => "",
+                            'data-toggle' => "modal",
+                            'data-target' => "#confirm",
+                            'data-href' => "sale/checkin/$RID/$SourceID/$DestinationID/$TSID/$CheckInID",
+                        );
+                    }
+                    $print_log = array(
+                        'class' => 'btn btn-block btn-info',
+                        'type' => "button",
+                        'data-id' => "1",
+                        'data-title' => "พิมพ์ใบล๊อก รถเบอร์ $vcode_",
+                        'data-sub_title' => "รอบเวลา ",
+                        'data-info' => "$time_depart_",
+                        'data-content' => "",
+                        'data-toggle' => "modal",
+                        'data-target' => "#confirm",
+                        'data-href' => "sale/print_log/$RID/$SourceID/$DestinationID/$TSID",
+                    );
+                    $parcle_post = array(
+                        'class' => "btn btn-primary btn-block $class_checkin",
+                        'type' => 'button',
+                    );
+                    ?>                  
+                    <div class="col-md-12">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th style="width:60%" colspan="2">ค่าโดยสาร</th>                                    
+                                    <th style="width:20%">เวลาออก</th>
+                                    <th style="width:20%"></th>
+                                </tr>
+                                <tr>
+                                    <th style="width:30%">เต็ม</th>
+                                    <th style="width:30%">ลด</th>
+                                    <th style="">
+                                        <span class="clock  <?= ( $TimeCheckIn != NULL) ? 'hidden' : '' ?>" id="clock">                                
+                                            <ul id="time">
+                                                <li id="hours"> </li>
+                                                <li id="point">:</li>
+                                                <li id="min"> </li>                                    
+                                            </ul>
+                                        </span>
+                                        <span class="time-checkin <?= ( $TimeCheckIn != NULL) ? '' : 'hidden' ?>">
+                                            <?= date('H:i', strtotime($TimeCheckIn)) ?>
+                                        </span>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><?php echo $form['Price'] ?></td>
+                                    <td><?php echo $form['PriceDicount'] ?></td>
+                                    <td>
+                                        <?php
+                                        if ($TimeCheckIn != NULL) {
+                                            echo anchor('#', '<i class="fa fa-print fa-lg"></i>&nbsp;พิมพ์ล๊อก', $print_log);
+                                        } else {
+                                            echo anchor('#', '<i class="fa fa-check-square-o fa-lg"></i>&nbsp;ลงเวลาออก', $checkin);
+                                        }
+                                        ?> 
+                                    </td>
+                                    <td>
+                                        <?php
+                                        echo anchor("sale/parcel/$RID/$SourceID/$DestinationID/$TSID", '<i class="fa fa-cart-plus fa-lg"></i>&nbsp;ฝากพัสดุ', $parcle_post);
+                                        ?>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
-                </div>  
+                </div>              
             </div>
             <div class="col-lg-12 <?= (array_key_exists('ScheduleNote', $schedule_select) && $schedule_select['ScheduleNote'] != NULL) ? "" : "hidden" ?>" >
                 <blockquote>
@@ -1114,7 +1097,7 @@ if (array_key_exists('ReportID', $schedule_select)) {
                     </p>                    
                 </blockquote>
             </div>
-            <div id="debug" class="col-lg-12 text-center" style="margin: 2% auto;padding-top: 5%; padding-bottom: 5%;">
+            <div id="debug" class="col-lg-12 text-center" style="margin: 2% auto;padding-top: 2%; padding-bottom: 5%;">
                 <div id="user_action" class="time-checkin">
                 </div>                      
             </div> 
@@ -1202,7 +1185,6 @@ if (array_key_exists('ReportID', $schedule_select)) {
                             foreach ($schedule_select['ScheduleReport'] as $sr) {
                                 $net+=$sr['Total'];
                                 $num+=$sr['NumberTicket'];
-
                                 $NumberTicket = $sr['NumberTicket'];
                                 $NumberPriceFull = $sr['NumberPriceFull'];
                                 $NumberPriceDiscount = $sr['NumberPriceDiscount'];
@@ -1231,9 +1213,125 @@ if (array_key_exists('ReportID', $schedule_select)) {
                     </tfoot>
                 </table>
             </div>
+            <div class="col-lg-12 <?= (count($data_parcel_post) > 0) ? '' : 'hidden' ?>">
+                <p class="text">
+                    <span class="pull-left">ข้อมูลของฝาก : <strong></strong></span>                    
+                </p>
+                <!-- Table -->
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th style="width: 50%">ถึง</th>
+                            <th style="width: 20%">จำนวน</th>
+                            <th style="width: 30%">เป็นเงิน</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php
+                        $Net = 0;
+                        $TotalNumber = 0;
+                        foreach ($data_parcel_post as $parcle) {
+                            $Number = $parcle['Number'];
+                            $Total = $parcle['Total'];
+                            ?>
+                            <tr>
+                                <td class = "text-left"><?= $parcle['DestinationName'] ?></td>
+                                <td class = "text-center"><?= $Number ?></td>
+                                <td class = "text-right"><?= number_format($Total) ?></td>
+                            </tr>
+                            <?php
+                            $TotalNumber +=$Number;
+                            $Net+=$Total;
+                        }
+                        ?>
+                    </tbody>
+                    <tfoot>
+                        <tr class="active">
+                            <td class="text-center"><strong>รวม</strong></td>
+                            <td class="text-center"><?= $TotalNumber ?></td>
+                            <td class="text-right"><strong><?= number_format($Net) ?></strong></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
         </div>
     </div>  
-
 </div>
+<?php
+/* for ($row = 1; $row <= $num_row; $row++) {
+  echo '<tr>';
+  for ($col = 1; $col <= $num_col; $col++) {
 
-<div style="position: absolute;bottom: 0;right: 0;"><strong>{elapsed_time}</strong> seconds</div>
+  $seat_info = $seat_no;
+  $class_seat_info = "badge-info";
+  $user = "";
+
+  $click_book = '';
+  $click_remove = '';
+
+  echo "<td style=\"width: $width%;height: 50px;padding:1%;\">";
+  if ($row != $num_row && $col == 3) {
+  $class_seat = "";
+  } else {
+  $class_seat = "bg-blank";
+
+  $click_book = "addSeat($seat_no,$VTID)";
+  $click_remove = "removeSeat($seat_no)";
+
+  $eid = $this->m_user->get_user_id();
+  $ticket_booking = check_ticket($schedule['TicketsBook'], $seat_no);
+  $ticket_sale = check_ticket($schedule['TicketsSale'], $seat_no);
+
+  if ($ticket_sale != NULL) {
+  $class_seat = " bg-busy ";
+  $class_seat_info = "badge-danger";
+
+  $user = '<i class="fa fa-user fa-lg"></i><br>';
+  $seat_info = iconv_substr($ticket_sale['DestinationName'], 0, 10, "UTF-8");
+
+  $click_book = "";
+  $click_remove = "";
+  } elseif ($ticket_booking != NULL) {
+  $class_seat = " bg-reserve ";
+  $class_seat_info = "badge-warning";
+
+  $user = '<i class="fa fa-user fa-lg"></i><br>';
+  $seat_info = iconv_substr($ticket_booking['DestinationName'], 0, 10, "UTF-8");
+
+  $ticket_booking_by_seller = check_ticket($schedule['TicketsBook'], $seat_no, $eid);
+  if ($ticket_booking_by_seller != NULL) {
+  $click_book = "addSeat($seat_no)";
+  $click_remove = "removeSeat($seat_no)";
+  } else {
+  $click_book = "";
+  $click_remove = "";
+  }
+  }
+
+  if ($schedule['IsSold'] == FALSE || $schedule['ReportID'] != NULL || $schedule['CheckInID'] != NULL) {
+  $click_book = "";
+  $click_remove = "";
+  $class_seat .='  ';
+  }
+
+  $id_seat = "seat_$seat_no";
+  $id_seat_info = "seat_info_$seat_no";
+  ?>
+  <div id="<?= $id_seat ?>" onclick="<?= $click_book ?>" ondblclick="<?= $click_remove ?>" class="col-xs-12 seat <?php echo $class_seat; ?>">
+  <span class="seat-info" id="<?= $id_seat_info ?>" >
+  <?= $user ?>
+  <span class="badge <?= $class_seat_info ?>" style="font-size: 8pt;">
+  <?= $seat_info ?>
+  </span>
+  </span>
+  </div>
+  <?php
+  $seat_no++;
+  }
+  echo "</td>";
+  }
+  echo '</tr>';
+  }
+ * 
+ */
+?>

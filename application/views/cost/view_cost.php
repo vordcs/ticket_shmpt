@@ -133,23 +133,29 @@ if ($data['ReportID'] != NULL) {
                                 foreach ($cost_in_schedule as $cost) {
                                     $CostID = $cost['CostID'];
                                     $CostDetail = $cost['CostDetail'];
+                                    $CostDetailID = $cost['CostDetailID'];
                                     if ($cost['OtherCostDetail'] != NULL) {
                                         $CostDetail = $cost['OtherCostDetail'];
                                     }
 
                                     $CostValue = $cost['CostValue'];
                                     $total +=$CostValue;
-
+                                    
+                                    $IsParcel = NULL;
+                                    if($CostDetailID==6){
+                                        $IsParcel = 'disabled';
+                                    }
+                                    
                                     $edit = array(
                                         'type' => 'button',
-                                        'class' => "btn btn-warning btn-sm $IsReport",
+                                        'class' => "btn btn-warning btn-sm $IsReport $IsParcel",
                                         'data-toggle' => "tooltip",
                                         'data-placement' => "left",
-                                        'title' => "แก้ไขข้อมูล $cost_type_name : $CostDetail  ",
+                                        'title' => "แก้ไขข้อมูล $cost_type_name : $CostDetail ",
                                     );
                                     $delete = array(
                                         'type' => 'button',
-                                        'class' => "btn btn-danger btn-sm $IsReport",
+                                        'class' => "btn btn-danger btn-sm $IsReport $IsParcel",
                                         'data-toggle' => "tooltip",
                                         'data-placement' => "right",
                                         'title' => "ลบข้อมูล $cost_type_name : $CostDetail",

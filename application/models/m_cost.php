@@ -42,6 +42,7 @@ class m_cost extends CI_Model {
         $this->db->join('vehicles_has_cost', 'vehicles_has_cost.CostID = cost.CostID', 'left');
         $this->db->join('vehicles', 'vehicles.VID = vehicles_has_cost.VID', 'left');
         $this->db->join('t_schedules_day_has_cost', 't_schedules_day_has_cost.CostID = cost.CostID');
+
         $this->db->join('t_stations', 't_stations.SID = cost.SID', 'left');
         if ($ctid != NULL) {
             $this->db->where('cost.CostTypeID', $ctid);
@@ -103,6 +104,78 @@ class m_cost extends CI_Model {
             $this->db->where('CostTypeID', $CostTypeID);
         }
         $query = $this->db->get('cost_detail');
+        return $query->result_array();
+    }
+
+    public function get_parcel_post($date = NULL, $cid = null, $tsid = NULL) {
+        $this->db->select('parcel_post.ReceiptID,cost.CostID,'
+                . 'vehicles.VCode,'
+                . 'cost.CostDate,'
+                . 'cost.CostValue,'
+                . 'cost.CostNote,'
+                . 'parcel_post.Number,'
+                . 'parcel_post.SourceID,'
+                . 'parcel_post.DestinationID,'
+                . 'parcel_post.SenderName,'
+                . 'parcel_post.SenderPhone,'
+                . 'parcel_post.ReceiverName,'
+                . 'parcel_post.ReceiverPhone,'
+                . 'cost.CreateBy AS CreateBy,'
+                . 'cost.CreateDate as CreateDate,'
+                . 'cost.UpdateBy as UpdateBy,'
+                . 'cost.UpdateDate as UpdateDate'
+        );
+        $this->db->join('cost_type', 'cost_type.CostTypeID = cost.CostTypeID');
+        $this->db->join('cost_detail', 'cost_detail.CostDetailID = cost.CostDetailID', 'left');
+        $this->db->join('t_schedules_day_has_cost', 't_schedules_day_has_cost.CostID = cost.CostID');
+        $this->db->join('parcel_post', 'parcel_post.CostID = cost.CostID', 'left');
+        $this->db->join('vehicles_has_schedules', 'vehicles_has_schedules.TSID = t_schedules_day_has_cost.TSID', 'left');
+        $this->db->join('vehicles', 'vehicles.VID = vehicles_has_schedules.VID', 'left');
+
+        if ($date == NULL) {
+            $date = $this->m_datetime->getDateToday();
+        }
+        if ($cid != NULL) {
+            $this->db->where('cost.CostID', $cid);
+        }
+        if ($tsid != NULL) {
+            $this->db->where('t_schedules_day_has_cost.TSID', $tsid);
+        }
+
+
+        $this->db->group_by('cost.CostID');
+        $this->db->where('cost.CostDate', $date);
+        $this->db->where('cost.CostID', $cid);
+        $this->db->where('cost.CostDetailID', '6');
+        $this->db->where('cost.CreateBy', $this->m_user->get_user_id());
+        $query = $this->db->get('cost');
+        return $query->result_array();
+    }
+
+    public function get_parcel_post_report($SourceID, $TSID = NULL) {
+        $this->db->select(''
+                . 'SUM(cost.CostValue) AS Total,'
+                . 'SUM(parcel_post.Number) AS Number,'
+                . 't_stations.StationName AS DestinationName,'
+                . 'cost.CreateBy AS CreateBy,'
+                . 'cost.CreateDate AS CreateDate,'
+        );
+        $this->db->join('cost_type', 'cost_type.CostTypeID = cost.CostTypeID');
+        $this->db->join('cost_detail', 'cost_detail.CostDetailID = cost.CostDetailID', 'left');
+        $this->db->join('t_schedules_day_has_cost', 't_schedules_day_has_cost.CostID = cost.CostID');
+        $this->db->join('parcel_post', 'parcel_post.CostID = cost.CostID', 'left');
+        $this->db->join('t_stations', 't_stations.SID = parcel_post.DestinationID', 'left');
+
+        $date = $this->m_datetime->getDateToday();
+        if ($TSID != NULL) {
+            $this->db->where('t_schedules_day_has_cost.TSID', $TSID);
+        }
+        $this->db->group_by('parcel_post.DestinationID');
+        $this->db->where('cost.CostDate', $date);
+        $this->db->where('cost.SID', $SourceID);
+        $this->db->where('cost.CostDetailID', '6');
+        $this->db->where('cost.CreateBy', $this->m_user->get_user_id());
+        $query = $this->db->get('cost');
         return $query->result_array();
     }
 
@@ -193,9 +266,6 @@ class m_cost extends CI_Model {
 
     public function insert_cost($data) {
 
-//        $this->db->truncate('cost');
-//        $this->db->truncate('t_schedules_day_has_cost');
-//        $this->db->truncate('vehicles_has_cost');
 //      insert cost data  
         $this->db->insert('cost', $data['data_cost']);
         $cost_id = $this->db->insert_id();
@@ -212,7 +282,6 @@ class m_cost extends CI_Model {
             'VID' => $data['VID'],
             'CostID' => $cost_id,
         );
-
         $this->db->insert('vehicles_has_cost', $vehicle_has_cost);
 
         $rs = $this->get_cost($cost_id);
@@ -488,13 +557,11 @@ class m_cost extends CI_Model {
             }
         } else {
             foreach ($this->get_cost_detail($ctid) as $value) {
-                if ($value['CostDetailID'] != '1') {
+                if ($value['CostDetailID'] != '1' && $value['CostDetailID'] != '6') {
                     $i_CostDetailID[$value['CostDetailID']] = $value['CostDetail'];
                 }
             }
         }
-
-
         $i_OtherDetail = array(
             'name' => 'OtherDetail',
             'id' => 'OtherDetail',
@@ -836,7 +903,7 @@ class m_cost extends CI_Model {
          * รายได้จากการขายตั๋ว
          */
         $income += $this->m_ticket->sum_ticket_price($date, $seller_station_id, $TSID)['Total'];
-        $tickets = $this->m_ticket->get_ticket_by_seller($date,$TSID, $seller_station_id);
+        $tickets = $this->m_ticket->get_ticket_by_seller($date, $TSID, $seller_station_id);
 
 
         /*
@@ -877,6 +944,7 @@ class m_cost extends CI_Model {
             $temp = array(
                 'TSID' => $cost['TSID'],
                 'CostID' => $CostID,
+                'CostDetailID' => $CostDetailID,
                 'CostTypeID' => $CostTypeID,
                 'CostTypeName' => $cost['CostTypeName'],
                 'CostDetail' => $cost['CostDetail'],
@@ -1053,6 +1121,262 @@ class m_cost extends CI_Model {
 
         $rs = $query->result_array();
 
+        return $rs;
+    }
+
+//  พัสดุ     
+
+    public function set_form_parcel($RID, $SourceID, $DestinationID, $TSID) {
+
+        $this->load->model('m_route');
+        $this->load->model('m_station');
+        $this->load->model('m_schedule');
+
+
+        $route = reset($this->m_route->get_route(NULL, NULL, $RID));
+
+        $RCode = $route['RCode'];
+        $VTID = $route['VTID'];
+        $VTName = $route['VTDescription'];
+        $RSource = $route['RSource'];
+        $RDestination = $route['RDestination'];
+        $StartPoint = $route['StartPoint'];
+
+        $RouteName = "$VTName " . $RCode . ' ' . ' ' . $RSource . ' - ' . $RDestination;
+
+        $StationSource = reset($this->m_station->get_stations($RCode, $VTID, $SourceID));
+        $SourceName = $StationSource['StationName'];
+        $SourceSeq = $StationSource['Seq'];
+
+        $StationDestination = $this->m_station->get_stations_by_start_point($StartPoint, $RCode, $VTID, $SourceSeq);
+
+        $schedule = reset($this->m_schedule->get_schedule(NULL, NULL, NULL, $RID, $TSID));
+
+        $VID = $schedule['VID'];
+        $VCode = $schedule['VCode'];
+
+        $TimeDepart = $this->m_schedule->time_depart($RID, $TSID, $SourceID);
+        $TimeArrive = $this->m_schedule->time_arrive($RID, $TSID, $SourceID, $DestinationID);
+
+        $i_RID = array(
+            'type' => "hidden",
+            'name' => "RID",
+            'id' => "RID",
+            'class' => "from-control",
+            'readonly' => "",
+            'value' => $RID,
+        );
+        $i_TSID = array(
+            'type' => "hidden",
+            'name' => "TSID",
+            'id' => "TSID",
+            'class' => "from-control",
+            'readonly' => "",
+            'value' => $TSID,
+        );
+        $i_TimeDepart = array(
+            'type' => "text",
+            'name' => "TimeDepart",
+            'id' => "TimeDepart",
+            'class' => "form-control text-center",
+            'readonly' => "TRUE",
+            'value' => $TimeDepart,
+        );
+
+        $i_TimeArrive = array(
+            'type' => "text",
+            'name' => "TimeArrive",
+            'id' => "TimeArrive",
+            'class' => "form-control text-center",
+            'readonly' => "TRUE",
+            'value' => $TimeArrive,
+        );
+
+        $i_VID = array(
+            'type' => "hidden",
+            'name' => "VID",
+            'id' => "VID",
+            'class' => "form-control text-center",
+            'readonly' => "TRUE",
+            'value' => $VID,
+        );
+
+        $i_VCode = array(
+            'type' => "text",
+            'name' => "VCode",
+            'id' => "VCode",
+            'class' => "form-control text-center",
+            'readonly' => "TRUE",
+            'value' => $VCode,
+        );
+
+        $i_SourceID = array(
+            'type' => "hidden",
+            'name' => "SourceID",
+            'id' => "SourceID",
+            'class' => "from-control",
+            'readonly' => "TRUE",
+            'value' => $SourceID,
+        );
+        $i_SourceName = array(
+            'type' => "text",
+            'name' => "SourceName",
+            'id' => "SourceName",
+            'class' => "form-control  text-center",
+            'readonly' => "TRUE",
+            'value' => $SourceName,
+        );
+
+        $i_StationDestination = array();
+        foreach ($StationDestination as $station) {
+            $i_StationDestination[$station['SID']] = $station['StationName'];
+        }
+
+
+        //table cost
+        $i_CostValue = array(
+            'name' => 'CostValue',
+            'value' => set_value('CostValue'),
+            'placeholder' => 'จำนวนเงิน',
+            'class' => 'form-control input-lg text-right'
+        );
+        $i_CostNote = array(
+            'name' => 'CostNote',
+            'value' => set_value('CostNote'),
+            'placeholder' => 'หมายเหตุ',
+            'rows' => '2',
+            'class' => 'form-control'
+        );
+
+        //table parcel_post
+        $i_Number = array(
+            'type' => 'number',
+            'name' => 'Number',
+            'value' => set_value('Number'),
+            'min' => '1',
+            'placeholder' => 'จำนวน',
+            'class' => 'form-control input-lg text-center'
+        );
+        $i_SenderName = array(
+            'type' => 'text',
+            'name' => 'SenderName',
+            'value' => set_value('SenderName'),
+            'placeholder' => 'ชื่อผู้ส่ง',
+            'class' => 'form-control'
+        );
+        $i_SenderPhone = array(
+            'type' => 'tel',
+            'name' => 'SenderPhone',
+            'value' => set_value('SenderPhone'),
+            'placeholder' => 'เบอร์โทรผู้ส่ง',
+            'class' => 'form-control'
+        );
+        $i_ReceiverName = array(
+            'type' => 'text',
+            'name' => 'ReceiverName',
+            'value' => set_value('ReceiverName'),
+            'placeholder' => 'ชื่อผู้รับ',
+            'class' => 'form-control'
+        );
+        $i_ReceiverPhone = array(
+            'type' => 'tel',
+            'name' => 'ReceiverPhone',
+            'value' => set_value('ReceiverPhone'),
+            'placeholder' => 'เบอร์โทรผู้รับ',
+            'class' => 'form-control'
+        );
+        $dropdown = 'id="DestinationID" onchange="change_destination()" ';
+        $form = array(
+            'form' => form_open("sale/parcel/$RID/$SourceID/$DestinationID/$TSID", array('class' => 'form', 'id' => 'form_parce', 'name' => 'form_parcel')),
+            'Time' => $TimeDepart,
+            'Code' => $VCode,
+            'RID' => form_input($i_RID),
+            'RouteName' => $RouteName,
+            'TSID' => form_input($i_TSID),
+            'TimeDepart' => form_input($i_TimeDepart),
+            'TimeArrive' => form_input($i_TimeArrive),
+            'VID' => form_input($i_VID),
+            'VCode' => form_input($i_VCode),
+            'SourceID' => form_input($i_SourceID),
+            'SourceName' => form_input($i_SourceName),
+            'DestinationID' => form_dropdown('DestinationID', $i_StationDestination, (set_value("DestinationID") == NULL) ? $DestinationID : set_value("DestinationID"), $dropdown),
+            'CostValue' => form_input($i_CostValue),
+            'CostNote' => form_textarea($i_CostNote),
+            'Number' => form_input($i_Number),
+            'SenderName' => form_input($i_SenderName),
+            'SenderPhone' => form_input($i_SenderPhone),
+            'ReceiverName' => form_input($i_ReceiverName),
+            'ReceiverPhone' => form_input($i_ReceiverPhone),
+            'form_close' => form_close(),
+        );
+
+        return $form;
+    }
+
+    public function validate_form_parcel() {
+
+        $this->form_validation->set_rules('TSID', 'รหัสรอบเวลา', 'trim|required|xss_clean');
+        $this->form_validation->set_rules('RID', 'รหัสเส้นทาง', 'trim|required|xss_clean');
+
+        $this->form_validation->set_rules('CostValue', 'จำนวนเงิน', 'trim|required|xss_clean|numeric');
+        $this->form_validation->set_rules('CostNote', 'หมายเหตุ', 'trim|xss_clean');
+
+        $this->form_validation->set_rules('Number', 'จำนวนพัสดุ', 'trim|required|xss_clean|numeric');
+        $this->form_validation->set_rules('SourceID', 'ต้นทาง', 'trim|required|xss_clean');
+        $this->form_validation->set_rules('DestinationID', 'ปลายทาง', 'trim|required|xss_clean');
+        $this->form_validation->set_rules('SenderName', 'ชื่อผู้ส่งพัสดุ', 'trim|xss_clean');
+        $this->form_validation->set_rules('SenderPhone', 'เบอร์โทรศัพท์ผู้ส่ง', 'trim|xss_clean|numeric');
+        $this->form_validation->set_rules('ReceiverName', 'ชื่อผู้รับพัสดุ', 'trim|xss_clean');
+        $this->form_validation->set_rules('ReceiverPhone', 'เบอร์โทรศัพท์ผู้รับ', 'trim|xss_clean|numeric');
+
+        return TRUE;
+    }
+
+    public function get_post_form_parcel() {
+        $data_cost = array(
+            'CostTypeID' => '1',
+            'CostDetailID' => '6',
+            'CostDate' => $this->m_datetime->getDateToday(),
+            'CostValue' => $this->input->post('CostValue'),
+            'CostNote' => $this->input->post('CostNote'),
+            'SID' => $this->input->post('SourceID'),
+            'CreateBy' => $this->session->userdata('EID'),
+            'CreateDate' => $this->m_datetime->getDatetimeNow(),
+        );
+
+        $data_parcel_post = array(
+            'ReceiptID' => '',
+            'CostID' => '',
+            'Number' => $this->input->post('Number'),
+            'SourceID' => $this->input->post('SourceID'),
+            'DestinationID' => $this->input->post('DestinationID'),
+            'SenderName' => $this->input->post('SenderName'),
+            'SenderPhone' => $this->input->post('SenderPhone'),
+            'ReceiverName' => $this->input->post('ReceiverName'),
+            'ReceiverPhone' => $this->input->post('ReceiverPhone'),
+            'CreateBy' => $this->session->userdata('EID'),
+            'CreateDate' => $this->m_datetime->getDatetimeNow(),
+        );
+
+        $form_data = array(
+            'TSID' => $this->input->post('TSID'),
+            'VID' => $this->input->post('VID'),
+            'data_cost' => $data_cost,
+            'data_parcel_post' => $data_parcel_post,
+        );
+        return $form_data;
+    }
+
+    public function gennerate_receipt_id($CostID) {
+        $receipt_id = "P" . str_pad($CostID, 11, '0', STR_PAD_LEFT);
+        return $receipt_id;
+    }
+
+    public function insert_parcel_post($CostID, $data_parcel_post) {
+        $ReceiptID = $this->gennerate_receipt_id($CostID);
+        $data_parcel_post['ReceiptID'] = $ReceiptID;
+        $data_parcel_post['CostID'] = $CostID;
+        $rs = $this->db->insert('parcel_post', $data_parcel_post);
         return $rs;
     }
 

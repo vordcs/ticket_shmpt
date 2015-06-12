@@ -1,11 +1,13 @@
 <script>
+    $(window).load(function () {
+        print_log();
+    });
     function print_log() {
         window.print();
     }
 
 </script>
-<style>    
-
+<style>
     .test-print{
         background: white;
         /*font-family: "Arial";*/        
@@ -115,8 +117,11 @@
         </div>        
     </div>
     <div class="row hidden-print">
-        <div class="col-md-12">
-            <table class="table table-bordered table-hover">
+        <div class="col-md-6 <?= (count($data_parcel_post) > 0) ? '' : 'col-md-offset-3' ?>">
+            <p class="text">
+                <span class="pull-left">ข้อมูลการขายตั๋วโดยสาร</span>                    
+            </p>
+            <table class="table table-hover">
                 <thead>
                     <tr>
                         <th style="width: 30%;">เลขที่นั่ง</th>
@@ -149,12 +154,50 @@
                     ?>
                 </tbody>
                 <tfoot>
-                    <tr>
+                    <tr class="active">
                         <td colspan="2" class="text text-center">รวม</td>
                         <td class="text text-right"><?= $sum_seat ?></td>
                     </tr>
                 </tfoot>
             </table>
+        </div>        
+        <div class="col-lg-6 <?= (count($data_parcel_post) > 0) ? '' : 'hidden' ?>">
+            <p class="text">
+                <span class="pull-left">ข้อมูลของฝาก : <strong></strong></span>                    
+            </p>
+            <!-- Table -->
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th style="width: 80%">ถึง</th>
+                        <th style="width: 20%">จำนวน</th>                        
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php
+                    $Net = 0;
+                    $TotalNumber = 0;
+                    foreach ($data_parcel_post as $parcle) {
+                        $Number = $parcle['Number'];
+                        $Total = $parcle['Total'];
+                        ?>
+                        <tr>
+                            <td class = "text-left"><?= $parcle['DestinationName'] ?></td>
+                            <td class = "text-center"><?= $Number ?></td>                            
+                        </tr>
+                        <?php
+                        $TotalNumber +=$Number;
+                        $Net+=$Total;
+                    }
+                    ?>
+                </tbody>
+                <tfoot>
+                    <tr class="active">
+                        <td class="text-center"><strong>รวม</strong></td>
+                        <td class="text-center"><?= $TotalNumber ?></td>                        
+                    </tr>
+                </tfoot>
+            </table>            
         </div>
         <div class="col-md-12 text-center">
             <?php
@@ -162,7 +205,7 @@
                 'type' => "button",
                 'class' => "btn btn-danger btn-lg",
             );
-            echo anchor(($previous_page == NULL) ? 'sale/' : $previous_page, '<i class="fa fa-times fa-lg" ></i>กลับ', $cancle) . '  ';
+            echo anchor(($previous_page == NULL) ? 'sale/' : $previous_page, '<i class="fa fa-ticket fa-lg" ></i>&nbsp;ขายตั๋วโดยสาร', $cancle) . '  ';
             ?>  
         </div>
     </div>
@@ -230,7 +273,24 @@
                     <tr>
                         <td class="text-center title-content">รวม</td>
                         <td class="text-center text content"><u><?= $sum_num_seat ?></u></td>
+                </tr>
+                <tr class=" <?= (count($data_parcel_post) > 0) ? '' : 'hidden' ?>">
+                    <td colspan="2" class="text text-center title-content" ><strong><u>ของฝาก</u></strong></td>
+                </tr>
+                <?php
+                foreach ($data_parcel_post as $parcle) {
+                    ?>
+                    <tr>
+                        <td class = "text-left content"><?= $parcle['DestinationName'] ?></td>
+                        <td class = "text-center content"><?= $parcle['Number'] ?></td>                            
                     </tr>
+                    <?php
+                }
+                ?>
+                <tr class=" <?= (count($data_parcel_post) > 0) ? '' : 'hidden' ?>">
+                    <td class="text-center content">รวม</td>
+                    <td class="text-center text content"><u><?= $TotalNumber ?></u></td>
+                </tr>
                 </tbody>
                 <tfoot>
                     <tr>

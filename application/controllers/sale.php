@@ -15,6 +15,7 @@ class sale extends CI_Controller {
         $this->load->model('m_fares');
         $this->load->model('m_ticket');
         $this->load->model('m_checkin');
+        $this->load->model('m_cost');
         $this->load->library('form_validation');
 
 //Initial language
@@ -77,6 +78,8 @@ class sale extends CI_Controller {
             redirect("sale/");
         }
 
+        $schedule = reset($schedules);
+
         $set_data = $this->m_sale->set_form_booking($rid, $source_id, $destination_id, $schedules_id);
 
         $data = array(
@@ -88,7 +91,10 @@ class sale extends CI_Controller {
             'routes_seller' => $set_data['routes_seller'],
             'schedules' => $set_data['schedules'],
             'schedule_select' => $set_data['schedule_select'],
+            'data_parcel_post' => $set_data['data_parcel_post'],
         );
+
+
         $form_data = array();
         $rs = array();
         if ($this->m_sale->validate_form_sale() && $this->form_validation->run() == TRUE) {
@@ -105,12 +111,18 @@ class sale extends CI_Controller {
 //            'form' => $data['form'],
 //            'routes_seller'=>$data['routes_seller'],
 //            'schedules'=>$data['schedules'],
-//            'schedule_select' => $data['schedule_select']['ScheduleCheckIn'],
+//            'schedule_select' => $data['schedule_select'],
+//            'data_parcel_post' => $data['data_parcel_post'],
+//            'schedules'=>  reset($schedules),
         );
 
         $this->m_template->set_Debug($data_debug);
         $this->m_template->set_Title('ขายตั๋วโดยสาร ');
-        $this->m_template->set_Content('sale/frm_booking', $data);
+        if ($schedule['VTID'] == 1) {
+            $this->m_template->set_Content('sale/frm_booking_van', $data);
+        } else {
+            $this->m_template->set_Content('sale/frm_booking_bus', $data);
+        }
         $this->m_template->showSaleTemplate();
     }
 
@@ -193,6 +205,59 @@ class sale extends CI_Controller {
         $this->m_template->showSaleTemplate();
     }
 
+    public function parcel($RID, $SourceID, $DestinationID, $TSID) {
+
+        $form_data = array();
+        $rs = array();
+        $rs_parcel = array();
+        if ($this->m_cost->validate_form_parcel() && $this->form_validation->run() == TRUE) {
+            $form_data = $this->m_cost->get_post_form_parcel();
+            $rs = reset($this->m_cost->insert_cost($form_data));
+            $CostID = $rs['CostID'];
+            $data_parcel_post = $form_data['data_parcel_post'];
+            $rs_parcel = $this->m_cost->insert_parcel_post($CostID, $data_parcel_post);
+            if ($rs_parcel) {
+                redirect("sale/print_recept/$RID/$SourceID/$DestinationID/$TSID/$CostID");
+            }
+        }
+        $data = array(
+            'page_title' => "เพิ่มพัสดุ",
+            'page_title_small' => "",
+            'previous_page' => "sale/booking/$RID/$SourceID/$DestinationID/$TSID",
+            'next_page' => '',
+            'form_parcel' => $this->m_cost->set_form_parcel($RID, $SourceID, $DestinationID, $TSID),
+        );
+        $data_debug = array(
+//            'form_parcel' => $data['form_parcel'],
+//            'form_data' => $form_data,
+//            'rs' => $rs,
+//            'rs_parcel' => $rs_parcel,
+        );
+        $this->m_template->set_Debug($data_debug);
+        $this->m_template->set_Title('เพิ่มพัสดุ');
+        $this->m_template->set_Content('sale/frm_parcel', $data);
+        $this->m_template->showSaleTemplate();
+    }
+
+    public function print_recept($RID, $SourceID, $DestinationID, $TSID, $CostID) {
+
+        $data = array(
+            'page_title' => "พิมพ์ใบเสร็จ",
+            'page_title_small' => "",
+            'previous_page' => "sale/booking/$RID/$SourceID/$DestinationID/$TSID",
+            'next_page' => '',
+            'data' => $this->m_sale->set_form_print_parcel($RID, $TSID, $CostID),
+        );
+        $data_debug = array(
+//            'data' => $data['data'],
+        );
+
+        $this->m_template->set_Debug($data_debug);
+        $this->m_template->set_Title('พิมพ์ใบเสร็จ');
+        $this->m_template->set_Content('sale/frm_print_parcel', $data);
+        $this->m_template->showSaleTemplate();
+    }
+
     public function checkin($RID, $SourceID, $DestinationID, $TSID, $CheckInID = NULL) {
 
         if ($CheckInID == NULL) {
@@ -213,10 +278,12 @@ class sale extends CI_Controller {
             'previous_page' => "sale/booking/$RID/$SourceID/$DestinationID/$TSID",
             'next_page' => '',
             'data' => $this->m_sale->set_form_print_log($TSID, $SourceID),
+            'data_parcel_post' => $this->m_cost->get_parcel_post_report($SourceID, $TSID),
         );
 
         $data_debug = array(
 //            'data' => $data['data'],
+//            'data_parcel_post' => $data['data_parcel_post'],
         );
 
         $this->m_template->set_Debug($data_debug);
@@ -314,7 +381,7 @@ class sale extends CI_Controller {
                 'Destination' => form_input($i_destination_id),
             );
             echo json_encode($rs);
-        } else {            
+        } else {
             echo json_encode(0);
         }
     }
@@ -351,6 +418,18 @@ class sale extends CI_Controller {
         } else {
             echo json_encode('false');
         }
+    }
+
+    public function get_time_arrive() {
+        $TSID = $this->input->post("TSID");
+        $RID = $this->input->post("RID");
+        $SourceID = $this->input->post("SourceID");
+        $DestinationID = $this->input->post("DestinationID");
+
+        $time_arrive = $this->m_schedule->time_arrive($RID, $TSID, $SourceID, $DestinationID);
+
+
+        echo json_encode($time_arrive);
     }
 
 }
