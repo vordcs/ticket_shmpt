@@ -783,13 +783,9 @@ if (array_key_exists('ReportID', $schedule_select)) {
                                 ?>
                                 </tbody>
                             </table>
-                        </div>
-                        <div class="row">
-
-                        </div>
-                        <br>
+                        </div> 
                     </div>
-                    <div id="SeatExtra" class="row well" style="width: 85%;margin: 0 auto;">
+                    <div id="SeatExtra" class="row well" style="width: 85%;margin: 0 auto;padding-top: 2%;">
                         <?php
                         if ($schedule_select['NumberTicketsExtra'] > 0 || ($schedule['NumberSeat'] <= $schedule['NumberSeatSale'])) {
                             foreach ($schedule_select['TicketsExtra'] as $ticket) {
@@ -895,7 +891,7 @@ if (array_key_exists('ReportID', $schedule_select)) {
                         'data-href' => "sale/print_log/$RID/$SourceID/$DestinationID/$TSID",
                     );
                     $parcle_post = array(
-                        'class' => "btn btn-primary btn-lg btn-block $class_checkin",
+                        'class' => "btn btn-primary btn-block $class_checkin",
                         'type' => 'button',
                     );
                     ?>                  
@@ -959,7 +955,7 @@ if (array_key_exists('ReportID', $schedule_select)) {
                     </p>                    
                 </blockquote>
             </div>
-            <div id="debug" class="col-lg-12 text-center" style="margin: 2% auto;padding-top: 2%; padding-bottom: 5%;">
+            <div id="debug" class="col-lg-12 text-center" style="margin: 2% auto;padding-top: 2%; padding-bottom: 2%;">
                 <div id="user_action" class="time-checkin">
                 </div>                      
             </div> 

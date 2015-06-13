@@ -362,6 +362,7 @@
 </style>
 
 <?php
+
 function search_tickets($tickes, $Seat, $eid = NULL, $SeatStatus = NULL) {
     $rs = NULL;
     foreach ($tickes as $val) {
@@ -691,13 +692,13 @@ if (array_key_exists('ReportID', $schedule_select)) {
                         $click_book = "";
                         $click_remove = "";
                     }
-
-                    if ($schedule['IsSold'] == FALSE || $schedule['ReportID'] != NULL || $schedule['CheckInID'] != NULL) {
-                        $click_book = "";
-                        $click_remove = "";
-                        $class_seat .='  ';
-                    }
                 }
+                if ($schedule['IsSold'] == FALSE || $schedule['ReportID'] != NULL || $schedule['CheckInID'] != NULL) {
+                    $click_book = "";
+                    $click_remove = "";
+                    $class_seat .='  ';
+                }
+
                 $id_seat = "seat_$seat_no";
                 $id_seat_info = "seat_info_$seat_no";
 
@@ -1060,6 +1061,11 @@ if (array_key_exists('ReportID', $schedule_select)) {
                                             <?= date('H:i', strtotime($TimeCheckIn)) ?>
                                         </span>
                                     </th>
+                                    <th>                                        
+                                        <button type="button" class="btn btn-default hidden" data-toggle="modal" data-target="#ModalParcel_IN">
+                                            <i class="fa fa-cart-arrow-down fa-lg"></i>&nbsp;พัสดุเข้า
+                                        </button>
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -1097,7 +1103,7 @@ if (array_key_exists('ReportID', $schedule_select)) {
                     </p>                    
                 </blockquote>
             </div>
-            <div id="debug" class="col-lg-12 text-center" style="margin: 2% auto;padding-top: 2%; padding-bottom: 5%;">
+            <div id="debug" class="col-lg-12 text-center" style="margin: 2% auto;padding-top: 2%; padding-bottom: 2%;">
                 <div id="user_action" class="time-checkin">
                 </div>                      
             </div> 
@@ -1257,6 +1263,73 @@ if (array_key_exists('ReportID', $schedule_select)) {
         </div>
     </div>  
 </div>
+
+<!-- Modal -->
+<div class="modal fade" id="ModalParcel_IN" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">พัสดุเข้า</h4>
+            </div>
+            <div class="modal-body">                
+                <div class="row text-center" style="padding-bottom: 2%;">
+                        <div class="col-md-12">
+                            <div class="form-inline">
+                                <div class="form-group">
+                                    <label for="">เลขที่</label>
+                                    <input type="text" class="form-control" id="" placeholder="">
+                                </div>
+                                <div class="form-group">
+                                    <label for="">วันที่</label>
+                                    <input type="" class="form-control" id="" placeholder="">
+                                </div>
+                                <div class="form-group">
+                                    <label for="">รถเบอร์</label>
+                                    <input type="" class="form-control" id="" placeholder="">
+                                </div>
+                                <button type="submit" class="btn btn-primary">ค้นหา</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 20%;">เลขที่</th>
+                                        <th style="width: 20%;">จาก</th>
+                                        <th style="width: 15%;">รถเบอร์</th>
+                                        <th style="width: 15%;">เวลาออก</th>
+                                        <th style="width: 20%;">สถานะ</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>                    
+                    </div>
+                
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
 <?php
 /* for ($row = 1; $row <= $num_row; $row++) {
   echo '<tr>';

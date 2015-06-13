@@ -353,7 +353,7 @@ class schedule extends CI_Controller {
                     'TimeDepart' => $form_data['TimeDepart'],
                     'TimeArrive' => $t,
                     'ScheduleStatus' => '1',
-                    'ScheduleNote' => $route_name . '(ไป ' . (($route_detail[0]['StartPoint'] == 'S') ? $route_detail[0]['RDestination'] : $route_detail[0]['RSource']) . ' รอบเสริม)',
+                    'ScheduleNote' => $form_data['ScheduleNote'],
                 );
                 //นำข้อมูลเข้า
                 $result['insert'] = $this->m_schedule_hr->insert_new_t_schedules_day($prepare_t_schedules_day);

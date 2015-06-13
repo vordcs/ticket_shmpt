@@ -92,6 +92,7 @@ class sale extends CI_Controller {
             'schedules' => $set_data['schedules'],
             'schedule_select' => $set_data['schedule_select'],
             'data_parcel_post' => $set_data['data_parcel_post'],
+            'data_parcel_post_in' => $set_data['data_parcel_post_in'],
         );
 
 
@@ -113,6 +114,7 @@ class sale extends CI_Controller {
 //            'schedules'=>$data['schedules'],
 //            'schedule_select' => $data['schedule_select'],
 //            'data_parcel_post' => $data['data_parcel_post'],
+//            'data_parcel_post_in' => $data['data_parcel_post_in'],
 //            'schedules'=>  reset($schedules),
         );
 

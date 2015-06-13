@@ -9,9 +9,9 @@ class m_cost extends CI_Model {
         $this->db->select('*,cost.CreateBy AS CreateBy,cost.CreateDate as CreateDate,cost.UpdateBy as UpdateBy,cost.UpdateDate as UpdateDate');
         $this->db->join('cost_type', 'cost_type.CostTypeID = cost.CostTypeID');
         $this->db->join('cost_detail', 'cost_detail.CostDetailID = cost.CostDetailID', 'left');
-        $this->db->join('vehicles_has_cost', 'vehicles_has_cost.CostID = cost.CostID', 'left');
-        $this->db->join('vehicles', 'vehicles.VID = vehicles_has_cost.VID', 'left');
         $this->db->join('t_schedules_day_has_cost', 't_schedules_day_has_cost.CostID = cost.CostID');
+        $this->db->join('vehicles_has_schedules', 'vehicles_has_schedules.TSID = t_schedules_day_has_cost.TSID', 'left');
+        $this->db->join('vehicles', 'vehicles.VID = vehicles_has_schedules.VID', 'left');
         $this->db->join('t_stations', 't_stations.SID = cost.SID', 'left');
         if ($cid != NULL) {
             $this->db->where('cost.CostID', $cid);
@@ -23,7 +23,7 @@ class m_cost extends CI_Model {
             $this->db->where('t_schedules_day_has_cost.TSID', $tsid);
         }
         if ($vid != NULL) {
-            $this->db->where('vehicles_has_cost.VID', $vid);
+            $this->db->where('vehicles_has_schedules.VID', $vid);
         }
         if ($date == NULL) {
             $date = $this->m_datetime->getDateToday();
@@ -39,10 +39,9 @@ class m_cost extends CI_Model {
         $this->db->select('*,cost.CreateBy AS CreateBy,cost.CreateDate as CreateDate');
         $this->db->join('cost_type', 'cost_type.CostTypeID = cost.CostTypeID');
         $this->db->join('cost_detail', 'cost_detail.CostDetailID = cost.CostDetailID', 'left');
-        $this->db->join('vehicles_has_cost', 'vehicles_has_cost.CostID = cost.CostID', 'left');
-        $this->db->join('vehicles', 'vehicles.VID = vehicles_has_cost.VID', 'left');
         $this->db->join('t_schedules_day_has_cost', 't_schedules_day_has_cost.CostID = cost.CostID');
-
+        $this->db->join('vehicles_has_schedules', 'vehicles_has_schedules.TSID = t_schedules_day_has_cost.TSID', 'left');
+        $this->db->join('vehicles', 'vehicles.VID = vehicles_has_schedules.VID', 'left');
         $this->db->join('t_stations', 't_stations.SID = cost.SID', 'left');
         if ($ctid != NULL) {
             $this->db->where('cost.CostTypeID', $ctid);
@@ -142,7 +141,6 @@ class m_cost extends CI_Model {
             $this->db->where('t_schedules_day_has_cost.TSID', $tsid);
         }
 
-
         $this->db->group_by('cost.CostID');
         $this->db->where('cost.CostDate', $date);
         $this->db->where('cost.CostID', $cid);
@@ -151,6 +149,7 @@ class m_cost extends CI_Model {
         $query = $this->db->get('cost');
         return $query->result_array();
     }
+
 
     public function get_parcel_post_report($SourceID, $TSID = NULL) {
         $this->db->select(''

@@ -425,6 +425,7 @@ class m_sale extends CI_Model {
             'schedules' => $data['schedules'],
             'schedule_select' => $data['schedule_select'],
             'data_parcel_post' => $data['data_parcel_post'],
+            'data_parcel_post_in'=>$data['data_parcel_post_in'],
         );
 
         return $rs;
@@ -746,8 +747,43 @@ class m_sale extends CI_Model {
             'schedules' => $schedules_in_route,
             'schedule_select' => $schedule_select,
             'data_parcel_post' => $this->get_parcel_post_report($SourceID, $TSID),
+            'data_parcel_post_in'=>  $this->get_parcel_post_in($SourceID),
         );
         return $rs;
+    }
+
+    public function get_parcel_post_in($SID, $date = NULL, $ReceptID = NULL, $VCode = NULL) {
+
+        $this->db->select('parcel_post.ReceiptID,'
+                . 'vehicles.VCode,'
+                . 'cost.CostDate,'
+                . 'cost.CostNote,'
+                . 'parcel_post.Number,'
+                . 'parcel_post.SourceID,'
+                . 'parcel_post.DestinationID,'
+                . 'parcel_post.SenderName,'
+                . 'parcel_post.SenderPhone,'
+                . 'parcel_post.ReceiverName,'
+                . 'parcel_post.ReceiverPhone,'
+               
+        );
+
+        $this->db->join('t_schedules_day_has_cost', 't_schedules_day_has_cost.CostID = cost.CostID');
+        $this->db->join('parcel_post', 'parcel_post.CostID = cost.CostID', 'left');
+        $this->db->join('vehicles_has_schedules', 'vehicles_has_schedules.TSID = t_schedules_day_has_cost.TSID', 'left');
+        $this->db->join('vehicles', 'vehicles.VID = vehicles_has_schedules.VID', 'left');
+
+        if ($date == NULL) {
+            $date = $this->m_datetime->getDateToday();
+        }
+
+        $this->db->where('parcel_post.DestinationID', $SID);
+
+        $this->db->where('cost.CostDate', $date);
+        $this->db->where('cost.CostDetailID', '6');
+
+        $query = $this->db->get('cost');
+        return $query->result_array();
     }
 
     public function get_parcel_post_report($SourceID, $TSID = NULL) {
