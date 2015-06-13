@@ -203,7 +203,7 @@
             'SourceID': document.getElementById("SourceID").value,
             'DestinationID': document.getElementById("DestinationID").value,
             'TimeDepart': document.getElementById('TimeDepart').value,
-            'TimeArrive': document.getElementById('TimeArrive').value,
+            'TimeArrive': document.getElementById('TimeArrive').value
         };
         var result = $.ajax({
             url: '<?= base_url() . "sale/booking_seat" ?>',
@@ -360,7 +360,82 @@
     }
 
 </style>
+<style>
+    .pace {
+        -webkit-pointer-events: none;
+        pointer-events: none;
 
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        user-select: none;
+
+        z-index: 2000;
+        position: fixed;
+        height: 90px;
+        width: 90px;
+        margin: auto;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+    }
+
+    .pace.pace-inactive .pace-activity {
+        display: none;
+    }
+
+    .pace .pace-activity {
+        position: fixed;
+        z-index: 2000;
+        display: block;
+        position: absolute;
+        left: -30px;
+        top: -30px;
+        height: 100px;
+        width: 100px;
+        display: block;
+        border-width: 30px;
+        border-style: double;
+        border-color: #29d transparent transparent;
+        border-radius: 50%;
+
+        -webkit-animation: spin 1s linear infinite;
+        -moz-animation: spin 1s linear infinite;
+        -o-animation: spin 1s linear infinite;
+        animation: spin 1s linear infinite;
+    }
+
+    .pace .pace-activity:before {
+        content: ' ';
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        height: 50px;
+        width: 50px;
+        display: block;
+        border-width: 10px;
+        border-style: solid;
+        border-color: #29d transparent transparent;
+        border-radius: 50%;
+    }
+
+    @-webkit-keyframes spin {
+        100% { -webkit-transform: rotate(359deg); }
+    }
+
+    @-moz-keyframes spin {
+        100% { -moz-transform: rotate(359deg); }
+    }
+
+    @-o-keyframes spin {
+        100% { -moz-transform: rotate(359deg); }
+    }
+
+    @keyframes spin {
+        100% {  transform: rotate(359deg); }
+    }      
+
+</style>
 <?php
 
 function search_tickets($tickes, $Seat, $eid = NULL, $SeatStatus = NULL) {
@@ -1050,14 +1125,14 @@ if (array_key_exists('ReportID', $schedule_select)) {
                                     <th style="width:30%">เต็ม</th>
                                     <th style="width:30%">ลด</th>
                                     <th style="">
-                                        <span class="clock  <?= ( $TimeCheckIn != NULL) ? 'hidden' : '' ?>" id="clock">                                
+                                        <span class="clock  <?= ( $CheckInID != NULL) ? 'hidden' : '' ?>" id="clock">                                
                                             <ul id="time">
                                                 <li id="hours"> </li>
                                                 <li id="point">:</li>
                                                 <li id="min"> </li>                                    
                                             </ul>
                                         </span>
-                                        <span class="time-checkin <?= ( $TimeCheckIn != NULL) ? '' : 'hidden' ?>">
+                                        <span class="time-checkin <?= ( $TimeCheckIn != NULL && $CheckInID != NULL) ? '' : 'hidden' ?>">
                                             <?= date('H:i', strtotime($TimeCheckIn)) ?>
                                         </span>
                                     </th>
@@ -1074,7 +1149,7 @@ if (array_key_exists('ReportID', $schedule_select)) {
                                     <td><?php echo $form['PriceDicount'] ?></td>
                                     <td>
                                         <?php
-                                        if ($TimeCheckIn != NULL) {
+                                        if ($CheckInID != NULL) {
                                             echo anchor('#', '<i class="fa fa-print fa-lg"></i>&nbsp;พิมพ์ล๊อก', $print_log);
                                         } else {
                                             echo anchor('#', '<i class="fa fa-check-square-o fa-lg"></i>&nbsp;ลงเวลาออก', $checkin);
@@ -1274,49 +1349,49 @@ if (array_key_exists('ReportID', $schedule_select)) {
             </div>
             <div class="modal-body">                
                 <div class="row text-center" style="padding-bottom: 2%;">
-                        <div class="col-md-12">
-                            <div class="form-inline">
-                                <div class="form-group">
-                                    <label for="">เลขที่</label>
-                                    <input type="text" class="form-control" id="" placeholder="">
-                                </div>
-                                <div class="form-group">
-                                    <label for="">วันที่</label>
-                                    <input type="" class="form-control" id="" placeholder="">
-                                </div>
-                                <div class="form-group">
-                                    <label for="">รถเบอร์</label>
-                                    <input type="" class="form-control" id="" placeholder="">
-                                </div>
-                                <button type="submit" class="btn btn-primary">ค้นหา</button>
+                    <div class="col-md-12">
+                        <div class="form-inline">
+                            <div class="form-group">
+                                <label for="">เลขที่</label>
+                                <input type="text" class="form-control" id="" placeholder="">
                             </div>
+                            <div class="form-group">
+                                <label for="">วันที่</label>
+                                <input type="" class="form-control" id="" placeholder="">
+                            </div>
+                            <div class="form-group">
+                                <label for="">รถเบอร์</label>
+                                <input type="" class="form-control" id="" placeholder="">
+                            </div>
+                            <button type="submit" class="btn btn-primary">ค้นหา</button>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <table class="table table-bordered">
-                                <thead>
-                                    <tr>
-                                        <th style="width: 20%;">เลขที่</th>
-                                        <th style="width: 20%;">จาก</th>
-                                        <th style="width: 15%;">รถเบอร์</th>
-                                        <th style="width: 15%;">เวลาออก</th>
-                                        <th style="width: 20%;">สถานะ</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>                    
-                    </div>
-                
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th style="width: 20%;">เลขที่</th>
+                                    <th style="width: 20%;">จาก</th>
+                                    <th style="width: 15%;">รถเบอร์</th>
+                                    <th style="width: 15%;">เวลาออก</th>
+                                    <th style="width: 20%;">สถานะ</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>                    
+                </div>
+
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>

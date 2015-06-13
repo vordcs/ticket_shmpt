@@ -367,8 +367,81 @@
         -webkit-box-shadow: 0 0 10px #ccc; 
         box-shadow: 0 0 10px #ccc;
     }
+</style>
+<style>
+    .pace {
+        -webkit-pointer-events: none;
+        pointer-events: none;
 
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        user-select: none;
 
+        z-index: 2000;
+        position: fixed;
+        height: 90px;
+        width: 90px;
+        margin: auto;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+    }
+
+    .pace.pace-inactive .pace-activity {
+        display: none;
+    }
+
+    .pace .pace-activity {
+        position: fixed;
+        z-index: 2000;
+        display: block;
+        position: absolute;
+        left: -30px;
+        top: -30px;
+        height: 100px;
+        width: 100px;
+        display: block;
+        border-width: 30px;
+        border-style: double;
+        border-color: #29d transparent transparent;
+        border-radius: 50%;
+
+        -webkit-animation: spin 1s linear infinite;
+        -moz-animation: spin 1s linear infinite;
+        -o-animation: spin 1s linear infinite;
+        animation: spin 1s linear infinite;
+    }
+
+    .pace .pace-activity:before {
+        content: ' ';
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        height: 50px;
+        width: 50px;
+        display: block;
+        border-width: 10px;
+        border-style: solid;
+        border-color: #29d transparent transparent;
+        border-radius: 50%;
+    }
+
+    @-webkit-keyframes spin {
+        100% { -webkit-transform: rotate(359deg); }
+    }
+
+    @-moz-keyframes spin {
+        100% { -moz-transform: rotate(359deg); }
+    }
+
+    @-o-keyframes spin {
+        100% { -moz-transform: rotate(359deg); }
+    }
+
+    @keyframes spin {
+        100% {  transform: rotate(359deg); }
+    }      
 
 </style>
 <?php
@@ -907,14 +980,14 @@ if (array_key_exists('ReportID', $schedule_select)) {
                                     <th style="width:30%">เต็ม</th>
                                     <th style="width:30%">ลด</th>
                                     <th style="">
-                                        <span class="clock  <?= ( $TimeCheckIn != NULL) ? 'hidden' : '' ?>" id="clock">                                
+                                        <span class="clock  <?= ( $CheckInID != NULL) ? 'hidden' : '' ?>" id="clock">                                
                                             <ul id="time">
                                                 <li id="hours"> </li>
                                                 <li id="point">:</li>
                                                 <li id="min"> </li>                                    
                                             </ul>
                                         </span>
-                                        <span class="time-checkin <?= ( $TimeCheckIn != NULL) ? '' : 'hidden' ?>">
+                                        <span class="time-checkin <?= ( $TimeCheckIn != NULL && $CheckInID != NULL) ? '' : 'hidden' ?>">
                                             <?= date('H:i', strtotime($TimeCheckIn)) ?>
                                         </span>
                                     </th>
@@ -926,7 +999,7 @@ if (array_key_exists('ReportID', $schedule_select)) {
                                     <td><?php echo $form['PriceDicount'] ?></td>
                                     <td>
                                         <?php
-                                        if ($TimeCheckIn != NULL) {
+                                        if ($CheckInID != NULL) {
                                             echo anchor('#', '<i class="fa fa-print fa-lg"></i>&nbsp;พิมพ์ล๊อก', $print_log);
                                         } else {
                                             echo anchor('#', '<i class="fa fa-check-square-o fa-lg"></i>&nbsp;ลงเวลาออก', $checkin);
