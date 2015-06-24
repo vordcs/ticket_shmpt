@@ -38,10 +38,13 @@ class m_log_clocking extends CI_Model {
     }
 
     function update_clock_out($EID) {
+        $temp = $this->check_log_clocking_today($EID);
+        $id_log = $temp[0]['id_log'];
         $data = array(
             'clock_out_date' => $this->m_datetime->getDatetimeNow(),
         );
         $this->db->where('EID', $EID);
+        $this->db->where('id_log', $id_log);
         $this->db->update('employee_log_clocking', $data);
         if ($this->db->affected_rows() == 1)
             return TRUE;
