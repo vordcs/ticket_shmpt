@@ -114,12 +114,14 @@ class m_report extends CI_Model {
     }
 
     public function insert_report($data) {
-        $rs = array();
+
         $ReportID = $data['report']['ReportID'];
         $num_report = count($this->get_report(NULL, NULL, NULL, $ReportID));
         if ($num_report <= 0) {
+            
             //insert report day 
             $this->db->insert('report_day', $data['report']);
+            
             //insert t_schedules_day_has_report
             $i = 0;
             foreach ($data['schedules_day_has_report'] as $s_r) {
@@ -347,7 +349,7 @@ class m_report extends CI_Model {
 
         $sum = 0;
 
-        foreach ($routes as $route) {            
+        foreach ($routes as $route) {
             $rcode = $route['RCode'];
             $vtid = $route['VTID'];
             $vt_name = $route['VTDescription'];
@@ -744,9 +746,9 @@ class m_report extends CI_Model {
         $this->db->where('cost.SID', $SID);
         $this->db->where('t_schedules_day_has_cost.TSID', $TSID);
 
-        
+
         $this->db->where('cost.CreateBy', $this->m_user->get_user_id());
-        
+
         $this->db->group_by('cost.CostDetailID');
 
         $query = $this->db->get('t_schedules_day_has_cost');
@@ -852,22 +854,23 @@ class m_report extends CI_Model {
     }
 
     public function gennerate_report_id($RCode, $VTID, $SID) {
-        $date = $this->m_datetime->getDateToday();
-//        $Report = $this->get_report($date, $RCode, $VTID,$SID);
+        $date_db = $this->m_datetime->getDateToday();
+
         $this->db->where('RCode', $RCode);
         $this->db->where('VTID', $VTID);
         $this->db->where('SID', $SID);
-        $this->db->where('ReportDate', $date);
+        $this->db->where('ReportDate', $date_db);
         $query = $this->db->get('report_day');
 
-        $Report = $query->result_array();
+        $reports = $query->result_array();
 
 
-        $num_report = count($Report);
+        $num_report = count($reports);
 
         $ReportID = '';
 
-        if ($num_report >= 0) {
+        if ($num_report == 0) {
+            //first report ID
             //วันที่
             $date = new DateTime();
             $ReportID .=$date->format("Ymd");
@@ -876,12 +879,15 @@ class m_report extends CI_Model {
             //รหัสประเภทรถ
             $ReportID .=$VTID;
             //สถานี
-            $ReportID .= str_pad($SID, 2, '0', STR_PAD_LEFT);
-            //run number
-            $ReportID .=str_pad($num_report, 2, '0', STR_PAD_LEFT);
+            $ReportID .= str_pad($SID, 3, '0', STR_PAD_LEFT);
+            $ReportID .=str_pad($num_report, 3, '0', STR_PAD_LEFT);
             return $ReportID;
+        } elseif ($num_report > 0) {
+            $report_id = (int)end($reports)['ReportID'];
+            return $report_id+1;
+        } else {
+            return NULL;
         }
-        return FALSE;
     }
 
 }

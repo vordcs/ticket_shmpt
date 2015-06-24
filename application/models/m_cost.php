@@ -248,9 +248,10 @@ class m_cost extends CI_Model {
     public function search_cost($form = NULL, $to = NULL) {
 
         $this->db->join('cost_type', 'cost_type.CostTypeID = cost.CostTypeID');
-        $this->db->join('cost_detail', 'cost_detail.CostDetailID = cost.CostDetailID');
-        $this->db->join('vehicles_has_cost', 'vehicles_has_cost.CostID = cost.CostID');
+        $this->db->join('cost_detail', 'cost_detail.CostDetailID = cost.CostDetailID');       
         $this->db->join('t_schedules_day_has_cost', 't_schedules_day_has_cost.CostID = cost.CostID');
+        $this->db->join('vehicles_has_schedules', 'vehicles_has_schedules.TSID = t_schedules_day_has_cost.TSID', 'left');
+        $this->db->join('vehicles', 'vehicles.VID = vehicles_has_schedules.VID', 'left');
 
         if ($form != NULL && $to == NULL) {
             $this->db->where('cost.CostDate', $this->m_datetime->setDateFomat($form));
@@ -277,11 +278,11 @@ class m_cost extends CI_Model {
         $this->db->insert('t_schedules_day_has_cost', $schedule_has_cost);
 
 //      insert vehicles has cost
-        $vehicle_has_cost = array(
-            'VID' => $data['VID'],
-            'CostID' => $cost_id,
-        );
-        $this->db->insert('vehicles_has_cost', $vehicle_has_cost);
+//        $vehicle_has_cost = array(
+//            'VID' => $data['VID'],
+//            'CostID' => $cost_id,
+//        );
+//        $this->db->insert('vehicles_has_cost', $vehicle_has_cost);
 
         $rs = $this->get_cost($cost_id);
 
@@ -300,9 +301,6 @@ class m_cost extends CI_Model {
     }
 
     public function delete_cost($cost_id) {
-//delete vehicle has cost
-        $this->db->where('CostID', $cost_id);
-        $this->db->delete('vehicles_has_cost');
 
 //delete schedules_day has cost
         $this->db->where('CostID', $cost_id);

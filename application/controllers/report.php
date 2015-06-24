@@ -94,6 +94,7 @@ class report extends CI_Controller {
         if ($this->m_report->validation_form_add() && $this->form_validation->run() == TRUE) {
             $form_data = $this->m_report->get_post_form_send();
             $ReportID = $this->m_report->insert_report($form_data);
+            
             if ($form_data != FALSE && $ReportID != NULL) {
                 $alert['alert_message'] = "ส่งรายงาน $route_name วันที่ $date_th";
                 $alert['alert_mode'] = "success";
@@ -103,9 +104,10 @@ class report extends CI_Controller {
                 $alert['alert_mode'] = "warning";
                 $this->session->set_flashdata('alert', $alert);
             }
+            
             $this->session->set_flashdata('RCode', $rcode);
             $this->session->set_flashdata('VTID', $vtid);
-
+            
             redirect("report/print_report/$rcode/$vtid/$sid/$ReportID");
         }
 
@@ -119,7 +121,7 @@ class report extends CI_Controller {
 
         $data_debug = array(
 //            'form_data' => $form_data,
-//            'rs' => $rs,
+//            'rs' => $ReportID,
 //            'get_report' => $this->m_report->get_report($this->m_datetime->getDateToday(), $rcode, $vtid, $sid),
 //            'data' => $data['data'],
         );
