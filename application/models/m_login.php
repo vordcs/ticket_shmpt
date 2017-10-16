@@ -56,6 +56,9 @@ class m_login extends CI_Model {
         } else {
             $temp = $this->check_sellers($data['user'], $data['pass']);
             if ($temp != NULL) {
+                if($temp[0]['StatusID'] == '0'){
+                    return FALSE;
+                }
                 $session['user_name'] = $temp[0]['Title'] . $temp[0]['FirstName'] . ' ' . $temp[0]['LastName'];
                 $session['EID'] = $temp[0]['EID'];
                 $session['login'] = TRUE;
